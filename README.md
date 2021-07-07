@@ -1,6 +1,6 @@
 <!-- Copyright 2014-2020 Signal Messenger, LLC -->
 <!-- SPDX-License-Identifier: AGPL-3.0-only -->
-# THe point of the fork
+# The point of the fork
 The point of the fork is to preserve a version of Signal, in case it was to have backdoors installed in it. This is relevant for EU citizens, see https://european-pirateparty.eu/parliament-approves-chatcontrol/
 
 # Signal Desktop

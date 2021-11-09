@@ -9,16 +9,22 @@ import { storiesOf } from '@storybook/react';
 import { text, boolean, number } from '@storybook/addon-knobs';
 import { action } from '@storybook/addon-actions';
 
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
-import { PropsType, Timeline } from './Timeline';
-import { TimelineItem, TimelineItemType } from './TimelineItem';
+import type { PropsType } from './Timeline';
+import { Timeline } from './Timeline';
+import type { TimelineItemType } from './TimelineItem';
+import { TimelineItem } from './TimelineItem';
+import { StorybookThemeContext } from '../../../.storybook/StorybookThemeContext';
 import { ConversationHero } from './ConversationHero';
 import { getDefaultConversation } from '../../test-both/helpers/getDefaultConversation';
+import { getRandomColor } from '../../test-both/helpers/getRandomColor';
 import { LastSeenIndicator } from './LastSeenIndicator';
 import { TimelineLoadingRow } from './TimelineLoadingRow';
 import { TypingBubble } from './TypingBubble';
 import { ContactSpoofingType } from '../../util/contactSpoofing';
+import { ReadStatus } from '../../messages/MessageReadStatus';
+import type { WidthBreakpoint } from '../_util';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -38,7 +44,6 @@ const items: Record<string, TimelineItemType> = {
     data: {
       author: getDefaultConversation({
         phoneNumber: '(202) 555-2001',
-        color: 'forest',
       }),
       canDeleteForEveryone: false,
       canDownload: true,
@@ -51,6 +56,7 @@ const items: Record<string, TimelineItemType> = {
       isBlocked: false,
       isMessageRequestAccepted: true,
       previews: [],
+      readStatus: ReadStatus.Read,
       text: '🔥',
       timestamp: Date.now(),
     },
@@ -58,7 +64,7 @@ const items: Record<string, TimelineItemType> = {
   'id-2': {
     type: 'message',
     data: {
-      author: getDefaultConversation({ color: 'forest' }),
+      author: getDefaultConversation({}),
       canDeleteForEveryone: false,
       canDownload: true,
       canReply: true,
@@ -70,6 +76,7 @@ const items: Record<string, TimelineItemType> = {
       isBlocked: false,
       isMessageRequestAccepted: true,
       previews: [],
+      readStatus: ReadStatus.Read,
       text: 'Hello there from the new world! http://somewhere.com',
       timestamp: Date.now(),
     },
@@ -77,7 +84,6 @@ const items: Record<string, TimelineItemType> = {
   'id-2.5': {
     type: 'unsupportedMessage',
     data: {
-      id: 'id-2.5',
       canProcessNow: false,
       contact: {
         id: '061d3783-5736-4145-b1a2-6b6cf1156393',
@@ -91,7 +97,7 @@ const items: Record<string, TimelineItemType> = {
   'id-3': {
     type: 'message',
     data: {
-      author: getDefaultConversation({ color: 'crimson' }),
+      author: getDefaultConversation({}),
       canDeleteForEveryone: false,
       canDownload: true,
       canReply: true,
@@ -103,6 +109,7 @@ const items: Record<string, TimelineItemType> = {
       isBlocked: false,
       isMessageRequestAccepted: true,
       previews: [],
+      readStatus: ReadStatus.Read,
       text: 'Hello there from the new world!',
       timestamp: Date.now(),
     },
@@ -121,7 +128,6 @@ const items: Record<string, TimelineItemType> = {
     data: {
       disabled: false,
       expireTimer: moment.duration(2, 'hours').asSeconds(),
-      phoneNumber: '(202) 555-0000',
       title: '(202) 555-0000',
       type: 'fromOther',
     },
@@ -131,8 +137,6 @@ const items: Record<string, TimelineItemType> = {
     data: {
       contact: {
         id: '+1202555000',
-        phoneNumber: '(202) 555-0000',
-        profileName: 'Mr. Fire',
         title: 'Mr. Fire',
       },
       isGroup: true,
@@ -141,11 +145,7 @@ const items: Record<string, TimelineItemType> = {
   'id-7': {
     type: 'verificationNotification',
     data: {
-      contact: {
-        name: 'Mrs. Ice',
-        phoneNumber: '(202) 555-0001',
-        title: 'Mrs. Ice',
-      },
+      contact: { title: 'Mrs. Ice' },
       isLocal: true,
       type: 'markVerified',
     },
@@ -161,25 +161,22 @@ const items: Record<string, TimelineItemType> = {
         {
           type: 'add',
           contacts: [
-            {
+            getDefaultConversation({
               phoneNumber: '(202) 555-0002',
-              profileName: 'Mr. Fire',
               title: 'Mr. Fire',
-            },
-            {
+            }),
+            getDefaultConversation({
               phoneNumber: '(202) 555-0003',
-              profileName: 'Ms. Water',
               title: 'Ms. Water',
-            },
+            }),
           ],
         },
       ],
-      from: {
+      from: getDefaultConversation({
         phoneNumber: '(202) 555-0001',
-        name: 'Mrs. Ice',
         title: 'Mrs. Ice',
         isMe: false,
-      },
+      }),
     },
   },
   'id-9': {
@@ -189,7 +186,7 @@ const items: Record<string, TimelineItemType> = {
   'id-10': {
     type: 'message',
     data: {
-      author: getDefaultConversation({ color: 'plum' }),
+      author: getDefaultConversation({}),
       canDeleteForEveryone: false,
       canDownload: true,
       canReply: true,
@@ -201,6 +198,7 @@ const items: Record<string, TimelineItemType> = {
       isBlocked: false,
       isMessageRequestAccepted: true,
       previews: [],
+      readStatus: ReadStatus.Read,
       status: 'sent',
       text: '🔥',
       timestamp: Date.now(),
@@ -209,7 +207,7 @@ const items: Record<string, TimelineItemType> = {
   'id-11': {
     type: 'message',
     data: {
-      author: getDefaultConversation({ color: 'plum' }),
+      author: getDefaultConversation({}),
       canDeleteForEveryone: false,
       canDownload: true,
       canReply: true,
@@ -221,6 +219,7 @@ const items: Record<string, TimelineItemType> = {
       isBlocked: false,
       isMessageRequestAccepted: true,
       previews: [],
+      readStatus: ReadStatus.Read,
       status: 'read',
       text: 'Hello there from the new world! http://somewhere.com',
       timestamp: Date.now(),
@@ -229,7 +228,7 @@ const items: Record<string, TimelineItemType> = {
   'id-12': {
     type: 'message',
     data: {
-      author: getDefaultConversation({ color: 'crimson' }),
+      author: getDefaultConversation({}),
       canDeleteForEveryone: false,
       canDownload: true,
       canReply: true,
@@ -241,6 +240,7 @@ const items: Record<string, TimelineItemType> = {
       isBlocked: false,
       isMessageRequestAccepted: true,
       previews: [],
+      readStatus: ReadStatus.Read,
       status: 'sent',
       text: 'Hello there from the new world! 🔥',
       timestamp: Date.now(),
@@ -249,7 +249,7 @@ const items: Record<string, TimelineItemType> = {
   'id-13': {
     type: 'message',
     data: {
-      author: getDefaultConversation({ color: 'blue' }),
+      author: getDefaultConversation({}),
       canDeleteForEveryone: false,
       canDownload: true,
       canReply: true,
@@ -261,6 +261,7 @@ const items: Record<string, TimelineItemType> = {
       isBlocked: false,
       isMessageRequestAccepted: true,
       previews: [],
+      readStatus: ReadStatus.Read,
       status: 'sent',
       text:
         'Hello there from the new world! And this is multiple lines of text. Lines and lines and lines.',
@@ -270,7 +271,7 @@ const items: Record<string, TimelineItemType> = {
   'id-14': {
     type: 'message',
     data: {
-      author: getDefaultConversation({ color: 'crimson' }),
+      author: getDefaultConversation({}),
       canDeleteForEveryone: false,
       canDownload: true,
       canReply: true,
@@ -282,6 +283,7 @@ const items: Record<string, TimelineItemType> = {
       isBlocked: false,
       isMessageRequestAccepted: true,
       previews: [],
+      readStatus: ReadStatus.Read,
       status: 'read',
       text:
         'Hello there from the new world! And this is multiple lines of text. Lines and lines and lines.',
@@ -300,11 +302,12 @@ const actions = () => ({
   ),
   checkForAccount: action('checkForAccount'),
   clearChangedMessages: action('clearChangedMessages'),
-  clearInvitedConversationsForNewlyCreatedGroup: action(
-    'clearInvitedConversationsForNewlyCreatedGroup'
+  clearInvitedUuidsForNewlyCreatedGroup: action(
+    'clearInvitedUuidsForNewlyCreatedGroup'
   ),
   setLoadCountdownStart: action('setLoadCountdownStart'),
   setIsNearBottom: action('setIsNearBottom'),
+  learnMoreAboutDeliveryIssue: action('learnMoreAboutDeliveryIssue'),
   loadAndScroll: action('loadAndScroll'),
   loadOlderMessages: action('loadOlderMessages'),
   loadNewerMessages: action('loadNewerMessages'),
@@ -325,6 +328,7 @@ const actions = () => ({
   showContactModal: action('showContactModal'),
   kickOffAttachmentDownload: action('kickOffAttachmentDownload'),
   markAttachmentAsCorrupted: action('markAttachmentAsCorrupted'),
+  markViewed: action('markViewed'),
   showVisualAttachment: action('showVisualAttachment'),
   downloadAttachment: action('downloadAttachment'),
   displayTapToViewMessage: action('displayTapToViewMessage'),
@@ -366,16 +370,28 @@ const actions = () => ({
   unblurAvatar: action('unblurAvatar'),
 });
 
-const renderItem = (id: string) => (
+const renderItem = ({
+  messageId,
+  containerElementRef,
+  containerWidthBreakpoint,
+}: {
+  messageId: string;
+  containerElementRef: React.RefObject<HTMLElement>;
+  containerWidthBreakpoint: WidthBreakpoint;
+}) => (
   <TimelineItem
     id=""
     isSelected={false}
     renderEmojiPicker={() => <div />}
-    item={items[id]}
+    renderReactionPicker={() => <div />}
+    item={items[messageId]}
+    previousItem={undefined}
+    nextItem={undefined}
     i18n={i18n}
     interactionMode="keyboard"
+    containerElementRef={containerElementRef}
+    containerWidthBreakpoint={containerWidthBreakpoint}
     conversationId=""
-    conversationAccepted
     renderContact={() => '*ContactName*'}
     renderUniversalTimerNotification={() => (
       <div>*UniversalTimerNotification*</div>
@@ -397,28 +413,36 @@ const getAvatarPath = () =>
   text('avatarPath', '/fixtures/kitten-4-112-112.jpg');
 const getPhoneNumber = () => text('phoneNumber', '+1 (808) 555-1234');
 
-const renderHeroRow = () => (
-  <ConversationHero
-    about={getAbout()}
-    acceptedMessageRequest
-    i18n={i18n}
-    isMe={false}
-    title={getTitle()}
-    avatarPath={getAvatarPath()}
-    name={getName()}
-    profileName={getProfileName()}
-    phoneNumber={getPhoneNumber()}
-    conversationType="direct"
-    sharedGroupNames={['NYC Rock Climbers', 'Dinner Party']}
-    unblurAvatar={action('unblurAvatar')}
-    updateSharedGroups={noop}
-  />
-);
+const renderHeroRow = () => {
+  const Wrapper = () => {
+    const theme = React.useContext(StorybookThemeContext);
+    return (
+      <ConversationHero
+        about={getAbout()}
+        acceptedMessageRequest
+        i18n={i18n}
+        isMe={false}
+        title={getTitle()}
+        avatarPath={getAvatarPath()}
+        name={getName()}
+        profileName={getProfileName()}
+        phoneNumber={getPhoneNumber()}
+        conversationType="direct"
+        onHeightChange={action('onHeightChange in ConversationHero')}
+        sharedGroupNames={['NYC Rock Climbers', 'Dinner Party']}
+        theme={theme}
+        unblurAvatar={action('unblurAvatar')}
+        updateSharedGroups={noop}
+      />
+    );
+  };
+  return <Wrapper />;
+};
 const renderLoadingRow = () => <TimelineLoadingRow state="loading" />;
 const renderTypingBubble = () => (
   <TypingBubble
     acceptedMessageRequest
-    color="crimson"
+    color={getRandomColor()}
     conversationType="direct"
     phoneNumber="+18005552222"
     i18n={i18n}
@@ -442,7 +466,10 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
     overrideProps.isLoadingMessages === false
   ),
   items: overrideProps.items || Object.keys(items),
+  loadCountdownStart: undefined,
+  messageHeightChangeIndex: undefined,
   resetCounter: 0,
+  scrollToBottomCounter: 0,
   scrollToIndex: overrideProps.scrollToIndex,
   scrollToIndexCounter: 0,
   totalUnread: number('totalUnread', overrideProps.totalUnread || 0),
@@ -454,6 +481,7 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
   warning: overrideProps.warning,
 
   id: uuid(),
+  isNearBottom: false,
   renderItem,
   renderLastSeenIndicator,
   renderHeroRow,

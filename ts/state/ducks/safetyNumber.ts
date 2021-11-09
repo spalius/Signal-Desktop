@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { generateSecurityNumberBlock } from '../../util/safetyNumber';
-import { ConversationType } from './conversations';
+import type { ConversationType } from './conversations';
 import {
   reloadProfiles,
   toggleVerification,
 } from '../../shims/contactVerification';
+import * as log from '../../logging/log';
 
 export type SafetyNumberContactType = {
   safetyNumber: string;
@@ -107,7 +108,7 @@ async function alterVerification(contact: ConversationType): Promise<void> {
       if (result.name === 'OutgoingIdentityKeyError') {
         throw result;
       } else {
-        window.log.error(
+        log.error(
           'failed to toggle verified:',
           result && result.stack ? result.stack : result
         );
@@ -120,7 +121,7 @@ async function alterVerification(contact: ConversationType): Promise<void> {
         throw keyError;
       } else {
         result.errors.forEach((error: Error) => {
-          window.log.error(
+          log.error(
             'failed to toggle verified:',
             error && error.stack ? error.stack : error
           );

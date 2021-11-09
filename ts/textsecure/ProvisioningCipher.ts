@@ -4,15 +4,17 @@
 /* eslint-disable more/no-then */
 /* eslint-disable max-classes-per-file */
 
-import { KeyPairType } from './Types.d';
-import { ProvisionEnvelopeClass } from '../textsecure.d';
+import type { KeyPairType } from './Types.d';
+import * as Bytes from '../Bytes';
 import {
   decryptAes256CbcPkcsPadding,
   deriveSecrets,
-  bytesFromString,
   verifyHmacSha256,
 } from '../Crypto';
 import { calculateAgreement, createKeyPair, generateKeyPair } from '../Curve';
+import { SignalService as Proto } from '../protobuf';
+import { strictAssert } from '../util/assert';
+import { normalizeUuid } from '../util/normalizeUuid';
 
 type ProvisionDecryptResult = {
   identityKeyPair: KeyPairType;
@@ -21,17 +23,21 @@ type ProvisionDecryptResult = {
   provisioningCode?: string;
   userAgent?: string;
   readReceipts?: boolean;
-  profileKey?: ArrayBuffer;
+  profileKey?: Uint8Array;
 };
 
 class ProvisioningCipherInner {
   keyPair?: KeyPairType;
 
   async decrypt(
-    provisionEnvelope: ProvisionEnvelopeClass
+    provisionEnvelope: Proto.ProvisionEnvelope
   ): Promise<ProvisionDecryptResult> {
-    const masterEphemeral = provisionEnvelope.publicKey.toArrayBuffer();
-    const message = provisionEnvelope.body.toArrayBuffer();
+    strictAssert(
+      provisionEnvelope.publicKey && provisionEnvelope.body,
+      'Missing required fields in ProvisionEnvelope'
+    );
+    const masterEphemeral = provisionEnvelope.publicKey;
+    const message = provisionEnvelope.body;
     if (new Uint8Array(message)[0] !== 1) {
       throw new Error('Bad version number on ProvisioningMessage');
     }
@@ -48,43 +54,36 @@ class ProvisioningCipherInner {
     const ecRes = calculateAgreement(masterEphemeral, this.keyPair.privKey);
     const keys = deriveSecrets(
       ecRes,
-      new ArrayBuffer(32),
-      bytesFromString('TextSecure Provisioning Message')
+      new Uint8Array(32),
+      Bytes.fromString('TextSecure Provisioning Message')
     );
-    await verifyHmacSha256(ivAndCiphertext, keys[1], mac, 32);
+    verifyHmacSha256(ivAndCiphertext, keys[1], mac, 32);
 
-    const plaintext = await decryptAes256CbcPkcsPadding(
-      keys[0],
-      ciphertext,
-      iv
-    );
-    const provisionMessage = window.textsecure.protobuf.ProvisionMessage.decode(
-      plaintext
-    );
-    const privKey = provisionMessage.identityKeyPrivate.toArrayBuffer();
+    const plaintext = decryptAes256CbcPkcsPadding(keys[0], ciphertext, iv);
+    const provisionMessage = Proto.ProvisionMessage.decode(plaintext);
+    const privKey = provisionMessage.identityKeyPrivate;
+    strictAssert(privKey, 'Missing identityKeyPrivate in ProvisionMessage');
 
     const keyPair = createKeyPair(privKey);
-    window.normalizeUuids(
-      provisionMessage,
-      ['uuid'],
-      'ProvisioningCipher.decrypt'
-    );
+
+    const { uuid } = provisionMessage;
+    strictAssert(uuid, 'Missing uuid in provisioning message');
 
     const ret: ProvisionDecryptResult = {
       identityKeyPair: keyPair,
       number: provisionMessage.number,
-      uuid: provisionMessage.uuid,
+      uuid: normalizeUuid(uuid, 'ProvisionMessage.uuid'),
       provisioningCode: provisionMessage.provisioningCode,
       userAgent: provisionMessage.userAgent,
       readReceipts: provisionMessage.readReceipts,
     };
     if (provisionMessage.profileKey) {
-      ret.profileKey = provisionMessage.profileKey.toArrayBuffer();
+      ret.profileKey = provisionMessage.profileKey;
     }
     return ret;
   }
 
-  async getPublicKey(): Promise<ArrayBuffer> {
+  async getPublicKey(): Promise<Uint8Array> {
     if (!this.keyPair) {
       this.keyPair = generateKeyPair();
     }
@@ -106,8 +105,8 @@ export default class ProvisioningCipher {
   }
 
   decrypt: (
-    provisionEnvelope: ProvisionEnvelopeClass
+    provisionEnvelope: Proto.ProvisionEnvelope
   ) => Promise<ProvisionDecryptResult>;
 
-  getPublicKey: () => Promise<ArrayBuffer>;
+  getPublicKey: () => Promise<Uint8Array>;
 }

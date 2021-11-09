@@ -1,27 +1,29 @@
 // Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useState } from 'react';
+import { get } from 'lodash';
 
-import { ReplacementValuesType } from '../../types/I18N';
-import { FullJSXType, Intl } from '../Intl';
-import { LocalizerType } from '../../types/Util';
+import type { ReplacementValuesType } from '../../types/I18N';
+import type { FullJSXType } from '../Intl';
+import { Intl } from '../Intl';
+import type { LocalizerType } from '../../types/Util';
+import type { UUIDStringType } from '../../types/UUID';
 import { GroupDescriptionText } from '../GroupDescriptionText';
 import { Button, ButtonSize, ButtonVariant } from '../Button';
+import { SystemMessage } from './SystemMessage';
 
-import { GroupV2ChangeType, GroupV2DescriptionChangeType } from '../../groups';
+import type { GroupV2ChangeType, GroupV2ChangeDetailType } from '../../groups';
 
-import { renderChange, SmartContactRendererType } from '../../groupChange';
+import type { SmartContactRendererType } from '../../groupChange';
+import { renderChange } from '../../groupChange';
 import { Modal } from '../Modal';
-
-import { AccessControlClass, MemberClass } from '../../textsecure.d';
 
 export type PropsDataType = {
   groupName?: string;
-  ourConversationId: string;
+  ourUuid: UUIDStringType;
   change: GroupV2ChangeType;
-  AccessControlEnum: typeof AccessControlClass.AccessRequired;
-  RoleEnum: typeof MemberClass.Role;
 };
 
 export type PropsHousekeepingType = {
@@ -39,63 +41,135 @@ function renderStringToIntl(
   return <Intl id={id} i18n={i18n} components={components} />;
 }
 
-export function GroupV2Change(props: PropsType): ReactElement {
-  const {
-    AccessControlEnum,
-    change,
-    groupName,
-    i18n,
-    ourConversationId,
-    renderContact,
-    RoleEnum,
-  } = props;
+type GroupIconType =
+  | 'group'
+  | 'group-access'
+  | 'group-add'
+  | 'group-approved'
+  | 'group-avatar'
+  | 'group-decline'
+  | 'group-edit'
+  | 'group-leave'
+  | 'group-remove';
 
-  const [
-    isGroupDescriptionDialogOpen,
-    setIsGroupDescriptionDialogOpen,
-  ] = useState<boolean>(false);
+const changeToIconMap = new Map<string, GroupIconType>([
+  ['access-attributes', 'group-access'],
+  ['access-invite-link', 'group-access'],
+  ['access-members', 'group-access'],
+  ['admin-approval-add-one', 'group-add'],
+  ['admin-approval-remove-one', 'group-decline'],
+  ['announcements-only', 'group-access'],
+  ['avatar', 'group-avatar'],
+  ['description', 'group-edit'],
+  ['group-link-add', 'group-access'],
+  ['group-link-remove', 'group-access'],
+  ['group-link-reset', 'group-access'],
+  ['member-add', 'group-add'],
+  ['member-add-from-admin-approval', 'group-approved'],
+  ['member-add-from-invite', 'group-add'],
+  ['member-add-from-link', 'group-add'],
+  ['member-privilege', 'group-access'],
+  ['member-remove', 'group-remove'],
+  ['pending-add-many', 'group-add'],
+  ['pending-add-one', 'group-add'],
+  ['pending-remove-many', 'group-decline'],
+  ['pending-remove-one', 'group-decline'],
+  ['title', 'group-edit'],
+]);
 
-  const newGroupDescription = change.details.find(
-    (item): item is GroupV2DescriptionChangeType =>
-      Boolean(item.type === 'description' && item.description)
-  )?.description;
+function getIcon(
+  detail: GroupV2ChangeDetailType,
+  fromId?: UUIDStringType
+): GroupIconType {
+  const changeType = detail.type;
+  let possibleIcon = changeToIconMap.get(changeType);
+  const isSameId = fromId === get(detail, 'uuid', null);
+  if (isSameId) {
+    if (changeType === 'member-remove') {
+      possibleIcon = 'group-leave';
+    }
+    if (changeType === 'member-add-from-invite') {
+      possibleIcon = 'group-approved';
+    }
+  }
+  return possibleIcon || 'group';
+}
+
+function GroupV2Detail({
+  detail,
+  i18n,
+  fromId,
+  onButtonClick,
+  text,
+}: {
+  detail: GroupV2ChangeDetailType;
+  i18n: LocalizerType;
+  fromId?: UUIDStringType;
+  onButtonClick: (x: string) => unknown;
+  text: FullJSXType;
+}): JSX.Element {
+  const icon = getIcon(detail, fromId);
+
+  const newGroupDescription =
+    detail.type === 'description' && get(detail, 'description');
 
   return (
-    <div className="module-group-v2-change">
-      <div className="module-group-v2-change--icon" />
-      {renderChange(change, {
-        AccessControlEnum,
-        i18n,
-        ourConversationId,
-        renderContact,
-        renderString: renderStringToIntl,
-        RoleEnum,
-      }).map((item: FullJSXType, index: number) => (
-        // Difficult to find a unique key for this type
-        // eslint-disable-next-line react/no-array-index-key
-        <div key={index}>{item}</div>
-      ))}
-      {newGroupDescription ? (
-        <div className="module-group-v2-change--button-container">
+    <SystemMessage
+      icon={icon}
+      contents={text}
+      button={
+        newGroupDescription ? (
           <Button
+            onClick={() => onButtonClick(newGroupDescription)}
             size={ButtonSize.Small}
-            variant={ButtonVariant.SecondaryAffirmative}
-            onClick={() => setIsGroupDescriptionDialogOpen(true)}
+            variant={ButtonVariant.SystemMessage}
           >
             {i18n('view')}
           </Button>
-        </div>
-      ) : null}
-      {newGroupDescription && isGroupDescriptionDialogOpen ? (
+        ) : undefined
+      }
+    />
+  );
+}
+
+export function GroupV2Change(props: PropsType): ReactElement {
+  const { change, groupName, i18n, ourUuid, renderContact } = props;
+
+  const [groupDescription, setGroupDescription] = useState<
+    string | undefined
+  >();
+
+  return (
+    <>
+      {renderChange(change, {
+        i18n,
+        ourUuid,
+        renderContact,
+        renderString: renderStringToIntl,
+      }).map((text: FullJSXType, index: number) => (
+        <GroupV2Detail
+          detail={change.details[index]}
+          fromId={change.from}
+          i18n={i18n}
+          // Difficult to find a unique key for this type
+          // eslint-disable-next-line react/no-array-index-key
+          key={index}
+          onButtonClick={nextGroupDescription =>
+            setGroupDescription(nextGroupDescription)
+          }
+          text={text}
+        />
+      ))}
+      {groupDescription ? (
         <Modal
           hasXButton
           i18n={i18n}
           title={groupName}
-          onClose={() => setIsGroupDescriptionDialogOpen(false)}
+          onClose={() => setGroupDescription(undefined)}
         >
-          <GroupDescriptionText text={newGroupDescription} />
+          <GroupDescriptionText text={groupDescription} />
         </Modal>
       ) : null}
-    </div>
+    </>
   );
 }

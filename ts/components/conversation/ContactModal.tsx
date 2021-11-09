@@ -1,120 +1,98 @@
 // Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { ReactPortal } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useEffect, useState } from 'react';
 
-import { ConversationType } from '../../state/ducks/conversations';
+import { missingCaseError } from '../../util/missingCaseError';
 import { About } from './About';
 import { Avatar } from '../Avatar';
+import { AvatarLightbox } from '../AvatarLightbox';
+import type { ConversationType } from '../../state/ducks/conversations';
+import { Modal } from '../Modal';
+import type { LocalizerType } from '../../types/Util';
+import { BadgeDialog } from '../BadgeDialog';
+import type { BadgeType } from '../../badges/types';
 import { SharedGroupNames } from '../SharedGroupNames';
-import { LocalizerType } from '../../types/Util';
+import { ConfirmationDialog } from '../ConfirmationDialog';
 
-export type PropsType = {
+export type PropsDataType = {
   areWeAdmin: boolean;
+  badges: ReadonlyArray<BadgeType>;
   contact?: ConversationType;
+  conversationId?: string;
   readonly i18n: LocalizerType;
   isAdmin: boolean;
   isMember: boolean;
-  onClose: () => void;
-  openConversation: (conversationId: string) => void;
-  removeMember: (conversationId: string) => void;
-  showSafetyNumber: (conversationId: string) => void;
-  toggleAdmin: (conversationId: string) => void;
-  updateSharedGroups: () => void;
 };
+
+type PropsActionType = {
+  hideContactModal: () => void;
+  openConversationInternal: (
+    options: Readonly<{
+      conversationId: string;
+      messageId?: string;
+      switchToAssociatedView?: boolean;
+    }>
+  ) => void;
+  removeMemberFromGroup: (conversationId: string, contactId: string) => void;
+  toggleAdmin: (conversationId: string, contactId: string) => void;
+  toggleSafetyNumberModal: (conversationId: string) => unknown;
+  updateConversationModelSharedGroups: (conversationId: string) => void;
+};
+
+export type PropsType = PropsDataType & PropsActionType;
+
+enum ContactModalView {
+  Default,
+  ShowingAvatar,
+  ShowingBadges,
+}
 
 export const ContactModal = ({
   areWeAdmin,
+  badges,
   contact,
+  conversationId,
+  hideContactModal,
   i18n,
   isAdmin,
   isMember,
-  onClose,
-  openConversation,
-  removeMember,
-  showSafetyNumber,
+  openConversationInternal,
+  removeMemberFromGroup,
   toggleAdmin,
-  updateSharedGroups,
-}: PropsType): ReactPortal | null => {
+  toggleSafetyNumberModal,
+  updateConversationModelSharedGroups,
+}: PropsType): JSX.Element => {
   if (!contact) {
     throw new Error('Contact modal opened without a matching contact');
   }
 
-  const [root, setRoot] = React.useState<HTMLElement | null>(null);
-  const overlayRef = React.useRef<HTMLElement | null>(null);
-  const closeButtonRef = React.useRef<HTMLElement | null>(null);
+  const [view, setView] = useState(ContactModalView.Default);
+  const [confirmToggleAdmin, setConfirmToggleAdmin] = useState(false);
 
-  React.useEffect(() => {
-    const div = document.createElement('div');
-    document.body.appendChild(div);
-    setRoot(div);
-
-    return () => {
-      document.body.removeChild(div);
-      setRoot(null);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    // Kick off the expensive hydration of the current sharedGroupNames
-    updateSharedGroups();
-  }, [updateSharedGroups]);
-
-  React.useEffect(() => {
-    if (root !== null && closeButtonRef.current) {
-      closeButtonRef.current.focus();
+  useEffect(() => {
+    if (conversationId) {
+      // Kick off the expensive hydration of the current sharedGroupNames
+      updateConversationModelSharedGroups(conversationId);
     }
-  }, [root]);
+  }, [conversationId, updateConversationModelSharedGroups]);
 
-  React.useEffect(() => {
-    const handler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        event.stopPropagation();
+  switch (view) {
+    case ContactModalView.Default: {
+      const preferredBadge: undefined | BadgeType = badges[0];
 
-        onClose();
-      }
-    };
-    document.addEventListener('keyup', handler);
-
-    return () => {
-      document.removeEventListener('keyup', handler);
-    };
-  }, [onClose]);
-
-  const onClickOverlay = (e: React.MouseEvent<HTMLElement>) => {
-    if (e.target === overlayRef.current) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      onClose();
-    }
-  };
-
-  return root
-    ? createPortal(
-        <div
-          ref={ref => {
-            overlayRef.current = ref;
-          }}
-          role="presentation"
-          className="module-contact-modal__overlay"
-          onClick={onClickOverlay}
+      return (
+        <Modal
+          moduleClassName="ContactModal__modal"
+          hasXButton
+          i18n={i18n}
+          onClose={hideContactModal}
         >
-          <div className="module-contact-modal">
-            <button
-              ref={r => {
-                closeButtonRef.current = r;
-              }}
-              type="button"
-              className="module-contact-modal__close-button"
-              onClick={onClose}
-              aria-label={i18n('close')}
-            />
+          <div className="ContactModal">
             <Avatar
               acceptedMessageRequest={contact.acceptedMessageRequest}
               avatarPath={contact.avatarPath}
+              badge={preferredBadge}
               color={contact.color}
               conversationType="direct"
               i18n={i18n}
@@ -125,54 +103,67 @@ export const ContactModal = ({
               size={96}
               title={contact.title}
               unblurredAvatarPath={contact.unblurredAvatarPath}
+              onClick={() => {
+                setView(
+                  preferredBadge
+                    ? ContactModalView.ShowingBadges
+                    : ContactModalView.ShowingAvatar
+                );
+              }}
             />
-            <div className="module-contact-modal__name">{contact.title}</div>
+            <div className="ContactModal__name">{contact.title}</div>
             <div className="module-about__container">
               <About text={contact.about} />
             </div>
             {contact.phoneNumber && (
-              <div className="module-contact-modal__info">
-                {contact.phoneNumber}
+              <div className="ContactModal__info">{contact.phoneNumber}</div>
+            )}
+            {!contact.isMe && (
+              <div className="ContactModal__info">
+                <SharedGroupNames
+                  i18n={i18n}
+                  sharedGroupNames={contact.sharedGroupNames || []}
+                />
               </div>
             )}
-            <div className="module-contact-modal__info">
-              <SharedGroupNames
-                i18n={i18n}
-                sharedGroupNames={contact.sharedGroupNames || []}
-              />
-            </div>
-            <div className="module-contact-modal__button-container">
+            <div className="ContactModal__button-container">
               <button
                 type="button"
-                className="module-contact-modal__button module-contact-modal__send-message"
-                onClick={() => openConversation(contact.id)}
+                className="ContactModal__button ContactModal__send-message"
+                onClick={() => {
+                  hideContactModal();
+                  openConversationInternal({ conversationId: contact.id });
+                }}
               >
-                <div className="module-contact-modal__bubble-icon">
-                  <div className="module-contact-modal__send-message__bubble-icon" />
+                <div className="ContactModal__bubble-icon">
+                  <div className="ContactModal__send-message__bubble-icon" />
                 </div>
                 <span>{i18n('ContactModal--message')}</span>
               </button>
               {!contact.isMe && (
                 <button
                   type="button"
-                  className="module-contact-modal__button module-contact-modal__safety-number"
-                  onClick={() => showSafetyNumber(contact.id)}
+                  className="ContactModal__button ContactModal__safety-number"
+                  onClick={() => {
+                    hideContactModal();
+                    toggleSafetyNumberModal(contact.id);
+                  }}
                 >
-                  <div className="module-contact-modal__bubble-icon">
-                    <div className="module-contact-modal__safety-number__bubble-icon" />
+                  <div className="ContactModal__bubble-icon">
+                    <div className="ContactModal__safety-number__bubble-icon" />
                   </div>
                   <span>{i18n('showSafetyNumber')}</span>
                 </button>
               )}
-              {!contact.isMe && areWeAdmin && isMember && (
+              {!contact.isMe && areWeAdmin && isMember && conversationId && (
                 <>
                   <button
                     type="button"
-                    className="module-contact-modal__button module-contact-modal__make-admin"
-                    onClick={() => toggleAdmin(contact.id)}
+                    className="ContactModal__button ContactModal__make-admin"
+                    onClick={() => setConfirmToggleAdmin(true)}
                   >
-                    <div className="module-contact-modal__bubble-icon">
-                      <div className="module-contact-modal__make-admin__bubble-icon" />
+                    <div className="ContactModal__bubble-icon">
+                      <div className="ContactModal__make-admin__bubble-icon" />
                     </div>
                     {isAdmin ? (
                       <span>{i18n('ContactModal--rm-admin')}</span>
@@ -182,20 +173,62 @@ export const ContactModal = ({
                   </button>
                   <button
                     type="button"
-                    className="module-contact-modal__button module-contact-modal__remove-from-group"
-                    onClick={() => removeMember(contact.id)}
+                    className="ContactModal__button ContactModal__remove-from-group"
+                    onClick={() =>
+                      removeMemberFromGroup(conversationId, contact.id)
+                    }
                   >
-                    <div className="module-contact-modal__bubble-icon">
-                      <div className="module-contact-modal__remove-from-group__bubble-icon" />
+                    <div className="ContactModal__bubble-icon">
+                      <div className="ContactModal__remove-from-group__bubble-icon" />
                     </div>
                     <span>{i18n('ContactModal--remove-from-group')}</span>
                   </button>
                 </>
               )}
             </div>
+            {confirmToggleAdmin && conversationId && (
+              <ConfirmationDialog
+                actions={[
+                  {
+                    action: () => toggleAdmin(conversationId, contact.id),
+                    text: isAdmin
+                      ? i18n('ContactModal--rm-admin')
+                      : i18n('ContactModal--make-admin'),
+                  },
+                ]}
+                i18n={i18n}
+                onClose={() => setConfirmToggleAdmin(false)}
+              >
+                {isAdmin
+                  ? i18n('ContactModal--rm-admin-info', [contact.title])
+                  : i18n('ContactModal--make-admin-info', [contact.title])}
+              </ConfirmationDialog>
+            )}
           </div>
-        </div>,
-        root
-      )
-    : null;
+        </Modal>
+      );
+    }
+    case ContactModalView.ShowingAvatar:
+      return (
+        <AvatarLightbox
+          avatarColor={contact.color}
+          avatarPath={contact.avatarPath}
+          conversationTitle={contact.title}
+          i18n={i18n}
+          onClose={() => setView(ContactModalView.Default)}
+        />
+      );
+    case ContactModalView.ShowingBadges:
+      return (
+        <BadgeDialog
+          badges={badges}
+          firstName={contact.firstName}
+          i18n={i18n}
+          onClose={() => setView(ContactModalView.Default)}
+          title={contact.title}
+        />
+      );
+    default:
+      throw missingCaseError(view);
+  }
 };

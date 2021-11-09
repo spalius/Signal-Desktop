@@ -1,24 +1,34 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { useState, ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import React, { useRef, useState } from 'react';
+import type { ContentRect, MeasuredComponentProps } from 'react-measure';
+import Measure from 'react-measure';
 import classNames from 'classnames';
 import { noop } from 'lodash';
+import { animated } from '@react-spring/web';
 
-import { LocalizerType } from '../types/Util';
+import type { LocalizerType } from '../types/Util';
 import { ModalHost } from './ModalHost';
-import { Theme } from '../util/theme';
+import type { Theme } from '../util/theme';
 import { getClassNamesFor } from '../util/getClassNamesFor';
-import { useHasWrapped } from '../util/hooks';
+import { useAnimated } from '../hooks/useAnimated';
+import { useHasWrapped } from '../hooks/useHasWrapped';
+import { useRefMerger } from '../hooks/useRefMerger';
 
 type PropsType = {
   children: ReactNode;
+  hasStickyButtons?: boolean;
   hasXButton?: boolean;
   i18n: LocalizerType;
   moduleClassName?: string;
-  noMouseClose?: boolean;
   onClose?: () => void;
   title?: ReactNode;
+};
+
+type ModalPropsType = PropsType & {
+  noMouseClose?: boolean;
   theme?: Theme;
 };
 
@@ -26,6 +36,7 @@ const BASE_CLASS_NAME = 'module-Modal';
 
 export function Modal({
   children,
+  hasStickyButtons,
   hasXButton,
   i18n,
   moduleClassName,
@@ -33,19 +44,83 @@ export function Modal({
   onClose = noop,
   title,
   theme,
-}: Readonly<PropsType>): ReactElement {
+}: Readonly<ModalPropsType>): ReactElement {
+  const { close, modalStyles, overlayStyles } = useAnimated(onClose, {
+    getFrom: () => ({ opacity: 0, transform: 'translateY(48px)' }),
+    getTo: isOpen =>
+      isOpen
+        ? { opacity: 1, transform: 'translateY(0px)' }
+        : { opacity: 0, transform: 'translateY(48px)' },
+  });
+
+  return (
+    <ModalHost
+      noMouseClose={noMouseClose}
+      onClose={close}
+      overlayStyles={overlayStyles}
+      theme={theme}
+    >
+      <animated.div style={modalStyles}>
+        <ModalWindow
+          hasStickyButtons={hasStickyButtons}
+          hasXButton={hasXButton}
+          i18n={i18n}
+          moduleClassName={moduleClassName}
+          onClose={close}
+          title={title}
+        >
+          {children}
+        </ModalWindow>
+      </animated.div>
+    </ModalHost>
+  );
+}
+
+export function ModalWindow({
+  children,
+  hasStickyButtons,
+  hasXButton,
+  i18n,
+  moduleClassName,
+  onClose = noop,
+  title,
+}: Readonly<PropsType>): JSX.Element {
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
+  const refMerger = useRefMerger();
+
+  const bodyRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
 
   const hasHeader = Boolean(hasXButton || title);
   const getClassName = getClassNamesFor(BASE_CLASS_NAME, moduleClassName);
 
+  function handleResize({ scroll }: ContentRect) {
+    const modalNode = modalRef?.current;
+    if (!modalNode) {
+      return;
+    }
+    if (scroll) {
+      setHasOverflow(scroll.height > modalNode.clientHeight);
+    }
+  }
+
   return (
-    <ModalHost noMouseClose={noMouseClose} onClose={onClose} theme={theme}>
+    <>
+      {/* We don't want the click event to propagate to its container node. */}
+      {/* eslint-disable-next-line max-len */}
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
       <div
         className={classNames(
           getClassName(''),
-          getClassName(hasHeader ? '--has-header' : '--no-header')
+          getClassName(hasHeader ? '--has-header' : '--no-header'),
+          hasStickyButtons && getClassName('--sticky-buttons')
         )}
+        ref={modalRef}
+        onClick={event => {
+          event.stopPropagation();
+        }}
       >
         {hasHeader && (
           <div className={getClassName('__header')}>
@@ -55,9 +130,7 @@ export function Modal({
                 type="button"
                 className={getClassName('__close-button')}
                 tabIndex={0}
-                onClick={() => {
-                  onClose();
-                }}
+                onClick={onClose}
               />
             )}
             {title && (
@@ -72,19 +145,28 @@ export function Modal({
             )}
           </div>
         )}
-        <div
-          className={classNames(
-            getClassName('__body'),
-            scrolled ? getClassName('__body--scrolled') : null
+        <Measure scroll onResize={handleResize}>
+          {({ measureRef }: MeasuredComponentProps) => (
+            <div
+              className={classNames(
+                getClassName('__body'),
+                scrolled ? getClassName('__body--scrolled') : null,
+                hasOverflow || scrolled
+                  ? getClassName('__body--overflow')
+                  : null
+              )}
+              onScroll={() => {
+                const scrollTop = bodyRef.current?.scrollTop || 0;
+                setScrolled(scrollTop > 2);
+              }}
+              ref={refMerger(measureRef, bodyRef)}
+            >
+              {children}
+            </div>
           )}
-          onScroll={event => {
-            setScrolled((event.target as HTMLDivElement).scrollTop > 2);
-          }}
-        >
-          {children}
-        </div>
+        </Measure>
       </div>
-    </ModalHost>
+    </>
   );
 }
 

@@ -1,22 +1,22 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { KeyboardEvent, MouseEvent, useRef, useState } from 'react';
+import type { KeyboardEvent, MouseEvent } from 'react';
+import React, { useRef, useState } from 'react';
 import classNames from 'classnames';
 import { ContextMenu, ContextMenuTrigger, MenuItem } from 'react-contextmenu';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { CustomColorEditor } from './CustomColorEditor';
 import { Modal } from './Modal';
-import {
-  ConversationColors,
-  ConversationColorType,
-  CustomColorType,
-} from '../types/Colors';
-import { ConversationType } from '../state/ducks/conversations';
-import { LocalizerType } from '../types/Util';
+import type { ConversationColorType, CustomColorType } from '../types/Colors';
+import { ConversationColors } from '../types/Colors';
+import type { ConversationType } from '../state/ducks/conversations';
+import type { LocalizerType } from '../types/Util';
 import { SampleMessageBubbles } from './SampleMessageBubbles';
 import { PanelRow } from './conversation/conversation-details/PanelRow';
 import { getCustomColorStyle } from '../util/getCustomColorStyle';
+
+import { useDelayedRestoreFocus } from '../hooks/useRestoreFocus';
 
 type CustomColorDataType = {
   id?: string;
@@ -26,7 +26,9 @@ type CustomColorDataType = {
 export type PropsDataType = {
   conversationId?: string;
   customColors?: Record<string, CustomColorType>;
-  getConversationsWithCustomColor: (colorId: string) => Array<ConversationType>;
+  getConversationsWithCustomColor: (
+    colorId: string
+  ) => Promise<Array<ConversationType>>;
   i18n: LocalizerType;
   isGlobal?: boolean;
   selectedColor?: ConversationColorType;
@@ -34,10 +36,7 @@ export type PropsDataType = {
 };
 
 type PropsActionType = {
-  addCustomColor: (
-    color: CustomColorType,
-    nextAction: (uuid: string) => unknown
-  ) => unknown;
+  addCustomColor: (color: CustomColorType, conversationId?: string) => unknown;
   colorSelected: (payload: {
     conversationId: string;
     conversationColor?: ConversationColorType;
@@ -85,6 +84,8 @@ export const ChatColorPicker = ({
     CustomColorDataType | undefined
   >(undefined);
 
+  const [focusRef] = useDelayedRestoreFocus();
+
   const onSelectColor = (
     conversationColor: ConversationColorType,
     customColorData?: { id: string; value: CustomColorType }
@@ -100,20 +101,10 @@ export const ChatColorPicker = ({
     }
   };
 
-  const onColorAdded = (value: CustomColorType) => {
-    return (id: string) => {
-      onSelectColor('custom', {
-        id,
-        value,
-      });
-    };
-  };
-
   const renderCustomColorEditorWrapper = () => (
     <CustomColorEditorWrapper
       customColorToEdit={customColorToEdit}
       i18n={i18n}
-      isGlobal={isGlobal}
       onClose={() => setCustomColorToEdit(undefined)}
       onSave={(color: CustomColorType) => {
         if (customColorToEdit?.id) {
@@ -123,15 +114,11 @@ export const ChatColorPicker = ({
             value: color,
           });
         } else {
-          addCustomColor(color, onColorAdded(color));
+          addCustomColor(color, conversationId);
         }
       }}
     />
   );
-
-  if (isGlobal && customColorToEdit) {
-    return renderCustomColorEditorWrapper();
-  }
 
   return (
     <div className="ChatColorPicker__container">
@@ -187,7 +174,7 @@ export const ChatColorPicker = ({
       />
       <hr />
       <div className="ChatColorPicker__bubbles">
-        {ConversationColors.map(color => (
+        {ConversationColors.map((color, i) => (
           <div
             aria-label={color}
             className={classNames(
@@ -205,6 +192,7 @@ export const ChatColorPicker = ({
             }}
             role="button"
             tabIndex={0}
+            ref={i === 0 ? focusRef : undefined}
           />
         ))}
         {Object.keys(customColors).map(colorId => {
@@ -228,7 +216,7 @@ export const ChatColorPicker = ({
                 removeCustomColorOnConversations(colorId);
               }}
               onDupe={() => {
-                addCustomColor(colorValues, onColorAdded(colorValues));
+                addCustomColor(colorValues, conversationId);
               }}
               onEdit={() => {
                 setCustomColorToEdit({ id: colorId, value: colorValues });
@@ -238,7 +226,7 @@ export const ChatColorPicker = ({
         })}
         <div
           aria-label={i18n('ChatColorPicker__custom-color--label')}
-          className="ChatColorPicker__bubble"
+          className="ChatColorPicker__bubble ChatColorPicker__bubble--custom"
           onClick={() =>
             setCustomColorToEdit({ id: undefined, value: undefined })
           }
@@ -279,7 +267,9 @@ export const ChatColorPicker = ({
 type CustomColorBubblePropsType = {
   color: CustomColorType;
   colorId: string;
-  getConversationsWithCustomColor: (colorId: string) => Array<ConversationType>;
+  getConversationsWithCustomColor: (
+    colorId: string
+  ) => Promise<Array<ConversationType>>;
   i18n: LocalizerType;
   isSelected: boolean;
   onDelete: () => unknown;
@@ -398,11 +388,13 @@ const CustomColorBubble = ({
           attributes={{
             className: 'ChatColorPicker__context--delete',
           }}
-          onClick={(event: MouseEvent) => {
+          onClick={async (event: MouseEvent) => {
             event.stopPropagation();
             event.preventDefault();
 
-            const conversations = getConversationsWithCustomColor(colorId);
+            const conversations = await getConversationsWithCustomColor(
+              colorId
+            );
             if (!conversations.length) {
               onDelete();
             } else {
@@ -420,7 +412,6 @@ const CustomColorBubble = ({
 type CustomColorEditorWrapperPropsType = {
   customColorToEdit?: CustomColorDataType;
   i18n: LocalizerType;
-  isGlobal: boolean;
   onClose: () => unknown;
   onSave: (color: CustomColorType) => unknown;
 };
@@ -428,7 +419,6 @@ type CustomColorEditorWrapperPropsType = {
 const CustomColorEditorWrapper = ({
   customColorToEdit,
   i18n,
-  isGlobal,
   onClose,
   onSave,
 }: CustomColorEditorWrapperPropsType): JSX.Element => {
@@ -441,20 +431,16 @@ const CustomColorEditorWrapper = ({
     />
   );
 
-  if (!isGlobal) {
-    return (
-      <Modal
-        hasXButton
-        i18n={i18n}
-        moduleClassName="ChatColorPicker__modal"
-        noMouseClose
-        onClose={onClose}
-        title={i18n('CustomColorEditor__title')}
-      >
-        {editor}
-      </Modal>
-    );
-  }
-
-  return editor;
+  return (
+    <Modal
+      hasXButton
+      i18n={i18n}
+      moduleClassName="ChatColorPicker__modal"
+      noMouseClose
+      onClose={onClose}
+      title={i18n('CustomColorEditor__title')}
+    >
+      {editor}
+    </Modal>
+  );
 };

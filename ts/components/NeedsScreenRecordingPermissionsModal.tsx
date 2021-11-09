@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import React from 'react';
-import { LocalizerType } from '../types/Util';
+import type { LocalizerType } from '../types/Util';
 import { Theme } from '../util/theme';
 import { Modal } from './Modal';
 import { Button, ButtonVariant } from './Button';
@@ -29,6 +29,7 @@ export const NeedsScreenRecordingPermissionsModal = ({
       i18n={i18n}
       title={i18n('calling__presenting--permission-title')}
       theme={Theme.Dark}
+      onClose={toggleScreenRecordingPermissionsDialog}
     >
       <p>{i18n('calling__presenting--macos-permission-description')}</p>
       <ol style={{ paddingLeft: 16 }}>

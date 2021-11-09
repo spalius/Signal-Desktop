@@ -5,19 +5,14 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { Emojify } from './Emojify';
-import { ContactNameColorType } from '../../types/Colors';
-import { LocalizerType } from '../../types/Util';
+import type { ContactNameColorType } from '../../types/Colors';
 import { getClassNamesFor } from '../../util/getClassNamesFor';
 
 export type PropsType = {
   contactNameColor?: ContactNameColorType;
   firstName?: string;
-  i18n: LocalizerType;
   module?: string;
-  name?: string;
-  phoneNumber?: string;
   preferFirstName?: boolean;
-  profileName?: string;
   title: string;
 };
 

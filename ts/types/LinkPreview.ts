@@ -8,10 +8,10 @@ import LinkifyIt from 'linkify-it';
 import { maybeParseUrl } from '../util/url';
 import { replaceEmojiWithSpaces } from '../util/emoji';
 
-import { AttachmentType } from './Attachment';
+import type { AttachmentType } from './Attachment';
 
 export type LinkPreviewImage = AttachmentType & {
-  data: ArrayBuffer;
+  data: Uint8Array;
 };
 
 export type LinkPreviewResult = {
@@ -69,9 +69,13 @@ export function findLinks(text: string, caretLocation?: number): Array<string> {
   );
 }
 
-export function getDomain(href: string): string | undefined {
+export function getDomain(href: string): string {
   const url = maybeParseUrl(href);
-  return url ? url.hostname : undefined;
+  if (!url || !url.hostname) {
+    throw new Error('getDomain: Unable to extract hostname from href');
+  }
+
+  return url.hostname;
 }
 
 // See <https://tools.ietf.org/html/rfc3986>.

@@ -7,9 +7,15 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { boolean } from '@storybook/addon-knobs';
 
-import { CompositionArea, Props } from './CompositionArea';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { IMAGE_JPEG } from '../types/MIME';
+import type { Props } from './CompositionArea';
+import { CompositionArea } from './CompositionArea';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
+
+import { fakeAttachment } from '../test-both/helpers/fakeAttachment';
+import { landscapeGreenUrl } from '../storybook/Fixtures';
+import { ThemeType } from '../types/Util';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -18,26 +24,26 @@ const story = storiesOf('Components/CompositionArea', module);
 // necessary for the add attachment button to render properly
 story.addDecorator(storyFn => <div className="file-input">{storyFn()}</div>);
 
-// necessary for the mic button to render properly
-const micCellEl = new DOMParser().parseFromString(
-  `
-    <div class="capture-audio">
-      <button class="microphone"></button>
-    </div>
-  `,
-  'text/html'
-).body.firstElementChild as HTMLElement;
-
 const createProps = (overrideProps: Partial<Props> = {}): Props => ({
+  addAttachment: action('addAttachment'),
+  addPendingAttachment: action('addPendingAttachment'),
+  conversationId: '123',
   i18n,
-  micCellEl,
-  onChooseAttachment: action('onChooseAttachment'),
+  onSendMessage: action('onSendMessage'),
+  processAttachments: action('processAttachments'),
+  removeAttachment: action('removeAttachment'),
+  theme: ThemeType.light,
+
   // AttachmentList
-  draftAttachments: [],
-  onAddAttachment: action('onAddAttachment'),
+  draftAttachments: overrideProps.draftAttachments || [],
   onClearAttachments: action('onClearAttachments'),
   onClickAttachment: action('onClickAttachment'),
-  onCloseAttachment: action('onCloseAttachment'),
+  // AudioCapture
+  cancelRecording: action('cancelRecording'),
+  completeRecording: action('completeRecording'),
+  errorRecording: action('errorRecording'),
+  isRecording: Boolean(overrideProps.isRecording),
+  startRecording: action('startRecording'),
   // StagedLinkPreview
   linkPreviewLoading: Boolean(overrideProps.linkPreviewLoading),
   linkPreviewResult: overrideProps.linkPreviewResult,
@@ -52,12 +58,12 @@ const createProps = (overrideProps: Partial<Props> = {}): Props => ({
     overrideProps.shouldSendHighQualityAttachments
   ),
   // CompositionInput
-  onSubmit: action('onSubmit'),
   onEditorStateChange: action('onEditorStateChange'),
   onTextTooLong: action('onTextTooLong'),
   draftText: overrideProps.draftText || undefined,
   clearQuotedMessage: action('clearQuotedMessage'),
   getQuotedMessage: action('getQuotedMessage'),
+  scrollToBottom: action('scrollToBottom'),
   sortedGroupMembers: [],
   // EmojiButton
   onPickEmoji: action('onPickEmoji'),
@@ -90,7 +96,14 @@ const createProps = (overrideProps: Partial<Props> = {}): Props => ({
   title: '',
   // GroupV1 Disabled Actions
   onStartGroupMigration: action('onStartGroupMigration'),
-  // GroupV2 Pending Approval Actions
+  // GroupV2
+  announcementsOnly: boolean(
+    'announcementsOnly',
+    Boolean(overrideProps.announcementsOnly)
+  ),
+  areWeAdmin: boolean('areWeAdmin', Boolean(overrideProps.areWeAdmin)),
+  groupAdmins: [],
+  openConversation: action('openConversation'),
   onCancelJoinRequest: action('onCancelJoinRequest'),
   // SMS-only
   isSMSOnly: overrideProps.isSMSOnly || false,
@@ -144,3 +157,25 @@ story.add('SMS-only', () => {
 
   return <CompositionArea {...props} />;
 });
+
+story.add('Attachments', () => {
+  const props = createProps({
+    draftAttachments: [
+      fakeAttachment({
+        contentType: IMAGE_JPEG,
+        url: landscapeGreenUrl,
+      }),
+    ],
+  });
+
+  return <CompositionArea {...props} />;
+});
+
+story.add('Announcements Only group', () => (
+  <CompositionArea
+    {...createProps({
+      announcementsOnly: true,
+      areWeAdmin: false,
+    })}
+  />
+));

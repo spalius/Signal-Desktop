@@ -1,5 +1,13 @@
+// Copyright 2021 Signal Messenger, LLC
+// SPDX-License-Identifier: AGPL-3.0-only
+
+import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
-import * as Backbone from 'backbone';
+import type * as Backbone from 'backbone';
+import type { SafetyNumberProps } from './SafetyNumberChangeDialog';
+import { SafetyNumberChangeDialog } from './SafetyNumberChangeDialog';
+import type { ConversationType } from '../state/ducks/conversations';
+import type { LocalizerType } from '../types/Util';
 
 type InboxViewType = Backbone.View & {
   onEmpty?: () => void;
@@ -11,10 +19,28 @@ type InboxViewOptionsType = Backbone.ViewOptions & {
 };
 
 export type PropsType = {
+  cancelMessagesPendingConversationVerification: () => void;
+  conversationsStoppingMessageSendBecauseOfVerification: Array<ConversationType>;
   hasInitialLoadCompleted: boolean;
+  i18n: LocalizerType;
+  isCustomizingPreferredReactions: boolean;
+  numberOfMessagesPendingBecauseOfVerification: number;
+  renderCustomizingPreferredReactionsModal: () => JSX.Element;
+  renderSafetyNumber: (props: SafetyNumberProps) => JSX.Element;
+  verifyConversationsStoppingMessageSend: () => void;
 };
 
-export const Inbox = ({ hasInitialLoadCompleted }: PropsType): JSX.Element => {
+export const Inbox = ({
+  cancelMessagesPendingConversationVerification,
+  conversationsStoppingMessageSendBecauseOfVerification,
+  hasInitialLoadCompleted,
+  i18n,
+  isCustomizingPreferredReactions,
+  numberOfMessagesPendingBecauseOfVerification,
+  renderCustomizingPreferredReactionsModal,
+  renderSafetyNumber,
+  verifyConversationsStoppingMessageSend,
+}: PropsType): JSX.Element => {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<InboxViewType | undefined>(undefined);
 
@@ -44,5 +70,33 @@ export const Inbox = ({ hasInitialLoadCompleted }: PropsType): JSX.Element => {
     }
   }, [hasInitialLoadCompleted, viewRef]);
 
-  return <div className="inbox index" ref={hostRef} />;
+  let activeModal: ReactNode;
+  if (conversationsStoppingMessageSendBecauseOfVerification.length) {
+    const confirmText: string =
+      numberOfMessagesPendingBecauseOfVerification === 1
+        ? i18n('safetyNumberChangeDialog__pending-messages--1')
+        : i18n('safetyNumberChangeDialog__pending-messages--many', [
+            numberOfMessagesPendingBecauseOfVerification.toString(),
+          ]);
+    activeModal = (
+      <SafetyNumberChangeDialog
+        confirmText={confirmText}
+        contacts={conversationsStoppingMessageSendBecauseOfVerification}
+        i18n={i18n}
+        onCancel={cancelMessagesPendingConversationVerification}
+        onConfirm={verifyConversationsStoppingMessageSend}
+        renderSafetyNumber={renderSafetyNumber}
+      />
+    );
+  }
+  if (!activeModal && isCustomizingPreferredReactions) {
+    activeModal = renderCustomizingPreferredReactionsModal();
+  }
+
+  return (
+    <>
+      <div className="Inbox" ref={hostRef} />
+      {activeModal}
+    </>
+  );
 };

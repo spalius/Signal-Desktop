@@ -1,13 +1,14 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
-/* eslint-disable no-await-in-loop, no-restricted-syntax */
+/* eslint-disable no-await-in-loop */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { assert } from 'chai';
 import { noop } from 'lodash';
 import * as sinon from 'sinon';
 
-import { ChallengeHandler, MinimalMessage } from '../challenge';
+import type { MinimalMessage } from '../challenge';
+import { ChallengeHandler } from '../challenge';
 
 type CreateMessageOptions = {
   readonly sentAt?: number;

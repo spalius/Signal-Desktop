@@ -1,13 +1,12 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { useRef, useState, useEffect, FC, ReactElement } from 'react';
+import type { FC, ReactElement } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import classNames from 'classnames';
-import { LocalizerType } from '../types/Util';
-import {
-  GroupCallRemoteParticipantType,
-  VideoFrameSource,
-} from '../types/Calling';
+import type { VideoFrameSource } from 'ringrtc';
+import type { LocalizerType } from '../types/Util';
+import type { GroupCallRemoteParticipantType } from '../types/Calling';
 import { GroupCallRemoteParticipant } from './GroupCallRemoteParticipant';
 
 const OVERFLOW_SCROLLED_TO_EDGE_THRESHOLD = 20;

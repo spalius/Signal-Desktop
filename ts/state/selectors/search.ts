@@ -6,29 +6,31 @@ import { createSelector } from 'reselect';
 
 import { deconstructLookup } from '../../util/deconstructLookup';
 
-import { StateType } from '../reducer';
+import type { StateType } from '../reducer';
 
-import {
+import type {
   MessageSearchResultLookupType,
   MessageSearchResultType,
   SearchStateType,
 } from '../ducks/search';
-import {
+import type {
   ConversationLookupType,
   ConversationType,
 } from '../ducks/conversations';
 
-import { LeftPaneSearchPropsType } from '../../components/leftPane/LeftPaneSearchHelper';
-import { PropsDataType as MessageSearchResultPropsDataType } from '../../components/conversationList/MessageSearchResult';
+import type { LeftPaneSearchPropsType } from '../../components/leftPane/LeftPaneSearchHelper';
+import type { PropsDataType as MessageSearchResultPropsDataType } from '../../components/conversationList/MessageSearchResult';
 
-import { getUserConversationId } from './user';
+import { getIntl, getUserConversationId } from './user';
+import type { GetConversationByIdType } from './conversations';
 import {
-  GetConversationByIdType,
   getConversationLookup,
   getConversationSelector,
 } from './conversations';
 
-import { BodyRangeType } from '../../types/Util';
+import type { BodyRangeType } from '../../types/Util';
+import * as log from '../../logging/log';
+import { getOwn } from '../../util/getOwn';
 
 export const getSearch = (state: StateType): SearchStateType => state.search;
 
@@ -42,14 +44,34 @@ export const getSelectedMessage = createSelector(
   (state: SearchStateType): string | undefined => state.selectedMessage
 );
 
-export const getSearchConversationId = createSelector(
+const getSearchConversationId = createSelector(
   getSearch,
   (state: SearchStateType): string | undefined => state.searchConversationId
 );
 
+export const getIsSearchingInAConversation = createSelector(
+  getSearchConversationId,
+  Boolean
+);
+
+export const getSearchConversation = createSelector(
+  getSearchConversationId,
+  getConversationLookup,
+  (searchConversationId, conversationLookup): undefined | ConversationType =>
+    searchConversationId
+      ? getOwn(conversationLookup, searchConversationId)
+      : undefined
+);
+
 export const getSearchConversationName = createSelector(
-  getSearch,
-  (state: SearchStateType): string | undefined => state.searchConversationName
+  getSearchConversation,
+  getIntl,
+  (conversation, i18n): undefined | string => {
+    if (!conversation) {
+      return undefined;
+    }
+    return conversation.isMe ? i18n('noteToSelf') : conversation.title;
+  }
 );
 
 export const getStartSearchCounter = createSelector(
@@ -68,9 +90,10 @@ export const getMessageSearchResultLookup = createSelector(
 );
 
 export const getSearchResults = createSelector(
-  [getSearch, getConversationLookup],
+  [getSearch, getSearchConversationName, getConversationLookup],
   (
     state: SearchStateType,
+    searchConversationName,
     conversationLookup: ConversationLookupType
   ): Omit<LeftPaneSearchPropsType, 'primarySendsSms'> => {
     const {
@@ -80,7 +103,6 @@ export const getSearchResults = createSelector(
       messageIds,
       messageLookup,
       messagesLoading,
-      searchConversationName,
     } = state;
 
     return {
@@ -187,7 +209,7 @@ export const getMessageSearchResultSelector = createSelector(
     return (id: string) => {
       const message = messageSearchResultLookup[id];
       if (!message) {
-        window.log.warn(
+        log.warn(
           `getMessageSearchResultSelector: messageSearchResultLookup was missing id ${id}`
         );
         return undefined;
@@ -207,9 +229,7 @@ export const getMessageSearchResultSelector = createSelector(
         from = conversationSelector(ourConversationId);
         to = conversationSelector(conversationId);
       } else {
-        window.log.warn(
-          `getMessageSearchResultSelector: Got unexpected type ${type}`
-        );
+        log.warn(`getMessageSearchResultSelector: Got unexpected type ${type}`);
         return undefined;
       }
 

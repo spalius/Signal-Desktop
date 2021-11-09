@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import * as React from 'react';
-import { ContactName, PropsType as ContactNameProps } from './ContactName';
+import type { PropsType as ContactNameProps } from './ContactName';
+import { ContactName } from './ContactName';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { Intl } from '../Intl';
-import { LocalizerType } from '../../types/Util';
+import type { LocalizerType } from '../../types/Util';
 
 export enum MessageRequestState {
   blocking,
@@ -24,19 +25,16 @@ export type Props = {
   onDelete(): unknown;
   state: MessageRequestState;
   onChangeState(state: MessageRequestState): unknown;
-} & Omit<ContactNameProps, 'module' | 'i18n'>;
+} & Omit<ContactNameProps, 'module'>;
 
 export const MessageRequestActionsConfirmation = ({
   conversationType,
   i18n,
-  name,
   onBlock,
   onBlockAndReportSpam,
   onChangeState,
   onDelete,
   onUnblock,
-  phoneNumber,
-  profileName,
   state,
   title,
 }: Props): JSX.Element | null => {
@@ -51,16 +49,7 @@ export const MessageRequestActionsConfirmation = ({
           <Intl
             i18n={i18n}
             id={`MessageRequests--block-${conversationType}-confirm-title`}
-            components={[
-              <ContactName
-                key="name"
-                name={name}
-                profileName={profileName}
-                phoneNumber={phoneNumber}
-                title={title}
-                i18n={i18n}
-              />,
-            ]}
+            components={[<ContactName key="name" title={title} />]}
           />
         }
         actions={[
@@ -96,16 +85,7 @@ export const MessageRequestActionsConfirmation = ({
           <Intl
             i18n={i18n}
             id="MessageRequests--unblock-confirm-title"
-            components={[
-              <ContactName
-                key="name"
-                name={name}
-                profileName={profileName}
-                phoneNumber={phoneNumber}
-                title={title}
-                i18n={i18n}
-              />,
-            ]}
+            components={[<ContactName key="name" title={title} />]}
           />
         }
         actions={[
@@ -132,16 +112,7 @@ export const MessageRequestActionsConfirmation = ({
           <Intl
             i18n={i18n}
             id={`MessageRequests--delete-${conversationType}-confirm-title`}
-            components={[
-              <ContactName
-                key="name"
-                name={name}
-                profileName={profileName}
-                phoneNumber={phoneNumber}
-                title={title}
-                i18n={i18n}
-              />,
-            ]}
+            components={[<ContactName key="name" title={title} />]}
           />
         }
         actions={[

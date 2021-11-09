@@ -12,28 +12,18 @@ try {
   const electron = require('electron');
   const semver = require('semver');
   const _ = require('lodash');
-  const { installGetter, installSetter } = require('./preload_utils');
-  const {
-    getEnvironment,
-    setEnvironment,
-    parseEnvironment,
-    Environment,
-  } = require('./ts/environment');
+  const { strictAssert } = require('./ts/util/assert');
+  const { parseIntWithFallback } = require('./ts/util/parseIntWithFallback');
+
+  // It is important to call this as early as possible
+  const { SignalContext } = require('./ts/windows/context');
+
+  const { getEnvironment, Environment } = require('./ts/environment');
   const ipc = electron.ipcRenderer;
 
-  const { remote } = electron;
-  const { app } = remote;
-
-  const { Context: SignalContext } = require('./ts/context');
-
-  window.SignalContext = new SignalContext(ipc);
-
-  window.sqlInitializer = require('./ts/sql/initialize');
-
-  window.PROTO_ROOT = 'protos';
   const config = require('url').parse(window.location.toString(), true).query;
 
-  setEnvironment(parseEnvironment(config.environment));
+  const log = require('./ts/logging/log');
 
   let title = config.name;
   if (getEnvironment() !== Environment.Production) {
@@ -51,37 +41,46 @@ try {
   window.GV2_MIGRATION_DISABLE_ADD = false;
   window.GV2_MIGRATION_DISABLE_INVITE = false;
 
+  window.RETRY_DELAY = false;
+
   window.platform = process.platform;
   window.getTitle = () => title;
   window.getLocale = () => config.locale;
   window.getEnvironment = getEnvironment;
   window.getAppInstance = () => config.appInstance;
   window.getVersion = () => config.version;
+  window.getBuildCreation = () => parseIntWithFallback(config.buildCreation, 0);
   window.getExpiration = () => {
+    const sixtyDays = 60 * 86400 * 1000;
     const remoteBuildExpiration = window.storage.get('remoteBuildExpiration');
+    const localBuildExpiration = window.Events.getAutoDownloadUpdate()
+      ? config.buildExpiration
+      : config.buildExpiration - sixtyDays;
+
     if (remoteBuildExpiration) {
       return remoteBuildExpiration < config.buildExpiration
         ? remoteBuildExpiration
-        : config.buildExpiration;
+        : localBuildExpiration;
     }
-    return config.buildExpiration;
+    return localBuildExpiration;
   };
-  window.getNodeVersion = () => config.node_version;
   window.getHostName = () => config.hostname;
   window.getServerTrustRoot = () => config.serverTrustRoot;
   window.getServerPublicParams = () => config.serverPublicParams;
   window.getSfuUrl = () => config.sfuUrl;
   window.isBehindProxy = () => Boolean(config.proxyUrl);
-  window.getAutoLaunch = () => app.getLoginItemSettings().openAtLogin;
+  window.getAutoLaunch = () => {
+    return ipc.invoke('get-auto-launch');
+  };
   window.setAutoLaunch = value => {
-    app.setLoginItemSettings({ openAtLogin: Boolean(value) });
+    return ipc.invoke('set-auto-launch', value);
   };
 
   window.isBeforeVersion = (toCheck, baseVersion) => {
     try {
       return semver.lt(toCheck, baseVersion);
     } catch (error) {
-      window.log.error(
+      log.error(
         `isBeforeVersion error: toCheck: ${toCheck}, baseVersion: ${baseVersion}`,
         error && error.stack ? error.stack : error
       );
@@ -92,7 +91,7 @@ try {
     try {
       return semver.gt(toCheck, baseVersion);
     } catch (error) {
-      window.log.error(
+      log.error(
         `isBeforeVersion error: toCheck: ${toCheck}, baseVersion: ${baseVersion}`,
         error && error.stack ? error.stack : error
       );
@@ -100,13 +99,11 @@ try {
     }
   };
 
-  const localeMessages = ipc.sendSync('locale-data');
-
   window.setBadgeCount = count => ipc.send('set-badge-count', count);
 
   let connectStartTime = 0;
 
-  window.logMessageReceiverConnect = () => {
+  window.logAuthenticatedConnect = () => {
     if (connectStartTime === 0) {
       connectStartTime = Date.now();
     }
@@ -125,11 +122,11 @@ try {
   window.eval = global.eval = () => null;
 
   window.drawAttention = () => {
-    window.log.info('draw attention');
+    log.info('draw attention');
     ipc.send('draw-attention');
   };
   window.showWindow = () => {
-    window.log.info('show window');
+    log.info('show window');
     ipc.send('show-window');
   };
 
@@ -150,12 +147,16 @@ try {
   };
 
   window.restart = () => {
-    window.log.info('restart');
+    log.info('restart');
     ipc.send('restart');
   };
   window.shutdown = () => {
-    window.log.info('shutdown');
+    log.info('shutdown');
     ipc.send('shutdown');
+  };
+  window.showDebugLog = () => {
+    log.info('showDebugLog');
+    ipc.send('show-debug-log');
   };
 
   window.closeAbout = () => ipc.send('close-about');
@@ -163,6 +164,40 @@ try {
 
   window.updateTrayIcon = unreadCount =>
     ipc.send('update-tray-icon', unreadCount);
+
+  ipc.on('additional-log-data-request', async event => {
+    const ourConversation = window.ConversationController.getOurConversation();
+    const ourCapabilities = ourConversation
+      ? ourConversation.get('capabilities')
+      : undefined;
+
+    const remoteConfig = window.storage.get('remoteConfig') || {};
+
+    let statistics;
+    try {
+      statistics = await window.Signal.Data.getStatisticsForLogging();
+    } catch (error) {
+      statistics = {};
+    }
+
+    const ourUuid = window.textsecure.storage.user.getUuid();
+
+    event.sender.send('additional-log-data-response', {
+      capabilities: ourCapabilities || {},
+      remoteConfig: _.mapValues(remoteConfig, ({ value, enabled }) => {
+        const enableString = enabled ? 'enabled' : 'disabled';
+        const valueString = value && value !== 'TRUE' ? ` ${value}` : '';
+        return `${enableString}${valueString}`;
+      }),
+      statistics,
+      user: {
+        deviceId: window.textsecure.storage.user.getDeviceId(),
+        e164: window.textsecure.storage.user.getNumber(),
+        uuid: ourUuid && ourUuid.toString(),
+        conversationId: ourConversation && ourConversation.id,
+      },
+    });
+  });
 
   ipc.on('set-up-as-new-device', () => {
     Whisper.events.trigger('setupAsNewDevice');
@@ -203,7 +238,7 @@ try {
   // Settings-related events
 
   window.showSettings = () => ipc.send('show-settings');
-  window.showPermissionsPopup = () => ipc.send('show-permissions-popup');
+  window.showPermissionsPopup = () => ipc.invoke('show-permissions-popup');
   window.showCallingPermissionsPopup = forCamera =>
     ipc.invoke('show-calling-permissions-popup', forCamera);
 
@@ -217,146 +252,7 @@ try {
     window.Events.removeDarkOverlay();
   });
 
-  installGetter('device-name', 'getDeviceName');
-
-  installGetter('theme-setting', 'getThemeSetting');
-  installSetter('theme-setting', 'setThemeSetting');
-  installGetter('hide-menu-bar', 'getHideMenuBar');
-  installSetter('hide-menu-bar', 'setHideMenuBar');
-  installGetter('system-tray-setting', 'getSystemTraySetting');
-  installSetter('system-tray-setting', 'setSystemTraySetting');
-
-  installGetter('notification-setting', 'getNotificationSetting');
-  installSetter('notification-setting', 'setNotificationSetting');
-  installGetter('notification-draw-attention', 'getNotificationDrawAttention');
-  installSetter('notification-draw-attention', 'setNotificationDrawAttention');
-  installGetter('audio-notification', 'getAudioNotification');
-  installSetter('audio-notification', 'setAudioNotification');
-  installGetter(
-    'badge-count-muted-conversations',
-    'getCountMutedConversations'
-  );
-  installSetter(
-    'badge-count-muted-conversations',
-    'setCountMutedConversations'
-  );
-
-  window.getCountMutedConversations = () =>
-    new Promise((resolve, reject) => {
-      ipc.once(
-        'get-success-badge-count-muted-conversations',
-        (_event, error, value) => {
-          if (error) {
-            return reject(new Error(error));
-          }
-
-          return resolve(value);
-        }
-      );
-      ipc.send('get-badge-count-muted-conversations');
-    });
-
-  installGetter('spell-check', 'getSpellCheck');
-  installSetter('spell-check', 'setSpellCheck');
-
-  installGetter('auto-launch', 'getAutoLaunch');
-  installSetter('auto-launch', 'setAutoLaunch');
-
-  installGetter('always-relay-calls', 'getAlwaysRelayCalls');
-  installSetter('always-relay-calls', 'setAlwaysRelayCalls');
-
-  installGetter('call-ringtone-notification', 'getCallRingtoneNotification');
-  installSetter('call-ringtone-notification', 'setCallRingtoneNotification');
-
-  window.getCallRingtoneNotification = () =>
-    new Promise((resolve, reject) => {
-      ipc.once(
-        'get-success-call-ringtone-notification',
-        (_event, error, value) => {
-          if (error) {
-            return reject(new Error(error));
-          }
-
-          return resolve(value);
-        }
-      );
-      ipc.send('get-call-ringtone-notification');
-    });
-
-  installGetter('call-system-notification', 'getCallSystemNotification');
-  installSetter('call-system-notification', 'setCallSystemNotification');
-
-  window.getCallSystemNotification = () =>
-    new Promise((resolve, reject) => {
-      ipc.once(
-        'get-success-call-system-notification',
-        (_event, error, value) => {
-          if (error) {
-            return reject(new Error(error));
-          }
-
-          return resolve(value);
-        }
-      );
-      ipc.send('get-call-system-notification');
-    });
-
-  installGetter('incoming-call-notification', 'getIncomingCallNotification');
-  installSetter('incoming-call-notification', 'setIncomingCallNotification');
-
-  window.getIncomingCallNotification = () =>
-    new Promise((resolve, reject) => {
-      ipc.once(
-        'get-success-incoming-call-notification',
-        (_event, error, value) => {
-          if (error) {
-            return reject(new Error(error));
-          }
-
-          return resolve(value);
-        }
-      );
-      ipc.send('get-incoming-call-notification');
-    });
-
-  window.getAlwaysRelayCalls = () =>
-    new Promise((resolve, reject) => {
-      ipc.once('get-success-always-relay-calls', (_event, error, value) => {
-        if (error) {
-          return reject(new Error(error));
-        }
-
-        return resolve(value);
-      });
-      ipc.send('get-always-relay-calls');
-    });
-
-  window.getMediaPermissions = () =>
-    new Promise((resolve, reject) => {
-      ipc.once('get-success-media-permissions', (_event, error, value) => {
-        if (error) {
-          return reject(new Error(error));
-        }
-
-        return resolve(value);
-      });
-      ipc.send('get-media-permissions');
-    });
-
-  window.getMediaCameraPermissions = () =>
-    new Promise((resolve, reject) => {
-      ipc.once(
-        'get-success-media-camera-permissions',
-        (_event, error, value) => {
-          if (error) {
-            return reject(new Error(error));
-          }
-
-          return resolve(value);
-        }
-      );
-      ipc.send('get-media-camera-permissions');
-    });
+  require('./ts/windows/preload');
 
   window.getBuiltInImages = () =>
     new Promise((resolve, reject) => {
@@ -370,13 +266,6 @@ try {
       ipc.send('get-built-in-images');
     });
 
-  installGetter('is-primary', 'isPrimary');
-  installGetter('sync-request', 'getSyncRequest');
-  installGetter('sync-time', 'getLastSyncTime');
-  installSetter('sync-time', 'setLastSyncTime');
-  installGetter('universal-expire-timer', 'getUniversalExpireTimer');
-  installSetter('universal-expire-timer', 'setUniversalExpireTimer');
-
   ipc.on('delete-all-data', async () => {
     const { deleteAllData } = window.Events;
     if (!deleteAllData) {
@@ -386,7 +275,7 @@ try {
     try {
       await deleteAllData();
     } catch (error) {
-      window.log.error('delete-all-data: error', error && error.stack);
+      log.error('delete-all-data: error', error && error.stack);
     }
   });
 
@@ -403,6 +292,16 @@ try {
     const { showGroupViaLink } = window.Events;
     if (showGroupViaLink) {
       showGroupViaLink(hash);
+    }
+  });
+
+  ipc.on('show-conversation-via-signal.me', (_event, info) => {
+    const { hash } = info;
+    strictAssert(typeof hash === 'string', 'Got an invalid hash over IPC');
+
+    const { showConversationViaSignalDotMe } = window.Events;
+    if (showConversationViaSignalDotMe) {
+      showConversationViaSignalDotMe(hash);
     }
   });
 
@@ -424,7 +323,7 @@ try {
   ipc.on('get-ready-for-shutdown', async () => {
     const { shutdown } = window.Events || {};
     if (!shutdown) {
-      window.log.error('preload shutdown handler: shutdown method not found');
+      log.error('preload shutdown handler: shutdown method not found');
       ipc.send('now-ready-for-shutdown');
       return;
     }
@@ -440,26 +339,31 @@ try {
     }
   });
 
+  ipc.on('show-release-notes', () => {
+    const { showReleaseNotes } = window.Events;
+    if (showReleaseNotes) {
+      showReleaseNotes();
+    }
+  });
+
   window.addSetupMenuItems = () => ipc.send('add-setup-menu-items');
   window.removeSetupMenuItems = () => ipc.send('remove-setup-menu-items');
 
   // We pull these dependencies in now, from here, because they have Node.js dependencies
 
-  require('./ts/logging/set_up_renderer_logging').initialize();
-
   if (config.proxyUrl) {
-    window.log.info('Using provided proxy url');
+    log.info('Using provided proxy url');
   }
 
   window.nodeSetImmediate = setImmediate;
 
   window.Backbone = require('backbone');
   window.textsecure = require('./ts/textsecure').default;
-  window.synchronousCrypto = require('./ts/util/synchronousCrypto');
 
   window.WebAPI = window.textsecure.WebAPI.initialize({
     url: config.serverUrl,
     storageUrl: config.storageUrl,
+    updatesUrl: config.updatesUrl,
     directoryUrl: config.directoryUrl,
     directoryEnclaveId: config.directoryEnclaveId,
     directoryTrustAnchor: config.directoryTrustAnchor,
@@ -473,23 +377,13 @@ try {
     version: config.version,
   });
 
-  // Linux seems to periodically let the event loop stop, so this is a global workaround
-  setInterval(() => {
-    window.nodeSetImmediate(() => {});
-  }, 1000);
-
   const { imageToBlurHash } = require('./ts/util/imageToBlurHash');
-  const { isGroupCallingEnabled } = require('./ts/util/isGroupCallingEnabled');
-  const { isValidGuid } = require('./ts/util/isValidGuid');
   const { ActiveWindowService } = require('./ts/services/ActiveWindowService');
 
   window.imageToBlurHash = imageToBlurHash;
   window.emojiData = require('emoji-datasource');
   window.libphonenumber = require('google-libphonenumber').PhoneNumberUtil.getInstance();
   window.libphonenumber.PhoneNumberFormat = require('google-libphonenumber').PhoneNumberFormat;
-  window.loadImage = require('blueimp-load-image');
-  window.getGuid = require('uuid/v4');
-  window.isGroupCallingEnabled = isGroupCallingEnabled;
 
   const activeWindowService = new ActiveWindowService();
   activeWindowService.initialize(window.document, ipc);
@@ -505,40 +399,16 @@ try {
     reducedMotionSetting: Boolean(config.reducedMotionSetting),
   };
 
-  window.isValidGuid = isValidGuid;
-  // https://stackoverflow.com/a/23299989
-  window.isValidE164 = maybeE164 => /^\+?[1-9]\d{1,14}$/.test(maybeE164);
-
-  window.normalizeUuids = (obj, paths, context) => {
-    if (!obj) {
-      return;
-    }
-    paths.forEach(path => {
-      const val = _.get(obj, path);
-      if (val) {
-        if (!val || !window.isValidGuid(val)) {
-          window.log.warn(
-            `Normalizing invalid uuid: ${val} at path ${path} in context "${context}"`
-          );
-        }
-        if (val && val.toLowerCase) {
-          _.set(obj, path, val.toLowerCase());
-        }
-      }
-    });
-  };
-
   window.React = require('react');
   window.ReactDOM = require('react-dom');
   window.moment = require('moment');
   window.PQueue = require('p-queue').default;
 
   const Signal = require('./js/modules/signal');
-  const i18n = require('./js/modules/i18n');
-  const Attachments = require('./app/attachments');
+  const Attachments = require('./ts/windows/attachments');
 
   const { locale } = config;
-  window.i18n = i18n.setup(locale, localeMessages);
+  window.i18n = SignalContext.i18n;
   window.moment.updateLocale(locale, {
     relativeTime: {
       s: window.i18n('timestamp_s'),
@@ -548,7 +418,7 @@ try {
   });
   window.moment.locale(locale);
 
-  const userDataPath = app.getPath('userData');
+  const userDataPath = SignalContext.getPath('userData');
   window.baseAttachmentsPath = Attachments.getPath(userDataPath);
   window.baseStickersPath = Attachments.getStickersPath(userDataPath);
   window.baseTempPath = Attachments.getTempPath(userDataPath);
@@ -562,28 +432,29 @@ try {
     Attachments,
     userDataPath,
     getRegionCode: () => window.storage.get('regionCode'),
-    logger: window.log,
+    logger: log,
   });
-  window.CI = config.enableCI
-    ? {
-        setProvisioningURL: url => ipc.send('set-provisioning-url', url),
-        deviceName: title,
-      }
-    : undefined;
+
+  if (config.enableCI) {
+    const { CI, electronRequire } = require('./ts/CI');
+    window.CI = new CI(title);
+    window.electronRequire = electronRequire;
+  }
 
   // these need access to window.Signal:
   require('./ts/models/messages');
   require('./ts/models/conversations');
 
   require('./ts/backbone/views/whisper_view');
-  require('./ts/backbone/views/toast_view');
   require('./ts/views/conversation_view');
+  require('./ts/views/inbox_view');
+  require('./ts/views/install_view');
+  require('./ts/views/standalone_registration_view');
   require('./ts/SignalProtocolStore');
   require('./ts/background');
 
   // Pulling these in separately since they access filesystem, electron
   window.Signal.Debug = require('./js/modules/debug');
-  window.Signal.Logs = require('./js/modules/logs');
 
   window.addEventListener('contextmenu', e => {
     const editable = e.target.closest(
@@ -591,15 +462,16 @@ try {
     );
     const link = e.target.closest('a');
     const selection = Boolean(window.getSelection().toString());
-    const image = e.target.closest('.module-lightbox img');
+    const image = e.target.closest('.Lightbox img');
     if (!editable && !selection && !link && !image) {
       e.preventDefault();
     }
   });
 
   if (config.environment === 'test') {
-    require('./preload_test.js');
+    require('./preload_test');
   }
+  log.info('preload complete');
 } catch (error) {
   /* eslint-disable no-console */
   if (console._log) {
@@ -613,4 +485,3 @@ try {
 }
 
 preloadEndTime = Date.now();
-window.log.info('preload complete');

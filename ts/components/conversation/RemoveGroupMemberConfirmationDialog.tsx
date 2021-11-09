@@ -1,10 +1,11 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
-import { ConversationType } from '../../state/ducks/conversations';
-import { LocalizerType } from '../../types/Util';
+import type { ConversationType } from '../../state/ducks/conversations';
+import type { LocalizerType } from '../../types/Util';
 
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { Intl } from '../Intl';
@@ -38,13 +39,7 @@ export const RemoveGroupMemberConfirmationDialog: FunctionComponent<PropsType> =
         i18n={i18n}
         id="RemoveGroupMemberConfirmation__description"
         components={{
-          name: (
-            <ContactName
-              firstName={conversation.firstName}
-              i18n={i18n}
-              title={conversation.title}
-            />
-          ),
+          name: <ContactName title={conversation.title} />,
         }}
       />
     }

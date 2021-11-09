@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { assert } from 'chai';
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 import Delta from 'quill-delta';
 
 import { matchMention } from '../../../quill/mentions/matchers';
 import { MemberRepository } from '../../../quill/memberRepository';
-import { ConversationType } from '../../../state/ducks/conversations';
-import { getDefaultConversation } from '../../../test-both/helpers/getDefaultConversation';
+import type { ConversationType } from '../../../state/ducks/conversations';
+import { getDefaultConversationWithUuid } from '../../../test-both/helpers/getDefaultConversation';
 
 class FakeTokenList<T> extends Array<T> {
   constructor(elements: Array<T>) {
@@ -32,15 +32,14 @@ const createMockElement = (
 
 const createMockAtMentionElement = (
   dataset: Record<string, string>
-): HTMLElement => createMockElement('module-message-body__at-mention', dataset);
+): HTMLElement => createMockElement('MessageBody__at-mention', dataset);
 
 const createMockMentionBlotElement = (
   dataset: Record<string, string>
 ): HTMLElement => createMockElement('mention-blot', dataset);
 
-const memberMahershala: ConversationType = getDefaultConversation({
+const memberMahershala: ConversationType = getDefaultConversationWithUuid({
   id: '555444',
-  uuid: 'abcdefg',
   title: 'Mahershala Ali',
   firstName: 'Mahershala',
   profileName: 'Mahershala A.',
@@ -50,9 +49,8 @@ const memberMahershala: ConversationType = getDefaultConversation({
   areWeAdmin: false,
 });
 
-const memberShia: ConversationType = getDefaultConversation({
+const memberShia: ConversationType = getDefaultConversationWithUuid({
   id: '333222',
-  uuid: 'hijklmno',
   title: 'Shia LaBeouf',
   firstName: 'Shia',
   profileName: 'Shia L.',

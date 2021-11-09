@@ -7,14 +7,16 @@ import Delta from 'quill-delta';
 import ReactQuill from 'react-quill';
 import classNames from 'classnames';
 import { Manager, Reference } from 'react-popper';
-import Quill, { KeyboardStatic, RangeStatic } from 'quill';
+import type { KeyboardStatic, RangeStatic } from 'quill';
+import Quill from 'quill';
 
 import { MentionCompletion } from '../quill/mentions/completion';
 import { EmojiBlot, EmojiCompletion } from '../quill/emoji';
-import { EmojiPickDataType } from './emoji/EmojiPicker';
+import type { EmojiPickDataType } from './emoji/EmojiPicker';
 import { convertShortName } from './emoji/lib';
-import { LocalizerType, BodyRangeType } from '../types/Util';
-import { ConversationType } from '../state/ducks/conversations';
+import type { LocalizerType, BodyRangeType } from '../types/Util';
+import type { ConversationType } from '../state/ducks/conversations';
+import { isValidUuid } from '../types/UUID';
 import { MentionBlot } from '../quill/mentions/blot';
 import {
   matchEmojiImage,
@@ -35,6 +37,7 @@ import {
 import { SignalClipboard } from '../quill/signal-clipboard';
 import { DirectionalBlot } from '../quill/block/blot';
 import { getClassNamesFor } from '../util/getClassNamesFor';
+import * as log from '../logging/log';
 
 Quill.register('formats/emoji', EmojiBlot);
 Quill.register('formats/mention', MentionBlot);
@@ -58,6 +61,7 @@ export type InputApi = {
 
 export type Props = {
   readonly i18n: LocalizerType;
+  readonly conversationId: string;
   readonly disabled?: boolean;
   readonly large?: boolean;
   readonly inputApi?: React.MutableRefObject<InputApi | undefined>;
@@ -74,17 +78,23 @@ export type Props = {
   ): unknown;
   onTextTooLong(): unknown;
   onPickEmoji(o: EmojiPickDataType): unknown;
-  onSubmit(message: string, mentions: Array<BodyRangeType>): unknown;
+  onSubmit(
+    message: string,
+    mentions: Array<BodyRangeType>,
+    timestamp: number
+  ): unknown;
   getQuotedMessage(): unknown;
   clearQuotedMessage(): unknown;
+  scrollToBottom: (converstionId: string) => unknown;
 };
 
 const MAX_LENGTH = 64 * 1024;
 const BASE_CLASS_NAME = 'module-composition-input';
 
-export const CompositionInput: React.ComponentType<Props> = props => {
+export function CompositionInput(props: Props): React.ReactElement {
   const {
     i18n,
+    conversationId,
     disabled,
     large,
     inputApi,
@@ -96,6 +106,7 @@ export const CompositionInput: React.ComponentType<Props> = props => {
     draftBodyRanges,
     getQuotedMessage,
     clearQuotedMessage,
+    scrollToBottom,
     sortedGroupMembers,
   } = props;
 
@@ -218,6 +229,7 @@ export const CompositionInput: React.ComponentType<Props> = props => {
   };
 
   const submit = () => {
+    const timestamp = Date.now();
     const quill = quillRef.current;
 
     if (quill === undefined) {
@@ -226,8 +238,11 @@ export const CompositionInput: React.ComponentType<Props> = props => {
 
     const [text, mentions] = getTextAndMentions();
 
-    window.log.info(`Submitting a message with ${mentions.length} mentions`);
-    onSubmit(text, mentions);
+    log.info(
+      `CompositionInput: Submitting message ${timestamp} with ${mentions.length} mentions`
+    );
+    onSubmit(text, mentions, timestamp);
+    scrollToBottom(conversationId);
   };
 
   if (inputApi) {
@@ -456,7 +471,7 @@ export const CompositionInput: React.ComponentType<Props> = props => {
 
     const currentMemberUuids = currentMembers
       .map(m => m.uuid)
-      .filter((uuid): uuid is string => uuid !== undefined);
+      .filter(isValidUuid);
 
     const newDelta = getDeltaToRemoveStaleMentions(ops, currentMemberUuids);
 
@@ -637,4 +652,4 @@ export const CompositionInput: React.ComponentType<Props> = props => {
       </Reference>
     </Manager>
   );
-};
+}

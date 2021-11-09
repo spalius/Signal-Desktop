@@ -1,21 +1,17 @@
 // Copyright 2019-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, {
-  useCallback,
-  CSSProperties,
-  FunctionComponent,
-  ReactNode,
-} from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
+import React, { useCallback } from 'react';
 import { escapeRegExp } from 'lodash';
 
 import { MessageBodyHighlight } from './MessageBodyHighlight';
 import { ContactName } from '../conversation/ContactName';
 
 import { assert } from '../../util/assert';
-import { BodyRangesType, LocalizerType } from '../../types/Util';
+import type { BodyRangesType, LocalizerType } from '../../types/Util';
 import { BaseConversationListItem } from './BaseConversationListItem';
-import { ConversationType } from '../../state/ducks/conversations';
+import type { ConversationType } from '../../state/ducks/conversations';
 
 export type PropsDataType = {
   isSelected?: boolean;
@@ -59,7 +55,6 @@ type PropsHousekeepingType = {
     conversationId: string;
     messageId?: string;
   }) => void;
-  style: CSSProperties;
 };
 
 export type PropsType = PropsDataType & PropsHousekeepingType;
@@ -68,23 +63,10 @@ const renderPerson = (
   i18n: LocalizerType,
   person: Readonly<{
     isMe?: boolean;
-    name?: string;
-    phoneNumber?: string;
-    profileName?: string;
     title: string;
   }>
 ): ReactNode =>
-  person.isMe ? (
-    i18n('you')
-  ) : (
-    <ContactName
-      phoneNumber={person.phoneNumber}
-      name={person.name}
-      profileName={person.profileName}
-      title={person.title}
-      i18n={i18n}
-    />
-  );
+  person.isMe ? i18n('you') : <ContactName title={person.title} />;
 
 // This function exists because bodyRanges tells us the character position
 // where the at-mention starts at according to the full body text. The snippet
@@ -149,7 +131,7 @@ function getFilteredBodyRanges(
 }
 
 export const MessageSearchResult: FunctionComponent<PropsType> = React.memo(
-  ({
+  function MessageSearchResult({
     body,
     bodyRanges,
     conversationId,
@@ -159,15 +141,14 @@ export const MessageSearchResult: FunctionComponent<PropsType> = React.memo(
     openConversationInternal,
     sentAt,
     snippet,
-    style,
     to,
-  }) => {
+  }) {
     const onClickItem = useCallback(() => {
       openConversationInternal({ conversationId, messageId: id });
     }, [openConversationInternal, conversationId, id]);
 
     if (!from || !to) {
-      return <div style={style} />;
+      return <div />;
     }
 
     const isNoteToSelf = from.isMe && to.isMe;
@@ -179,9 +160,9 @@ export const MessageSearchResult: FunctionComponent<PropsType> = React.memo(
       // This isn't perfect because (1) it doesn't work with RTL languages (2)
       //   capitalization may be incorrect for some languages, like English.
       headerName = (
-        <>
+        <span>
           {renderPerson(i18n, from)} {i18n('toJoiner')} {renderPerson(i18n, to)}
-        </>
+        </span>
       );
     }
 
@@ -213,7 +194,6 @@ export const MessageSearchResult: FunctionComponent<PropsType> = React.memo(
         phoneNumber={from.phoneNumber}
         profileName={from.profileName}
         sharedGroupNames={from.sharedGroupNames}
-        style={style}
         title={from.title}
         unblurredAvatarPath={from.unblurredAvatarPath}
       />

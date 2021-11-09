@@ -3,7 +3,10 @@
 
 import { v4 as generateUuid } from 'uuid';
 import { sample } from 'lodash';
-import { ConversationType } from '../../state/ducks/conversations';
+import type { ConversationType } from '../../state/ducks/conversations';
+import { UUID } from '../../types/UUID';
+import type { UUIDStringType } from '../../types/UUID';
+import { getRandomColor } from './getRandomColor';
 
 const FIRST_NAMES = [
   'James',
@@ -311,8 +314,8 @@ const LAST_NAMES = [
   'Jimenez',
 ];
 
-const getFirstName = (): string => sample(FIRST_NAMES) || 'Test';
-const getLastName = (): string => sample(LAST_NAMES) || 'Test';
+export const getFirstName = (): string => sample(FIRST_NAMES) || 'Test';
+export const getLastName = (): string => sample(LAST_NAMES) || 'Test';
 
 export function getDefaultConversation(
   overrideProps: Partial<ConversationType> = {}
@@ -322,7 +325,9 @@ export function getDefaultConversation(
 
   return {
     acceptedMessageRequest: true,
+    badges: [],
     e164: '+1300555000',
+    color: getRandomColor(),
     firstName,
     id: generateUuid(),
     isGroupV2Capable: true,
@@ -332,7 +337,17 @@ export function getDefaultConversation(
     sharedGroupNames: [],
     title: `${firstName} ${lastName}`,
     type: 'direct' as const,
-    uuid: generateUuid(),
+    uuid: UUID.generate().toString(),
     ...overrideProps,
+  };
+}
+
+export function getDefaultConversationWithUuid(
+  overrideProps: Partial<ConversationType> = {},
+  uuid: UUIDStringType = UUID.generate().toString()
+): ConversationType & { uuid: UUIDStringType } {
+  return {
+    ...getDefaultConversation(overrideProps),
+    uuid,
   };
 }

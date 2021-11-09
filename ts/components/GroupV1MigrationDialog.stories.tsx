@@ -7,9 +7,10 @@ import { isBoolean } from 'lodash';
 import { boolean } from '@storybook/addon-knobs';
 import { action } from '@storybook/addon-actions';
 
-import { GroupV1MigrationDialog, PropsType } from './GroupV1MigrationDialog';
-import { ConversationType } from '../state/ducks/conversations';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import type { PropsType } from './GroupV1MigrationDialog';
+import { GroupV1MigrationDialog } from './GroupV1MigrationDialog';
+import type { ConversationType } from '../state/ducks/conversations';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
 

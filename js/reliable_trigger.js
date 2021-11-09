@@ -66,7 +66,7 @@
       a2 = args[1],
       a3 = args[2];
     const logError = function (error) {
-      window.log.error(
+      window.SignalContext.log.error(
         'Model caught error triggering',
         name,
         'event:',

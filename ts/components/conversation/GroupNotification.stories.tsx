@@ -1,43 +1,44 @@
-// Copyright 2020 Signal Messenger, LLC
+// Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import * as React from 'react';
 
 import { storiesOf } from '@storybook/react';
 
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
-import { GroupNotification, Props } from './GroupNotification';
+import type { Props } from './GroupNotification';
+import { GroupNotification } from './GroupNotification';
+import { getDefaultConversation } from '../../test-both/helpers/getDefaultConversation';
 
 const book = storiesOf('Components/Conversation', module);
 const i18n = setupI18n('en', enMessages);
 
 type GroupNotificationStory = [string, Array<Props>];
 
+const longName = '🍷🐓🥶'.repeat(50);
+
 const stories: Array<GroupNotificationStory> = [
   [
     'Combo',
     [
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
         changes: [
           {
             type: 'add',
             contacts: [
-              {
+              getDefaultConversation({
                 title: 'Mrs. Ice',
                 phoneNumber: '(202) 555-1001',
-                profileName: 'Mrs. Ice',
-              },
-              {
+              }),
+              getDefaultConversation({
                 phoneNumber: '(202) 555-1002',
-                name: 'Ms. Earth',
                 title: 'Ms. Earth',
-              },
+              }),
             ],
           },
           { type: 'name', newName: 'Fishing Stories' },
@@ -46,26 +47,23 @@ const stories: Array<GroupNotificationStory> = [
         i18n,
       },
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
           isMe: true,
-        },
+        }),
         changes: [
           {
             type: 'add',
             contacts: [
-              {
+              getDefaultConversation({
                 title: 'Mrs. Ice',
                 phoneNumber: '(202) 555-1001',
-                profileName: 'Mrs. Ice',
-              },
-              {
+              }),
+              getDefaultConversation({
                 title: 'Ms. Earth',
                 phoneNumber: '(202) 555-1002',
-                name: 'Ms. Earth',
-              },
+              }),
             ],
           },
           { type: 'name', newName: 'Fishing Stories' },
@@ -79,147 +77,132 @@ const stories: Array<GroupNotificationStory> = [
     'Joined group',
     [
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
         changes: [
           {
             type: 'add',
             contacts: [
-              {
+              getDefaultConversation({
                 title: '(202) 555-1000',
                 phoneNumber: '(202) 555-1000',
-              },
-              {
+              }),
+              getDefaultConversation({
                 title: 'Mrs. Ice',
                 phoneNumber: '(202) 555-1001',
-                profileName: 'Mrs. Ice',
-              },
-              {
+              }),
+              getDefaultConversation({
                 title: 'Ms. Earth',
                 phoneNumber: '(202) 555-1002',
-                name: 'Ms. Earth',
-              },
+              }),
             ],
           },
         ],
         i18n,
       },
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
         changes: [
           {
             type: 'add',
             contacts: [
-              {
+              getDefaultConversation({
                 title: '(202) 555-1000',
                 phoneNumber: '(202) 555-1000',
                 isMe: true,
-              },
-              {
+              }),
+              getDefaultConversation({
                 title: 'Mrs. Ice',
                 phoneNumber: '(202) 555-1001',
-                profileName: 'Mrs. Ice',
-              },
-              {
+              }),
+              getDefaultConversation({
                 title: 'Ms. Earth',
                 phoneNumber: '(202) 555-1002',
-                name: 'Ms. Earth',
-              },
+              }),
             ],
           },
         ],
         i18n,
       },
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
         changes: [
           {
             type: 'add',
             contacts: [
-              {
+              getDefaultConversation({
                 title: 'Mr. Fire',
                 phoneNumber: '(202) 555-1000',
-                profileName: 'Mr. Fire',
-              },
+              }),
             ],
           },
         ],
         i18n,
       },
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
           isMe: true,
-        },
+        }),
         changes: [
           {
             type: 'add',
             contacts: [
-              {
+              getDefaultConversation({
                 title: 'Mr. Fire',
                 phoneNumber: '(202) 555-1000',
-                profileName: 'Mr. Fire',
-              },
+              }),
             ],
           },
         ],
         i18n,
       },
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
         changes: [
           {
             type: 'add',
             contacts: [
-              {
+              getDefaultConversation({
                 title: 'Mr. Fire',
                 phoneNumber: '(202) 555-1000',
-                profileName: 'Mr. Fire',
                 isMe: true,
-              },
+              }),
             ],
           },
         ],
         i18n,
       },
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
         changes: [
           {
             type: 'add',
             contacts: [
-              {
+              getDefaultConversation({
                 title: 'Mr. Fire',
                 phoneNumber: '(202) 555-1000',
-                profileName: 'Mr. Fire',
                 isMe: true,
-              },
-              {
+              }),
+              getDefaultConversation({
                 title: 'Mrs. Ice',
                 phoneNumber: '(202) 555-1001',
-                profileName: 'Mrs. Ice',
-              },
+              }),
             ],
           },
         ],
@@ -231,72 +214,64 @@ const stories: Array<GroupNotificationStory> = [
     'Left group',
     [
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
         changes: [
           {
             type: 'remove',
             contacts: [
-              {
+              getDefaultConversation({
                 title: 'Mr. Fire',
                 phoneNumber: '(202) 555-1000',
-                profileName: 'Mr. Fire',
-              },
-              {
+              }),
+              getDefaultConversation({
                 title: 'Mrs. Ice',
                 phoneNumber: '(202) 555-1001',
-                profileName: 'Mrs. Ice',
-              },
-              {
+              }),
+              getDefaultConversation({
                 title: 'Ms. Earth',
                 phoneNumber: '(202) 555-1002',
-                name: 'Ms. Earth',
-              },
+              }),
             ],
           },
         ],
         i18n,
       },
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
         changes: [
           {
             type: 'remove',
             contacts: [
-              {
+              getDefaultConversation({
                 title: 'Mr. Fire',
                 phoneNumber: '(202) 555-1000',
-                profileName: 'Mr. Fire',
-              },
+              }),
             ],
           },
         ],
         i18n,
       },
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
           isMe: true,
-        },
+        }),
         changes: [
           {
             type: 'remove',
             contacts: [
-              {
+              getDefaultConversation({
                 title: 'Alice',
-                name: 'Alice',
                 phoneNumber: '(202) 555-1000',
                 isMe: true,
-              },
+              }),
             ],
           },
         ],
@@ -308,11 +283,10 @@ const stories: Array<GroupNotificationStory> = [
     'Title changed',
     [
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
         changes: [
           {
             type: 'name',
@@ -322,12 +296,11 @@ const stories: Array<GroupNotificationStory> = [
         i18n,
       },
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
           isMe: true,
-        },
+        }),
         changes: [
           {
             type: 'name',
@@ -342,11 +315,10 @@ const stories: Array<GroupNotificationStory> = [
     'Avatar changed',
     [
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
         changes: [
           {
             type: 'avatar',
@@ -356,12 +328,11 @@ const stories: Array<GroupNotificationStory> = [
         i18n,
       },
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
           isMe: true,
-        },
+        }),
         changes: [
           {
             type: 'avatar',
@@ -376,11 +347,27 @@ const stories: Array<GroupNotificationStory> = [
     'Generic group update',
     [
       {
-        from: {
+        from: getDefaultConversation({
           title: 'Alice',
-          name: 'Alice',
           phoneNumber: '(202) 555-1000',
-        },
+        }),
+        changes: [
+          {
+            type: 'general',
+          },
+        ],
+        i18n,
+      },
+    ],
+  ],
+  [
+    'Long name',
+    [
+      {
+        from: getDefaultConversation({
+          title: longName,
+          phoneNumber: '(202) 555-1000',
+        }),
         changes: [
           {
             type: 'general',

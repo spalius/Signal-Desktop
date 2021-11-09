@@ -1,23 +1,27 @@
 // Copyright 2018-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import type { ReactChild, ReactNode } from 'react';
 import React from 'react';
 import classNames from 'classnames';
 import moment from 'moment';
 import { noop } from 'lodash';
 
-import { Avatar } from '../Avatar';
+import { Avatar, AvatarSize } from '../Avatar';
 import { ContactName } from './ContactName';
-import {
-  Message,
-  MessageStatusType,
+import type {
   Props as MessagePropsType,
   PropsData as MessagePropsDataType,
 } from './Message';
-import { LocalizerType } from '../../types/Util';
-import { ConversationType } from '../../state/ducks/conversations';
-import { assert } from '../../util/assert';
-import { ContactNameColorType } from '../../types/Colors';
+import { Message } from './Message';
+import type { LocalizerType } from '../../types/Util';
+import type { ConversationType } from '../../state/ducks/conversations';
+import { groupBy } from '../../util/mapUtil';
+import type { ContactNameColorType } from '../../types/Colors';
+import { SendStatus } from '../../messages/MessageSendState';
+import { WidthBreakpoint } from '../_util';
+import * as log from '../../logging/log';
+import { Timestamp } from './Timestamp';
 
 export type Contact = Pick<
   ConversationType,
@@ -33,7 +37,8 @@ export type Contact = Pick<
   | 'title'
   | 'unblurredAvatarPath'
 > & {
-  status: MessageStatusType | null;
+  status?: SendStatus;
+  statusTimestamp?: number;
 
   isOutgoingKeyError: boolean;
   isUnidentifiedDelivery: boolean;
@@ -41,34 +46,34 @@ export type Contact = Pick<
   errors?: Array<Error>;
 };
 
-export type Props = {
-  contacts: Array<Contact>;
+export type PropsData = {
+  // An undefined status means they were the sender and it's an incoming message. If
+  //   `undefined` is a status, there should be no other items in the array; if there are
+  //   any defined statuses, `undefined` shouldn't be present.
+  contacts: ReadonlyArray<Contact>;
+
   contactNameColor?: ContactNameColorType;
   errors: Array<Error>;
   message: Omit<MessagePropsDataType, 'renderingContext'>;
   receivedAt: number;
   sentAt: number;
 
-  sendAnyway: (contactId: string, messageId: string) => unknown;
   showSafetyNumber: (contactId: string) => void;
   i18n: LocalizerType;
-} & Pick<
+} & Pick<MessagePropsType, 'interactionMode'>;
+
+export type PropsBackboneActions = Pick<
   MessagePropsType,
-  | 'checkForAccount'
-  | 'clearSelectedMessage'
-  | 'deleteMessage'
-  | 'deleteMessageForEveryone'
   | 'displayTapToViewMessage'
-  | 'downloadAttachment'
-  | 'doubleCheckMissingQuoteReference'
-  | 'interactionMode'
   | 'kickOffAttachmentDownload'
   | 'markAttachmentAsCorrupted'
+  | 'markViewed'
   | 'openConversation'
   | 'openLink'
   | 'reactToMessage'
   | 'renderAudioAttachment'
   | 'renderEmojiPicker'
+  | 'renderReactionPicker'
   | 'replyToMessage'
   | 'retrySend'
   | 'showContactDetail'
@@ -79,12 +84,26 @@ export type Props = {
   | 'showVisualAttachment'
 >;
 
+export type PropsReduxActions = Pick<
+  MessagePropsType,
+  | 'clearSelectedMessage'
+  | 'doubleCheckMissingQuoteReference'
+  | 'checkForAccount'
+>;
+
+export type ExternalProps = PropsData & PropsBackboneActions;
+export type Props = PropsData & PropsBackboneActions & PropsReduxActions;
+
+const contactSortCollator = new Intl.Collator();
+
 const _keyForError = (error: Error): string => {
   return `${error.name}-${error.message}`;
 };
 
 export class MessageDetail extends React.Component<Props> {
   private readonly focusRef = React.createRef<HTMLDivElement>();
+
+  private readonly messageContainerRef = React.createRef<HTMLDivElement>();
 
   public componentDidMount(): void {
     // When this component is created, it's initially not part of the DOM, and then it's
@@ -124,32 +143,14 @@ export class MessageDetail extends React.Component<Props> {
         profileName={profileName}
         title={title}
         sharedGroupNames={sharedGroupNames}
-        size={52}
+        size={AvatarSize.THIRTY_SIX}
         unblurredAvatarPath={unblurredAvatarPath}
       />
     );
   }
 
-  public renderDeleteButton(): JSX.Element {
-    const { deleteMessage, i18n, message } = this.props;
-
-    return (
-      <div className="module-message-detail__delete-button-container">
-        <button
-          type="button"
-          onClick={() => {
-            deleteMessage(message.id);
-          }}
-          className="module-message-detail__delete-button"
-        >
-          {i18n('deleteThisMessage')}
-        </button>
-      </div>
-    );
-  }
-
   public renderContact(contact: Contact): JSX.Element {
-    const { i18n, message, showSafetyNumber, sendAnyway } = this.props;
+    const { i18n, showSafetyNumber } = this.props;
     const errors = contact.errors || [];
 
     const errorComponent = contact.isOutgoingKeyError ? (
@@ -161,41 +162,18 @@ export class MessageDetail extends React.Component<Props> {
         >
           {i18n('showSafetyNumber')}
         </button>
-        <button
-          type="button"
-          className="module-message-detail__contact__send-anyway"
-          onClick={() => sendAnyway(contact.id, message.id)}
-        >
-          {i18n('sendAnyway')}
-        </button>
       </div>
-    ) : null;
-    const statusComponent = !contact.isOutgoingKeyError ? (
-      <div
-        className={classNames(
-          'module-message-detail__contact__status-icon',
-          contact.status
-            ? `module-message-detail__contact__status-icon--${contact.status}`
-            : undefined
-        )}
-      />
     ) : null;
     const unidentifiedDeliveryComponent = contact.isUnidentifiedDelivery ? (
       <div className="module-message-detail__contact__unidentified-delivery-icon" />
     ) : null;
 
     return (
-      <div key={contact.phoneNumber} className="module-message-detail__contact">
+      <div key={contact.id} className="module-message-detail__contact">
         {this.renderAvatar(contact)}
         <div className="module-message-detail__contact__text">
           <div className="module-message-detail__contact__name">
-            <ContactName
-              phoneNumber={contact.phoneNumber}
-              name={contact.name}
-              profileName={contact.profileName}
-              title={contact.title}
-              i18n={i18n}
-            />
+            <ContactName title={contact.title} />
           </div>
           {errors.map(error => (
             <div
@@ -208,21 +186,72 @@ export class MessageDetail extends React.Component<Props> {
         </div>
         {errorComponent}
         {unidentifiedDeliveryComponent}
-        {statusComponent}
+        {contact.statusTimestamp && (
+          <Timestamp
+            i18n={i18n}
+            module="module-message-detail__status-timestamp"
+            timestamp={contact.statusTimestamp}
+          />
+        )}
       </div>
     );
   }
 
-  public renderContacts(): JSX.Element | null {
-    const { contacts } = this.props;
-
+  private renderContactGroup(
+    sendStatus: undefined | SendStatus,
+    contacts: undefined | ReadonlyArray<Contact>
+  ): ReactNode {
+    const { i18n } = this.props;
     if (!contacts || !contacts.length) {
       return null;
     }
 
+    const i18nKey =
+      sendStatus === undefined ? 'from' : `MessageDetailsHeader--${sendStatus}`;
+
+    const sortedContacts = [...contacts].sort((a, b) =>
+      contactSortCollator.compare(a.title, b.title)
+    );
+
+    return (
+      <div key={i18nKey} className="module-message-detail__contact-group">
+        <div
+          className={classNames(
+            'module-message-detail__contact-group__header',
+            sendStatus &&
+              `module-message-detail__contact-group__header--${sendStatus}`
+          )}
+        >
+          {i18n(i18nKey)}
+        </div>
+        {sortedContacts.map(contact => this.renderContact(contact))}
+      </div>
+    );
+  }
+
+  private renderContacts(): ReactChild {
+    // This assumes that the list either contains one sender (a status of `undefined`) or
+    //   1+ contacts with `SendStatus`es, but it doesn't check that assumption.
+    const { contacts } = this.props;
+
+    const contactsBySendStatus = groupBy(contacts, contact => contact.status);
+
     return (
       <div className="module-message-detail__contact-container">
-        {contacts.map(contact => this.renderContact(contact))}
+        {[
+          undefined,
+          SendStatus.Failed,
+          SendStatus.Viewed,
+          SendStatus.Read,
+          SendStatus.Delivered,
+          SendStatus.Sent,
+          SendStatus.Pending,
+        ].map(sendStatus =>
+          this.renderContactGroup(
+            sendStatus,
+            contactsBySendStatus.get(sendStatus)
+          )
+        )}
       </div>
     );
   }
@@ -237,20 +266,19 @@ export class MessageDetail extends React.Component<Props> {
       checkForAccount,
       clearSelectedMessage,
       contactNameColor,
-      deleteMessage,
-      deleteMessageForEveryone,
       displayTapToViewMessage,
-      downloadAttachment,
       doubleCheckMissingQuoteReference,
       i18n,
       interactionMode,
       kickOffAttachmentDownload,
       markAttachmentAsCorrupted,
+      markViewed,
       openConversation,
       openLink,
       reactToMessage,
       renderAudioAttachment,
       renderEmojiPicker,
+      renderReactionPicker,
       replyToMessage,
       retrySend,
       showContactDetail,
@@ -264,38 +292,48 @@ export class MessageDetail extends React.Component<Props> {
     return (
       // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
       <div className="module-message-detail" tabIndex={0} ref={this.focusRef}>
-        <div className="module-message-detail__message-container">
+        <div
+          className="module-message-detail__message-container"
+          ref={this.messageContainerRef}
+        >
           <Message
             {...message}
             renderingContext="conversation/MessageDetail"
             checkForAccount={checkForAccount}
             clearSelectedMessage={clearSelectedMessage}
             contactNameColor={contactNameColor}
-            deleteMessage={deleteMessage}
-            deleteMessageForEveryone={deleteMessageForEveryone}
+            containerElementRef={this.messageContainerRef}
+            containerWidthBreakpoint={WidthBreakpoint.Wide}
+            deleteMessage={() =>
+              log.warn('MessageDetail: deleteMessage called!')
+            }
+            deleteMessageForEveryone={() =>
+              log.warn('MessageDetail: deleteMessageForEveryone called!')
+            }
             disableMenu
             disableScroll
             displayTapToViewMessage={displayTapToViewMessage}
-            downloadAttachment={downloadAttachment}
+            downloadAttachment={() =>
+              log.warn('MessageDetail: deleteMessageForEveryone called!')
+            }
             doubleCheckMissingQuoteReference={doubleCheckMissingQuoteReference}
             i18n={i18n}
             interactionMode={interactionMode}
             kickOffAttachmentDownload={kickOffAttachmentDownload}
             markAttachmentAsCorrupted={markAttachmentAsCorrupted}
+            markViewed={markViewed}
             onHeightChange={noop}
             openConversation={openConversation}
             openLink={openLink}
             reactToMessage={reactToMessage}
             renderAudioAttachment={renderAudioAttachment}
             renderEmojiPicker={renderEmojiPicker}
+            renderReactionPicker={renderReactionPicker}
             replyToMessage={replyToMessage}
             retrySend={retrySend}
             showForwardMessageModal={showForwardMessageModal}
             scrollToQuotedMessage={() => {
-              assert(
-                false,
-                'scrollToQuotedMessage should never be called because scrolling is disabled'
-              );
+              log.warn('MessageDetail: scrollToQuotedMessage called!');
             }}
             showContactDetail={showContactDetail}
             showContactModal={showContactModal}
@@ -306,10 +344,7 @@ export class MessageDetail extends React.Component<Props> {
               showExpiredOutgoingTapToViewToast
             }
             showMessageDetail={() => {
-              assert(
-                false,
-                "showMessageDetail should never be called because the menu is disabled (and we're already in the message detail!)"
-              );
+              log.warn('MessageDetail: deleteMessageForEveryone called!');
             }}
             showVisualAttachment={showVisualAttachment}
           />
@@ -349,15 +384,9 @@ export class MessageDetail extends React.Component<Props> {
                 </td>
               </tr>
             ) : null}
-            <tr>
-              <td className="module-message-detail__label">
-                {message.direction === 'incoming' ? i18n('from') : i18n('to')}
-              </td>
-            </tr>
           </tbody>
         </table>
         {this.renderContacts()}
-        {this.renderDeleteButton()}
       </div>
     );
   }

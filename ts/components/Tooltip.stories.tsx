@@ -5,7 +5,8 @@ import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { select } from '@storybook/addon-knobs';
 
-import { Tooltip, TooltipPlacement, PropsType } from './Tooltip';
+import type { PropsType } from './Tooltip';
+import { Tooltip, TooltipPlacement } from './Tooltip';
 import { Theme } from '../util/theme';
 
 const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
@@ -80,6 +81,26 @@ story.add('Sticky', () => (
     {Trigger}
   </Tooltip>
 ));
+
+story.add('With Applied Popper Modifiers', () => {
+  return (
+    <Tooltip
+      {...createProps({
+        direction: TooltipPlacement.Bottom,
+      })}
+      popperModifiers={[
+        {
+          name: 'offset',
+          options: {
+            offset: [80, 80],
+          },
+        },
+      ]}
+    >
+      {Trigger}
+    </Tooltip>
+  );
+});
 
 story.add('Dark Theme', () => (
   <Tooltip

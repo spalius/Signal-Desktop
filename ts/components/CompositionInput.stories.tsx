@@ -9,8 +9,9 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
-import { CompositionInput, Props } from './CompositionInput';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import type { Props } from './CompositionInput';
+import { CompositionInput } from './CompositionInput';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 
 const i18n = setupI18n('en', enMessages);
@@ -19,6 +20,7 @@ const story = storiesOf('Components/CompositionInput', module);
 
 const createProps = (overrideProps: Partial<Props> = {}): Props => ({
   i18n,
+  conversationId: 'conversation-id',
   disabled: boolean('disabled', overrideProps.disabled || false),
   onSubmit: action('onSubmit'),
   onEditorStateChange: action('onEditorStateChange'),
@@ -29,6 +31,7 @@ const createProps = (overrideProps: Partial<Props> = {}): Props => ({
   getQuotedMessage: action('getQuotedMessage'),
   onPickEmoji: action('onPickEmoji'),
   large: boolean('large', overrideProps.large || false),
+  scrollToBottom: action('scrollToBottom'),
   sortedGroupMembers: overrideProps.sortedGroupMembers || [],
   skinTone: select(
     'skinTone',

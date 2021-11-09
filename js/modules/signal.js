@@ -10,14 +10,12 @@ const {
   start: conversationControllerStart,
 } = require('../../ts/ConversationController');
 const Data = require('../../ts/sql/Client').default;
-const Emojis = require('./emojis');
 const EmojiLib = require('../../ts/components/emoji/lib');
 const Groups = require('../../ts/groups');
 const GroupChange = require('../../ts/groupChange');
 const IndexedDB = require('./indexeddb');
-const Notifications = require('../../ts/notifications');
 const OS = require('../../ts/OS');
-const Stickers = require('./stickers');
+const Stickers = require('../../ts/types/Stickers');
 const Settings = require('./settings');
 const RemoteConfig = require('../../ts/RemoteConfig');
 const Util = require('../../ts/util');
@@ -41,7 +39,6 @@ const {
 const { Emojify } = require('../../ts/components/conversation/Emojify');
 const { ErrorModal } = require('../../ts/components/ErrorModal');
 const { Lightbox } = require('../../ts/components/Lightbox');
-const { LightboxGallery } = require('../../ts/components/LightboxGallery');
 const {
   MediaGallery,
 } = require('../../ts/components/conversation/media-gallery/MediaGallery');
@@ -59,24 +56,15 @@ const {
 const {
   SystemTraySettingsCheckboxes,
 } = require('../../ts/components/conversation/SystemTraySettingsCheckboxes');
+const { WhatsNewLink } = require('../../ts/components/WhatsNewLink');
 
 // State
-const { createTimeline } = require('../../ts/state/roots/createTimeline');
 const {
   createChatColorPicker,
 } = require('../../ts/state/roots/createChatColorPicker');
 const {
-  createCompositionArea,
-} = require('../../ts/state/roots/createCompositionArea');
-const {
-  createContactModal,
-} = require('../../ts/state/roots/createContactModal');
-const {
   createConversationDetails,
 } = require('../../ts/state/roots/createConversationDetails');
-const {
-  createConversationHeader,
-} = require('../../ts/state/roots/createConversationHeader');
 const { createApp } = require('../../ts/state/roots/createApp');
 const {
   createForwardMessageModal,
@@ -94,6 +82,9 @@ const { createLeftPane } = require('../../ts/state/roots/createLeftPane');
 const {
   createMessageDetail,
 } = require('../../ts/state/roots/createMessageDetail');
+const {
+  createConversationNotificationsSettings,
+} = require('../../ts/state/roots/createConversationNotificationsSettings');
 const {
   createGroupV2Permissions,
 } = require('../../ts/state/roots/createGroupV2Permissions');
@@ -131,15 +122,12 @@ const conversationsSelectors = require('../../ts/state/selectors/conversations')
 const searchSelectors = require('../../ts/state/selectors/search');
 
 // Types
-const AttachmentType = require('./types/attachment');
-const VisualAttachment = require('./types/visual_attachment');
-const Contact = require('../../ts/types/Contact');
-const Conversation = require('./types/conversation');
-const Errors = require('./types/errors');
-const MediaGalleryMessage = require('../../ts/components/conversation/media-gallery/types/Message');
+const AttachmentType = require('../../ts/types/Attachment');
+const VisualAttachment = require('../../ts/types/VisualAttachment');
 const MessageType = require('./types/message');
-const MIME = require('../../ts/types/MIME');
-const SettingsType = require('../../ts/types/Settings');
+const { UUID } = require('../../ts/types/UUID');
+const { Address } = require('../../ts/types/Address');
+const { QualifiedAddress } = require('../../ts/types/QualifiedAddress');
 
 // Views
 const Initialization = require('./views/initialization');
@@ -158,9 +146,7 @@ const {
 const {
   initializeUpdateListener,
 } = require('../../ts/services/updateListener');
-const { notify } = require('../../ts/services/notify');
 const { calling } = require('../../ts/services/calling');
-const { onTimeout, removeTimeout } = require('../../ts/services/timers');
 const {
   enableStorageService,
   eraseAllStorageServiceState,
@@ -185,9 +171,11 @@ function initializeMigrations({
     createWriterForExisting,
     createWriterForNew,
     createDoesExist,
+    getAvatarsPath,
     getDraftPath,
     getPath,
     getStickersPath,
+    getBadgesPath,
     getTempPath,
     openFileInFolder,
     saveAttachmentToDisk,
@@ -220,6 +208,10 @@ function initializeMigrations({
   const deleteSticker = Attachments.createDeleter(stickersPath);
   const readStickerData = createReader(stickersPath);
 
+  const badgesPath = getBadgesPath(userDataPath);
+  const getAbsoluteBadgeImageFilePath = createAbsolutePathGetter(badgesPath);
+  const writeNewBadgeImageFileData = createWriterForNew(badgesPath, '.svg');
+
   const tempPath = getTempPath(userDataPath);
   const getAbsoluteTempPath = createAbsolutePathGetter(tempPath);
   const writeNewTempData = createWriterForNew(tempPath);
@@ -235,11 +227,17 @@ function initializeMigrations({
   const deleteDraftFile = Attachments.createDeleter(draftPath);
   const readDraftData = createReader(draftPath);
 
+  const avatarsPath = getAvatarsPath(userDataPath);
+  const getAbsoluteAvatarPath = createAbsolutePathGetter(avatarsPath);
+  const writeNewAvatarData = createWriterForNew(avatarsPath);
+  const deleteAvatar = Attachments.createDeleter(avatarsPath);
+
   return {
     attachmentsPath,
     copyIntoAttachmentsDirectory,
     copyIntoTempDirectory,
     deleteAttachmentData: deleteOnDisk,
+    deleteAvatar,
     deleteDraftFile,
     deleteExternalMessageFiles: MessageType.deleteAllExternalFiles({
       deleteAttachmentData: Type.deleteData(deleteOnDisk),
@@ -249,6 +247,8 @@ function initializeMigrations({
     deleteTempFile,
     doesAttachmentExist,
     getAbsoluteAttachmentPath,
+    getAbsoluteAvatarPath,
+    getAbsoluteBadgeImageFilePath,
     getAbsoluteDraftPath,
     getAbsoluteStickerPath,
     getAbsoluteTempPath,
@@ -309,7 +309,9 @@ function initializeMigrations({
       logger,
     }),
     writeNewAttachmentData: createWriterForNew(attachmentsPath),
+    writeNewAvatarData,
     writeNewDraftData,
+    writeNewBadgeImageFileData,
   };
 }
 
@@ -336,7 +338,6 @@ exports.setup = (options = {}) => {
     Emojify,
     ErrorModal,
     Lightbox,
-    LightboxGallery,
     MediaGallery,
     MessageDetail,
     Quote,
@@ -344,18 +345,13 @@ exports.setup = (options = {}) => {
     StagedLinkPreview,
     DisappearingTimeDialog,
     SystemTraySettingsCheckboxes,
-    Types: {
-      Message: MediaGalleryMessage,
-    },
+    WhatsNewLink,
   };
 
   const Roots = {
     createApp,
     createChatColorPicker,
-    createCompositionArea,
-    createContactModal,
     createConversationDetails,
-    createConversationHeader,
     createForwardMessageModal,
     createGroupLinkManagement,
     createGroupV1MigrationModal,
@@ -363,12 +359,12 @@ exports.setup = (options = {}) => {
     createGroupV2Permissions,
     createLeftPane,
     createMessageDetail,
+    createConversationNotificationsSettings,
     createPendingInvites,
     createSafetyNumberViewer,
     createShortcutGuideModal,
     createStickerManager,
     createStickerPreviewModal,
-    createTimeline,
   };
 
   const Ducks = {
@@ -398,9 +394,6 @@ exports.setup = (options = {}) => {
     initializeGroupCredentialFetcher,
     initializeNetworkObserver,
     initializeUpdateListener,
-    onTimeout,
-    notify,
-    removeTimeout,
     runStorageServiceSyncJob,
     storageServiceUploadJob,
   };
@@ -413,14 +406,12 @@ exports.setup = (options = {}) => {
   };
 
   const Types = {
-    Attachment: AttachmentType,
-    Contact,
-    Conversation,
-    Errors,
     Message: MessageType,
-    MIME,
-    Settings: SettingsType,
-    VisualAttachment,
+
+    // Mostly for debugging
+    UUID,
+    Address,
+    QualifiedAddress,
   };
 
   const Views = {
@@ -439,13 +430,11 @@ exports.setup = (options = {}) => {
     Curve,
     conversationControllerStart,
     Data,
-    Emojis,
     EmojiLib,
     Groups,
     GroupChange,
     IndexedDB,
     Migrations,
-    Notifications,
     OS,
     RemoteConfig,
     Settings,

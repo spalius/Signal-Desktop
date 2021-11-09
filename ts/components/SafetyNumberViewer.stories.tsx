@@ -6,59 +6,51 @@ import { action } from '@storybook/addon-actions';
 import { boolean, text } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 
-import { PropsType, SafetyNumberViewer } from './SafetyNumberViewer';
-import { ConversationType } from '../state/ducks/conversations';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import type { PropsType } from './SafetyNumberViewer';
+import { SafetyNumberViewer } from './SafetyNumberViewer';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
+import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
 
 const i18n = setupI18n('en', enMessages);
 
-const contactWithAllData = {
+const contactWithAllData = getDefaultConversation({
   title: 'Summer Smith',
   name: 'Summer Smith',
   phoneNumber: '(305) 123-4567',
   isVerified: true,
-} as ConversationType;
+});
 
-const contactWithJustProfile = {
+const contactWithJustProfile = getDefaultConversation({
   avatarPath: undefined,
-  color: 'ultramarine',
   title: '-*Smartest Dude*-',
   profileName: '-*Smartest Dude*-',
   name: undefined,
   phoneNumber: '(305) 123-4567',
-} as ConversationType;
+});
 
-const contactWithJustNumber = {
+const contactWithJustNumber = getDefaultConversation({
   avatarPath: undefined,
-  color: 'ultramarine',
   profileName: undefined,
   name: undefined,
   title: '(305) 123-4567',
   phoneNumber: '(305) 123-4567',
-} as ConversationType;
+});
 
-const contactWithNothing = {
+const contactWithNothing = getDefaultConversation({
   id: 'some-guid',
   avatarPath: undefined,
-  color: 'ultramarine',
   profileName: undefined,
   title: 'Unknown contact',
   name: undefined,
   phoneNumber: undefined,
-} as ConversationType;
+});
 
 const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
   contact: overrideProps.contact || contactWithAllData,
   generateSafetyNumber: action('generate-safety-number'),
   i18n,
   safetyNumber: text('safetyNumber', overrideProps.safetyNumber || 'XXX'),
-  safetyNumberChanged: boolean(
-    'safetyNumberChanged',
-    overrideProps.safetyNumberChanged !== undefined
-      ? overrideProps.safetyNumberChanged
-      : false
-  ),
   toggleVerified: action('toggle-verified'),
   verificationDisabled: boolean(
     'verificationDisabled',
@@ -93,16 +85,6 @@ story.add('Verification Disabled', () => {
     <SafetyNumberViewer
       {...createProps({
         verificationDisabled: true,
-      })}
-    />
-  );
-});
-
-story.add('Safety Number Changed', () => {
-  return (
-    <SafetyNumberViewer
-      {...createProps({
-        safetyNumberChanged: true,
       })}
     />
   );

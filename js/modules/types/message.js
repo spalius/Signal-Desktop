@@ -1,12 +1,12 @@
-// Copyright 2018-2020 Signal Messenger, LLC
+// Copyright 2018-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 const { isFunction, isObject, isString, omit } = require('lodash');
 
-const Contact = require('./contact');
-const Attachment = require('./attachment');
-const Errors = require('./errors');
-const SchemaVersion = require('./schema_version');
+const Contact = require('../../../ts/types/EmbeddedContact');
+const Attachment = require('../../../ts/types/Attachment');
+const Errors = require('../../../ts/types/errors');
+const SchemaVersion = require('../../../ts/types/SchemaVersion');
 const {
   initializeAttachmentMetadata,
 } = require('../../../ts/types/message/initializeAttachmentMetadata');
@@ -392,7 +392,6 @@ exports.upgradeSchema = async (
   }
 
   let message = rawMessage;
-  // eslint-disable-next-line no-restricted-syntax
   for (let index = 0, max = VERSIONS.length; index < max; index += 1) {
     if (maxVersion < index) {
       break;
@@ -458,7 +457,11 @@ exports.processNewAttachment = async (
     throw new TypeError('context.logger is required');
   }
 
-  const rotatedAttachment = await Attachment.autoOrientJPEG(attachment);
+  const rotatedAttachment = await Attachment.autoOrientJPEG(
+    attachment,
+    undefined,
+    { isIncoming: true }
+  );
   const onDiskAttachment = await Attachment.migrateDataToFileSystem(
     rotatedAttachment,
     { writeNewAttachmentData }

@@ -10,20 +10,27 @@ import { CustomColorType } from './types/Colors';
 import { DeviceType } from './textsecure/Types';
 import { SendOptionsType } from './textsecure/SendMessage';
 import { SendMessageChallengeData } from './textsecure/Errors';
-import {
-  AccessRequiredEnum,
-  MemberRoleEnum,
-  SyncMessageClass,
-} from './textsecure.d';
 import { UserMessage } from './types/Message';
 import { MessageModel } from './models/messages';
 import { ConversationModel } from './models/conversations';
 import { ProfileNameChangeType } from './util/getStringForProfileChange';
 import { CapabilitiesType } from './textsecure/WebAPI';
+import { ReadStatus } from './messages/MessageReadStatus';
+import {
+  SendState,
+  SendStateByConversationId,
+} from './messages/MessageSendState';
 import { GroupNameCollisionsWithIdsByTitle } from './util/groupMemberNameCollisions';
 import { ConversationColorType } from './types/Colors';
 import { AttachmentType, ThumbnailType } from './types/Attachment';
-import { ContactType } from './types/Contact';
+import { EmbeddedContactType } from './types/EmbeddedContact';
+import { SignalService as Proto } from './protobuf';
+import { AvatarDataType } from './types/Avatar';
+import { UUIDStringType } from './types/UUID';
+import { ReactionSource } from './reactions/ReactionSource';
+
+import AccessRequiredEnum = Proto.AccessControl.AccessRequired;
+import MemberRoleEnum = Proto.Member.Role;
 
 export type WhatIsThis = any;
 
@@ -34,7 +41,8 @@ export type LastMessageStatus =
   | 'sending'
   | 'sent'
   | 'delivered'
-  | 'read';
+  | 'read'
+  | 'viewed';
 
 type TaskResultType = any;
 
@@ -58,7 +66,7 @@ export type QuotedMessageType = {
   author?: string;
   authorUuid?: string;
   bodyRanges?: BodyRangesType;
-  id: string;
+  id: number;
   referencedMessageNotFound: boolean;
   isViewOnce: boolean;
   text?: string;
@@ -79,17 +87,24 @@ export type GroupV1Update = {
   name?: string;
 };
 
+export type MessageReactionType = {
+  emoji: undefined | string;
+  fromId: string;
+  targetAuthorUuid: string;
+  targetTimestamp: number;
+  timestamp: number;
+  isSentByConversationId?: Record<string, boolean>;
+};
+
 export type MessageAttributesType = {
   bodyPending?: boolean;
   bodyRanges?: BodyRangesType;
   callHistoryDetails?: CallHistoryDetailsFromDiskType;
   changedId?: string;
-  dataMessage?: ArrayBuffer | null;
+  dataMessage?: Uint8Array | null;
   decrypted_at?: number;
   deletedForEveryone?: boolean;
   deletedForEveryoneTimestamp?: number;
-  delivered?: number;
-  delivered_to?: Array<string | null>;
   errors?: Array<CustomError>;
   expirationStartTimestamp?: number | null;
   expireTimer?: number;
@@ -108,18 +123,10 @@ export type MessageAttributesType = {
   messageTimer?: unknown;
   profileChange?: ProfileNameChangeType;
   quote?: QuotedMessageType;
-  reactions?: Array<{
-    emoji: string;
-    fromId: string;
-    targetAuthorUuid: string;
-    targetTimestamp: number;
-    timestamp: number;
-  }>;
-  read_by?: Array<string | null>;
+  reactions?: Array<MessageReactionType>;
   requiredProtocolVersion?: number;
   retryOptions?: RetryOptions;
-  sent?: boolean;
-  sourceDevice?: string | number;
+  sourceDevice?: number;
   supportedVersionAtReceive?: unknown;
   synced?: boolean;
   unidentifiedDeliveryReceived?: boolean;
@@ -141,6 +148,7 @@ export type MessageAttributesType = {
     | 'profile-change'
     | 'timer-notification'
     | 'universal-timer-notification'
+    | 'change-number-notification'
     | 'verified-change';
   body?: string;
   attachments?: Array<AttachmentType>;
@@ -152,14 +160,10 @@ export type MessageAttributesType = {
     data?: AttachmentType;
   };
   sent_at: number;
-  sent_to?: Array<string>;
   unidentifiedDeliveries?: Array<string>;
-  contact?: Array<ContactType>;
+  contact?: Array<EmbeddedContactType>;
   conversationId: string;
-  recipients?: Array<string>;
   reaction?: WhatIsThis;
-  destination?: WhatIsThis;
-  destinationUuid?: string;
 
   expirationTimerUpdate?: {
     expireTimer: number;
@@ -182,14 +186,21 @@ export type MessageAttributesType = {
   serverGuid?: string;
   serverTimestamp?: number;
   source?: string;
-  sourceUuid?: string;
+  sourceUuid?: UUIDStringType;
 
-  unread?: boolean;
   timestamp: number;
 
   // Backwards-compatibility with prerelease data schema
   invitedGV2Members?: Array<GroupV2PendingMemberType>;
   droppedGV2MemberIds?: Array<string>;
+
+  sendHQImages?: boolean;
+
+  // Should only be present for incoming messages
+  readStatus?: ReadStatus;
+
+  // Should only be present for outgoing messages
+  sendStateByConversationId?: SendStateByConversationId;
 };
 
 export type ConversationAttributesTypeType = 'private' | 'group';
@@ -197,16 +208,22 @@ export type ConversationAttributesTypeType = 'private' | 'group';
 export type ConversationAttributesType = {
   accessKey?: string | null;
   addedBy?: string;
+  badges?: Array<
+    | { id: string }
+    | {
+        id: string;
+        expiresAt: number;
+        isVisible: boolean;
+      }
+  >;
   capabilities?: CapabilitiesType;
   color?: string;
   conversationColor?: ConversationColorType;
   customColor?: CustomColorType;
   customColorId?: string;
   discoveredUnregisteredAt?: number;
-  draftAttachments?: Array<{
-    path?: string;
-    screenshotPath?: string;
-  }>;
+  draftChanged?: boolean;
+  draftAttachments?: Array<AttachmentType>;
   draftBodyRanges?: Array<BodyRangeType>;
   draftTimestamp?: number | null;
   inbox_position: number;
@@ -218,6 +235,7 @@ export type ConversationAttributesType = {
   messageCountBeforeMessageRequests?: number | null;
   messageRequestResponseType?: number;
   muteExpiresAt?: number;
+  dontNotifyForMentionsIfMuted?: boolean;
   profileAvatar?: null | {
     hash: string;
     path: string;
@@ -248,7 +266,7 @@ export type ConversationAttributesType = {
   version: number;
 
   // Private core info
-  uuid?: string;
+  uuid?: UUIDStringType;
   e164?: string;
 
   // Private other fields
@@ -260,6 +278,7 @@ export type ConversationAttributesType = {
   verified?: number;
   profileLastFetchedAt?: number;
   pendingUniversalTimer?: string;
+  username?: string;
 
   // Group-only
   groupId?: string;
@@ -290,11 +309,13 @@ export type ConversationAttributesType = {
     members: AccessRequiredEnum;
     addFromInviteLink: AccessRequiredEnum;
   };
+  announcementsOnly?: boolean;
   avatar?: {
     url: string;
     path: string;
     hash?: string;
   } | null;
+  avatars?: Array<AvatarDataType>;
   description?: string;
   expireTimer?: number;
   membersV2?: Array<GroupV2MemberType>;
@@ -320,7 +341,7 @@ export type ConversationAttributesType = {
 };
 
 export type GroupV2MemberType = {
-  conversationId: string;
+  uuid: UUIDStringType;
   role: MemberRoleEnum;
   joinedAtVersion: number;
 
@@ -332,19 +353,19 @@ export type GroupV2MemberType = {
 };
 
 export type GroupV2PendingMemberType = {
-  addedByUserId?: string;
-  conversationId: string;
+  addedByUserId?: UUIDStringType;
+  uuid: UUIDStringType;
   timestamp: number;
   role: MemberRoleEnum;
 };
 
 export type GroupV2PendingAdminApprovalType = {
-  conversationId: string;
+  uuid: UUIDStringType;
   timestamp: number;
 };
 
 export type VerificationOptions = {
-  key?: null | ArrayBuffer;
+  key?: null | Uint8Array;
   viaContactSync?: boolean;
   viaStorageServiceSync?: boolean;
   viaSyncMessage?: boolean;
@@ -366,9 +387,7 @@ export type ReactionAttributesType = {
   remove?: boolean;
   targetAuthorUuid: string;
   targetTimestamp: number;
-  fromId?: string;
+  fromId: string;
   timestamp: number;
-  fromSync?: boolean;
+  source: ReactionSource;
 };
-
-export declare class ReactionModelType extends Backbone.Model<ReactionAttributesType> {}

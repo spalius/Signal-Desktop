@@ -3,7 +3,7 @@
 
 import React, { useRef, useState } from 'react';
 
-import { LocalizerType } from '../types/Util';
+import type { LocalizerType } from '../types/Util';
 import { Button, ButtonVariant } from './Button';
 import { Modal } from './Modal';
 import { Spinner } from './Spinner';
@@ -39,6 +39,7 @@ export function CaptchaDialog(props: Readonly<PropsType>): JSX.Element {
         moduleClassName="module-Modal"
         i18n={i18n}
         title={i18n('CaptchaDialog--can-close__title')}
+        onClose={() => setIsClosing(false)}
       >
         <section>
           <p>{i18n('CaptchaDialog--can-close__body')}</p>

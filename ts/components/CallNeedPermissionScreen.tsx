@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import React, { useRef, useEffect } from 'react';
-import { LocalizerType } from '../types/Util';
+import type { LocalizerType } from '../types/Util';
+import { AvatarColors } from '../types/Colors';
 import { Avatar } from './Avatar';
 import { Intl } from './Intl';
 import { ContactName } from './conversation/ContactName';
-import { ConversationType } from '../state/ducks/conversations';
+import type { ConversationType } from '../state/ducks/conversations';
 
 type Props = {
   conversation: Pick<
@@ -46,7 +47,7 @@ export const CallNeedPermissionScreen: React.FC<Props> = ({
       <Avatar
         acceptedMessageRequest={conversation.acceptedMessageRequest}
         avatarPath={conversation.avatarPath}
-        color={conversation.color || 'ultramarine'}
+        color={conversation.color || AvatarColors[0]}
         noteToSelf={false}
         conversationType="direct"
         i18n={i18n}
@@ -63,7 +64,7 @@ export const CallNeedPermissionScreen: React.FC<Props> = ({
         <Intl
           i18n={i18n}
           id="callNeedPermission"
-          components={[<ContactName i18n={i18n} title={title} />]}
+          components={[<ContactName title={title} />]}
         />
       </p>
 

@@ -8,10 +8,12 @@ import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 
 import { getDefaultConversation } from '../../test-both/helpers/getDefaultConversation';
-import { ContactModal, PropsType } from './ContactModal';
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import type { PropsType } from './ContactModal';
+import { ContactModal } from './ContactModal';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
-import { ConversationType } from '../../state/ducks/conversations';
+import type { ConversationType } from '../../state/ducks/conversations';
+import { getFakeBadges } from '../../test-both/helpers/getFakeBadge';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -27,16 +29,19 @@ const defaultContact: ConversationType = getDefaultConversation({
 
 const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
   areWeAdmin: boolean('areWeAdmin', overrideProps.areWeAdmin || false),
+  badges: overrideProps.badges || [],
   contact: overrideProps.contact || defaultContact,
+  hideContactModal: action('hideContactModal'),
   i18n,
   isAdmin: boolean('isAdmin', overrideProps.isAdmin || false),
   isMember: boolean('isMember', overrideProps.isMember || true),
-  onClose: action('onClose'),
-  openConversation: action('openConversation'),
-  removeMember: action('removeMember'),
-  showSafetyNumber: action('showSafetyNumber'),
+  openConversationInternal: action('openConversationInternal'),
+  removeMemberFromGroup: action('removeMemberFromGroup'),
+  toggleSafetyNumberModal: action('toggleSafetyNumberModal'),
   toggleAdmin: action('toggleAdmin'),
-  updateSharedGroups: action('updateSharedGroups'),
+  updateConversationModelSharedGroups: action(
+    'updateConversationModelSharedGroups'
+  ),
 });
 
 story.add('As non-admin', () => {
@@ -79,6 +84,14 @@ story.add('Viewing self', () => {
       ...defaultContact,
       isMe: true,
     },
+  });
+
+  return <ContactModal {...props} />;
+});
+
+story.add('With badges', () => {
+  const props = createProps({
+    badges: getFakeBadges(2),
   });
 
   return <ContactModal {...props} />;

@@ -3,16 +3,19 @@
 
 import React from 'react';
 
-import { ConversationDetailsIcon } from './ConversationDetailsIcon';
-import { ConversationType } from '../../../state/ducks/conversations';
-import { LocalizerType } from '../../../types/Util';
+import { ConversationDetailsIcon, IconType } from './ConversationDetailsIcon';
+import { SignalService as Proto } from '../../../protobuf';
+import type { ConversationType } from '../../../state/ducks/conversations';
+import type { LocalizerType } from '../../../types/Util';
 import { PanelRow } from './PanelRow';
 import { PanelSection } from './PanelSection';
-import { AccessControlClass } from '../../../textsecure.d';
 import { Select } from '../../Select';
 
+import { useDelayedRestoreFocus } from '../../../hooks/useRestoreFocus';
+
+const AccessControlEnum = Proto.AccessControl.AccessRequired;
+
 export type PropsType = {
-  accessEnum: typeof AccessControlClass.AccessRequired;
   changeHasGroupLink: (value: boolean) => void;
   conversation?: ConversationType;
   copyGroupLink: (groupLink: string) => void;
@@ -23,7 +26,6 @@ export type PropsType = {
 };
 
 export const GroupLinkManagement: React.ComponentType<PropsType> = ({
-  accessEnum,
   changeHasGroupLink,
   conversation,
   copyGroupLink,
@@ -36,6 +38,8 @@ export const GroupLinkManagement: React.ComponentType<PropsType> = ({
     throw new Error('GroupLinkManagement rendered without a conversation');
   }
 
+  const [focusRef] = useDelayedRestoreFocus();
+
   const createEventHandler = (handleEvent: (x: boolean) => void) => {
     return (value: string) => {
       handleEvent(value === 'true');
@@ -43,11 +47,13 @@ export const GroupLinkManagement: React.ComponentType<PropsType> = ({
   };
 
   const membersNeedAdminApproval =
-    conversation.accessControlAddFromInviteLink === accessEnum.ADMINISTRATOR;
+    conversation.accessControlAddFromInviteLink ===
+    AccessControlEnum.ADMINISTRATOR;
 
   const hasGroupLink =
     conversation.groupLink &&
-    conversation.accessControlAddFromInviteLink !== accessEnum.UNSATISFIABLE;
+    conversation.accessControlAddFromInviteLink !==
+      AccessControlEnum.UNSATISFIABLE;
   const groupLinkInfo = hasGroupLink ? conversation.groupLink : '';
 
   return (
@@ -70,6 +76,7 @@ export const GroupLinkManagement: React.ComponentType<PropsType> = ({
                     value: 'false',
                   },
                 ]}
+                ref={focusRef}
                 value={String(Boolean(hasGroupLink))}
               />
             ) : null
@@ -84,10 +91,11 @@ export const GroupLinkManagement: React.ComponentType<PropsType> = ({
               icon={
                 <ConversationDetailsIcon
                   ariaLabel={i18n('GroupLinkManagement--share')}
-                  icon="share"
+                  icon={IconType.share}
                 />
               }
               label={i18n('GroupLinkManagement--share')}
+              ref={!isAdmin ? focusRef : undefined}
               onClick={() => {
                 if (conversation.groupLink) {
                   copyGroupLink(conversation.groupLink);
@@ -99,7 +107,7 @@ export const GroupLinkManagement: React.ComponentType<PropsType> = ({
                 icon={
                   <ConversationDetailsIcon
                     ariaLabel={i18n('GroupLinkManagement--reset')}
-                    icon="reset"
+                    icon={IconType.reset}
                   />
                 }
                 label={i18n('GroupLinkManagement--reset')}

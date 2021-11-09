@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { noop } from 'lodash';
-import { LogLevel } from './shared';
+import type { LogFunction } from '../types/Logging';
+import { LogLevel } from '../types/Logging';
 
 type LogAtLevelFnType = (
   level: LogLevel,
@@ -12,13 +13,18 @@ type LogAtLevelFnType = (
 let logAtLevel: LogAtLevelFnType = noop;
 let hasInitialized = false;
 
-type LogFn = (...args: ReadonlyArray<unknown>) => void;
-export const fatal: LogFn = (...args) => logAtLevel(LogLevel.Fatal, ...args);
-export const error: LogFn = (...args) => logAtLevel(LogLevel.Error, ...args);
-export const warn: LogFn = (...args) => logAtLevel(LogLevel.Warn, ...args);
-export const info: LogFn = (...args) => logAtLevel(LogLevel.Info, ...args);
-export const debug: LogFn = (...args) => logAtLevel(LogLevel.Debug, ...args);
-export const trace: LogFn = (...args) => logAtLevel(LogLevel.Trace, ...args);
+export const fatal: LogFunction = (...args) =>
+  logAtLevel(LogLevel.Fatal, ...args);
+export const error: LogFunction = (...args) =>
+  logAtLevel(LogLevel.Error, ...args);
+export const warn: LogFunction = (...args) =>
+  logAtLevel(LogLevel.Warn, ...args);
+export const info: LogFunction = (...args) =>
+  logAtLevel(LogLevel.Info, ...args);
+export const debug: LogFunction = (...args) =>
+  logAtLevel(LogLevel.Debug, ...args);
+export const trace: LogFunction = (...args) =>
+  logAtLevel(LogLevel.Trace, ...args);
 
 /**
  * Sets the low-level logging interface. Should be called early in a process's life, and

@@ -6,10 +6,11 @@ import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { setup as setupI18n } from '../../../../js/modules/i18n';
+import { setupI18n } from '../../../util/setupI18n';
 import enMessages from '../../../../_locales/en/messages.json';
-import { GroupV2Permissions, PropsType } from './GroupV2Permissions';
-import { ConversationType } from '../../../state/ducks/conversations';
+import type { PropsType } from './GroupV2Permissions';
+import { GroupV2Permissions } from './GroupV2Permissions';
+import type { ConversationType } from '../../../state/ducks/conversations';
 import { getDefaultConversation } from '../../../test-both/helpers/getDefaultConversation';
 
 const i18n = setupI18n('en', enMessages);
@@ -27,28 +28,18 @@ const conversation: ConversationType = getDefaultConversation({
   title: 'Some Conversation',
   type: 'group',
   sharedGroupNames: [],
+  announcementsOnlyReady: true,
+  areWeAdmin: true,
 });
 
-class AccessEnum {
-  static ANY = 0;
-
-  static UNKNOWN = 1;
-
-  static MEMBER = 2;
-
-  static ADMINISTRATOR = 3;
-
-  static UNSATISFIABLE = 4;
-}
-
 const createProps = (): PropsType => ({
-  accessEnum: AccessEnum,
   conversation,
   i18n,
   setAccessControlAttributesSetting: action(
     'setAccessControlAttributesSetting'
   ),
   setAccessControlMembersSetting: action('setAccessControlMembersSetting'),
+  setAnnouncementsOnly: action('setAnnouncementsOnly'),
 });
 
 story.add('Basic', () => {
@@ -56,3 +47,34 @@ story.add('Basic', () => {
 
   return <GroupV2Permissions {...props} />;
 });
+
+story.add('Not admin', () => (
+  <GroupV2Permissions
+    {...createProps()}
+    conversation={getDefaultConversation({
+      announcementsOnly: true,
+      areWeAdmin: false,
+    })}
+  />
+));
+
+story.add('Admin but not announcement ready', () => (
+  <GroupV2Permissions
+    {...createProps()}
+    conversation={getDefaultConversation({
+      announcementsOnlyReady: false,
+      areWeAdmin: true,
+    })}
+  />
+));
+
+story.add('Admin, not announcement ready, but it was on', () => (
+  <GroupV2Permissions
+    {...createProps()}
+    conversation={getDefaultConversation({
+      announcementsOnly: true,
+      announcementsOnlyReady: false,
+      areWeAdmin: true,
+    })}
+  />
+));

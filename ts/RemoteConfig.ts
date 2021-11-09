@@ -2,32 +2,42 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { get, throttle } from 'lodash';
-import { connectToServerWithStoredCredentials } from './util/connectToServerWithStoredCredentials';
+
+import type { WebAPIType } from './textsecure/WebAPI';
+import * as log from './logging/log';
 
 export type ConfigKeyType =
+  | 'desktop.announcementGroup'
   | 'desktop.clientExpiration'
   | 'desktop.disableGV1'
+  | 'desktop.groupCallOutboundRing'
   | 'desktop.groupCalling'
   | 'desktop.gv2'
+  | 'desktop.internalUser'
   | 'desktop.mandatoryProfileSharing'
   | 'desktop.mediaQuality.levels'
   | 'desktop.messageRequests'
   | 'desktop.retryReceiptLifespan'
   | 'desktop.retryRespondMaxAge'
   | 'desktop.screensharing2'
-  | 'desktop.sendSenderKey'
+  | 'desktop.senderKey.send'
+  | 'desktop.senderKey.retry'
+  | 'desktop.sendSenderKey3'
   | 'desktop.storage'
   | 'desktop.storageWrite3'
-  | 'desktop.worksAtSignal'
-  | 'global.groupsv2.maxGroupSize'
-  | 'global.groupsv2.groupSizeHardLimit';
+  | 'desktop.usernames'
+  | 'global.calling.maxGroupCallRingSize'
+  | 'global.groupsv2.groupSizeHardLimit'
+  | 'global.groupsv2.maxGroupSize';
 type ConfigValueType = {
   name: ConfigKeyType;
   enabled: boolean;
   enabledAt?: number;
   value?: unknown;
 };
-export type ConfigMapType = { [key: string]: ConfigValueType };
+export type ConfigMapType = {
+  [key in ConfigKeyType]?: ConfigValueType;
+};
 type ConfigListenerType = (value: ConfigValueType) => unknown;
 type ConfigListenersMapType = {
   [key: string]: Array<ConfigListenerType>;
@@ -36,9 +46,9 @@ type ConfigListenersMapType = {
 let config: ConfigMapType = {};
 const listeners: ConfigListenersMapType = {};
 
-export async function initRemoteConfig(): Promise<void> {
+export async function initRemoteConfig(server: WebAPIType): Promise<void> {
   config = window.storage.get('remoteConfig') || {};
-  await maybeRefreshRemoteConfig();
+  await maybeRefreshRemoteConfig(server);
 }
 
 export function onChange(
@@ -54,12 +64,10 @@ export function onChange(
   };
 }
 
-export const refreshRemoteConfig = async (): Promise<void> => {
+export const refreshRemoteConfig = async (
+  server: WebAPIType
+): Promise<void> => {
   const now = Date.now();
-  const server = connectToServerWithStoredCredentials(
-    window.WebAPI,
-    window.storage
-  );
   const newConfig = await server.getConfig();
 
   // Process new configuration in light of the old configuration
@@ -87,7 +95,7 @@ export const refreshRemoteConfig = async (): Promise<void> => {
     // If enablement changes at all, notify listeners
     const currentListeners = listeners[name] || [];
     if (hasChanged) {
-      window.log.info(`Remote Config: Flag ${name} has changed`);
+      log.info(`Remote Config: Flag ${name} has changed`);
       currentListeners.forEach(listener => {
         listener(configValue);
       });

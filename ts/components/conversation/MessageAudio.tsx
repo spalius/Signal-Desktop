@@ -6,19 +6,32 @@ import classNames from 'classnames';
 import { noop } from 'lodash';
 
 import { assert } from '../../util/assert';
-import { LocalizerType } from '../../types/Util';
-import { hasNotDownloaded, AttachmentType } from '../../types/Attachment';
+import type { LocalizerType } from '../../types/Util';
+import type { AttachmentType } from '../../types/Attachment';
+import { hasNotDownloaded } from '../../types/Attachment';
+import type { DirectionType, MessageStatusType } from './Message';
 
-import { ComputePeaksResult } from '../GlobalAudioContext';
+import type { ComputePeaksResult } from '../GlobalAudioContext';
+import { MessageMetadata } from './MessageMetadata';
+import * as log from '../../logging/log';
 
 export type Props = {
-  direction?: 'incoming' | 'outgoing';
-  id: string;
   renderingContext: string;
   i18n: LocalizerType;
   attachment: AttachmentType;
   withContentAbove: boolean;
   withContentBelow: boolean;
+
+  // Message properties. Many are needed for rendering metadata
+  direction: DirectionType;
+  expirationLength?: number;
+  expirationTimestamp?: number;
+  id: string;
+  played: boolean;
+  showMessageDetail: (id: string) => void;
+  status?: MessageStatusType;
+  textPending?: boolean;
+  timestamp: number;
 
   // See: GlobalAudioContext.tsx
   audio: HTMLAudioElement;
@@ -26,6 +39,7 @@ export type Props = {
   buttonRef: React.RefObject<HTMLButtonElement>;
   kickOffAttachmentDownload(): void;
   onCorrupted(): void;
+  onFirstPlayed(): void;
 
   computePeaks(url: string, barCount: number): Promise<ComputePeaksResult>;
   activeAudioID: string | undefined;
@@ -134,16 +148,25 @@ const Button: React.FC<ButtonProps> = props => {
 export const MessageAudio: React.FC<Props> = (props: Props) => {
   const {
     i18n,
-    id,
     renderingContext,
-    direction,
     attachment,
     withContentAbove,
     withContentBelow,
 
+    direction,
+    expirationLength,
+    expirationTimestamp,
+    id,
+    played,
+    showMessageDetail,
+    status,
+    textPending,
+    timestamp,
+
     buttonRef,
     kickOffAttachmentDownload,
     onCorrupted,
+    onFirstPlayed,
 
     audio,
     computePeaks,
@@ -159,7 +182,9 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
     activeAudioID === id && activeAudioContext === renderingContext;
 
   const waveformRef = useRef<HTMLDivElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(isActive && !audio.paused);
+  const [isPlaying, setIsPlaying] = useState(
+    isActive && !(audio.paused || audio.ended)
+  );
   const [currentTime, setCurrentTime] = useState(
     isActive ? audio.currentTime : 0
   );
@@ -184,14 +209,14 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
     state = State.Normal;
   }
 
-  // This effect loads audio file and computes its RMS peak for dispalying the
+  // This effect loads audio file and computes its RMS peak for displaying the
   // waveform.
   useEffect(() => {
     if (state !== State.Computing) {
       return noop;
     }
 
-    window.log.info('MessageAudio: loading audio and computing waveform');
+    log.info('MessageAudio: loading audio and computing waveform');
 
     let canceled = false;
 
@@ -215,7 +240,7 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
         setHasPeaks(true);
         setDuration(Math.max(newDuration, 1e-23));
       } catch (err) {
-        window.log.error(
+        log.error(
           'MessageAudio: computePeaks error, marking as corrupted',
           err
         );
@@ -248,7 +273,7 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     // Owner of Audio instance changed
     if (!isActive) {
-      window.log.info('MessageAudio: pausing old owner', id);
+      log.info('MessageAudio: pausing old owner', id);
       setIsPlaying(false);
       setCurrentTime(0);
       return noop;
@@ -256,10 +281,13 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
 
     const onTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
+      if (audio.currentTime > duration) {
+        setDuration(audio.currentTime);
+      }
     };
 
     const onEnded = () => {
-      window.log.info('MessageAudio: ended, changing UI', id);
+      log.info('MessageAudio: ended, changing UI', id);
       setIsPlaying(false);
       setCurrentTime(0);
     };
@@ -270,7 +298,7 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
         'Audio should have definite duration on `loadedmetadata` event'
       );
 
-      window.log.info('MessageAudio: `loadedmetadata` event', id);
+      log.info('MessageAudio: `loadedmetadata` event', id);
 
       // Sync-up audio's time in case if <audio/> loaded its source after
       // user clicked on waveform
@@ -278,7 +306,7 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
     };
 
     const onDurationChange = () => {
-      window.log.info('MessageAudio: `durationchange` event', id);
+      log.info('MessageAudio: `durationchange` event', id);
 
       if (!Number.isNaN(audio.duration)) {
         setDuration(Math.max(audio.duration, 1e-23));
@@ -296,7 +324,7 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       audio.removeEventListener('durationchange', onDurationChange);
     };
-  }, [id, audio, isActive, currentTime]);
+  }, [id, audio, isActive, currentTime, duration]);
 
   // This effect detects `isPlaying` changes and starts/pauses playback when
   // needed (+keeps waveform position and audio position in sync).
@@ -310,13 +338,13 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
         return;
       }
 
-      window.log.info('MessageAudio: resuming playback for', id);
+      log.info('MessageAudio: resuming playback for', id);
       audio.currentTime = currentTime;
       audio.play().catch(error => {
-        window.log.info('MessageAudio: resume error', id, error.stack || error);
+        log.info('MessageAudio: resume error', id, error.stack || error);
       });
     } else {
-      window.log.info('MessageAudio: pausing playback for', id);
+      log.info('MessageAudio: pausing playback for', id);
       audio.pause();
     }
   }, [id, audio, isActive, isPlaying, currentTime]);
@@ -325,7 +353,7 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
     setIsPlaying(!isPlaying);
 
     if (!isActive && !isPlaying) {
-      window.log.info('MessageAudio: changing owner', id);
+      log.info('MessageAudio: changing owner', id);
       setActiveAudioID(id, renderingContext);
 
       // Pause old audio
@@ -342,6 +370,12 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
       audio.src = attachment.url;
     }
   };
+
+  useEffect(() => {
+    if (!played && isPlaying) {
+      onFirstPlayed();
+    }
+  }, [played, isPlaying, onFirstPlayed]);
 
   // Clicking waveform moves playback head position and starts playback.
   const onWaveformClick = (event: React.MouseEvent) => {
@@ -490,7 +524,37 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
     );
   }
 
-  const countDown = duration - currentTime;
+  const countDown = Math.max(0, duration - currentTime);
+
+  const metadata = (
+    <div className={`${CSS_BASE}__metadata`}>
+      {!withContentBelow && (
+        <MessageMetadata
+          direction={direction}
+          expirationLength={expirationLength}
+          expirationTimestamp={expirationTimestamp}
+          hasText={withContentBelow}
+          i18n={i18n}
+          id={id}
+          isShowingImage={false}
+          isSticker={false}
+          isTapToViewExpired={false}
+          showMessageDetail={showMessageDetail}
+          status={status}
+          textPending={textPending}
+          timestamp={timestamp}
+        />
+      )}
+      <div
+        className={classNames(
+          `${CSS_BASE}__countdown`,
+          `${CSS_BASE}__countdown--${played ? 'played' : 'unplayed'}`
+        )}
+      >
+        {timeToText(countDown)}
+      </div>
+    </div>
+  );
 
   return (
     <div
@@ -501,9 +565,11 @@ export const MessageAudio: React.FC<Props> = (props: Props) => {
         withContentAbove ? `${CSS_BASE}--with-content-above` : null
       )}
     >
-      {button}
-      {waveform}
-      <div className={`${CSS_BASE}__countdown`}>{timeToText(countDown)}</div>
+      <div className={`${CSS_BASE}__button-and-waveform`}>
+        {button}
+        {waveform}
+      </div>
+      {metadata}
     </div>
   );
 };

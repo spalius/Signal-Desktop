@@ -1,57 +1,27 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ComponentProps } from 'react';
 import { connect } from 'react-redux';
 
-import {
-  MessageDetail,
-  Contact,
-} from '../../components/conversation/MessageDetail';
-import { PropsData as MessagePropsDataType } from '../../components/conversation/Message';
-import { mapDispatchToProps } from '../actions';
+import type { ExternalProps as MessageDetailProps } from '../../components/conversation/MessageDetail';
+import { MessageDetail } from '../../components/conversation/MessageDetail';
 
-import { StateType } from '../reducer';
+import { mapDispatchToProps } from '../actions';
+import type { StateType } from '../reducer';
 import { getIntl, getInteractionMode } from '../selectors/user';
 import { renderAudioAttachment } from './renderAudioAttachment';
 import { renderEmojiPicker } from './renderEmojiPicker';
+import { renderReactionPicker } from './renderReactionPicker';
 import { getContactNameColorSelector } from '../selectors/conversations';
 
-type MessageDetailProps = ComponentProps<typeof MessageDetail>;
-
 export { Contact } from '../../components/conversation/MessageDetail';
-
-export type OwnProps = {
-  contacts: Array<Contact>;
-  errors: Array<Error>;
-  message: Omit<MessagePropsDataType, 'renderingContext'>;
-  receivedAt: number;
-  sentAt: number;
-
-  sendAnyway: (contactId: string, messageId: string) => unknown;
-  showSafetyNumber: (contactId: string) => void;
-} & Pick<
+export type OwnProps = Omit<
   MessageDetailProps,
-  | 'clearSelectedMessage'
-  | 'checkForAccount'
-  | 'deleteMessage'
-  | 'deleteMessageForEveryone'
-  | 'displayTapToViewMessage'
-  | 'downloadAttachment'
-  | 'doubleCheckMissingQuoteReference'
-  | 'kickOffAttachmentDownload'
-  | 'markAttachmentAsCorrupted'
-  | 'openConversation'
-  | 'openLink'
-  | 'reactToMessage'
-  | 'replyToMessage'
-  | 'retrySend'
-  | 'showContactDetail'
-  | 'showContactModal'
-  | 'showExpiredIncomingTapToViewToast'
-  | 'showExpiredOutgoingTapToViewToast'
-  | 'showForwardMessageModal'
-  | 'showVisualAttachment'
+  | 'i18n'
+  | 'interactionMode'
+  | 'renderAudioAttachment'
+  | 'renderEmojiPicker'
+  | 'renderReactionPicker'
 >;
 
 const mapStateToProps = (
@@ -65,18 +35,12 @@ const mapStateToProps = (
     receivedAt,
     sentAt,
 
-    sendAnyway,
     showSafetyNumber,
 
-    checkForAccount,
-    clearSelectedMessage,
-    deleteMessage,
-    deleteMessageForEveryone,
     displayTapToViewMessage,
-    downloadAttachment,
-    doubleCheckMissingQuoteReference,
     kickOffAttachmentDownload,
     markAttachmentAsCorrupted,
+    markViewed,
     openConversation,
     openLink,
     reactToMessage,
@@ -109,23 +73,18 @@ const mapStateToProps = (
     i18n: getIntl(state),
     interactionMode: getInteractionMode(state),
 
-    sendAnyway,
     showSafetyNumber,
 
-    checkForAccount,
-    clearSelectedMessage,
-    deleteMessage,
-    deleteMessageForEveryone,
     displayTapToViewMessage,
-    downloadAttachment,
-    doubleCheckMissingQuoteReference,
     kickOffAttachmentDownload,
     markAttachmentAsCorrupted,
+    markViewed,
     openConversation,
     openLink,
     reactToMessage,
     renderAudioAttachment,
     renderEmojiPicker,
+    renderReactionPicker,
     replyToMessage,
     retrySend,
     showContactDetail,

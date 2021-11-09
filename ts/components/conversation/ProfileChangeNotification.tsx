@@ -1,15 +1,14 @@
-// Copyright 2020 Signal Messenger, LLC
+// Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import React from 'react';
 
-import { LocalizerType } from '../../types/Util';
-import { ConversationType } from '../../state/ducks/conversations';
+import type { LocalizerType } from '../../types/Util';
+import type { ConversationType } from '../../state/ducks/conversations';
+import { SystemMessage } from './SystemMessage';
 import { Emojify } from './Emojify';
-import {
-  getStringForProfileChange,
-  ProfileNameChangeType,
-} from '../../util/getStringForProfileChange';
+import type { ProfileNameChangeType } from '../../util/getStringForProfileChange';
+import { getStringForProfileChange } from '../../util/getStringForProfileChange';
 
 export type PropsType = {
   change: ProfileNameChangeType;
@@ -21,10 +20,5 @@ export function ProfileChangeNotification(props: PropsType): JSX.Element {
   const { change, changedContact, i18n } = props;
   const message = getStringForProfileChange(change, changedContact, i18n);
 
-  return (
-    <div className="module-profile-change-notification">
-      <div className="module-profile-change-notification--icon" />
-      <Emojify text={message} />
-    </div>
-  );
+  return <SystemMessage icon="profile" contents={<Emojify text={message} />} />;
 }

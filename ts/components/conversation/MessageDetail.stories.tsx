@@ -7,10 +7,13 @@ import { action } from '@storybook/addon-actions';
 import { number } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 
-import { PropsData as MessageDataPropsType } from './Message';
-import { MessageDetail, Props } from './MessageDetail';
+import type { PropsData as MessageDataPropsType } from './Message';
+import type { Props } from './MessageDetail';
+import { MessageDetail } from './MessageDetail';
+import { SendStatus } from '../../messages/MessageSendState';
+import { ReadStatus } from '../../messages/MessageReadStatus';
 import { getDefaultConversation } from '../../test-both/helpers/getDefaultConversation';
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
 
 const i18n = setupI18n('en', enMessages);
@@ -34,6 +37,7 @@ const defaultMessage: MessageDataPropsType = {
   isBlocked: false,
   isMessageRequestAccepted: true,
   previews: [],
+  readStatus: ReadStatus.Read,
   status: 'sent',
   text: 'A message from Max',
   timestamp: Date.now(),
@@ -43,12 +47,11 @@ const createProps = (overrideProps: Partial<Props> = {}): Props => ({
   contacts: overrideProps.contacts || [
     {
       ...getDefaultConversation({
-        color: 'indigo',
         title: 'Just Max',
       }),
       isOutgoingKeyError: false,
       isUnidentifiedDelivery: false,
-      status: 'delivered',
+      status: SendStatus.Delivered,
     },
   ],
   errors: overrideProps.errors || [],
@@ -59,23 +62,21 @@ const createProps = (overrideProps: Partial<Props> = {}): Props => ({
   i18n,
   interactionMode: 'keyboard',
 
-  sendAnyway: action('onSendAnyway'),
-  showSafetyNumber: action('onShowSafetyNumber'),
+  showSafetyNumber: action('showSafetyNumber'),
 
   checkForAccount: action('checkForAccount'),
   clearSelectedMessage: action('clearSelectedMessage'),
-  deleteMessage: action('deleteMessage'),
-  deleteMessageForEveryone: action('deleteMessageForEveryone'),
   displayTapToViewMessage: action('displayTapToViewMessage'),
-  downloadAttachment: action('downloadAttachment'),
   doubleCheckMissingQuoteReference: action('doubleCheckMissingQuoteReference'),
   kickOffAttachmentDownload: action('kickOffAttachmentDownload'),
   markAttachmentAsCorrupted: action('markAttachmentAsCorrupted'),
+  markViewed: action('markViewed'),
   openConversation: action('openConversation'),
   openLink: action('openLink'),
   reactToMessage: action('reactToMessage'),
   renderAudioAttachment: () => <div>*AudioAttachment*</div>,
   renderEmojiPicker: () => <div />,
+  renderReactionPicker: () => <div />,
   replyToMessage: action('replyToMessage'),
   retrySend: action('retrySend'),
   showContactDetail: action('showContactDetail'),
@@ -91,7 +92,19 @@ const createProps = (overrideProps: Partial<Props> = {}): Props => ({
 });
 
 story.add('Delivered Incoming', () => {
-  const props = createProps({});
+  const props = createProps({
+    contacts: [
+      {
+        ...getDefaultConversation({
+          color: 'forest',
+          title: 'Max',
+        }),
+        status: undefined,
+        isOutgoingKeyError: false,
+        isUnidentifiedDelivery: false,
+      },
+    ],
+  });
   return <MessageDetail {...props} />;
 });
 
@@ -111,48 +124,43 @@ story.add('Message Statuses', () => {
     contacts: [
       {
         ...getDefaultConversation({
-          color: 'forest',
           title: 'Max',
         }),
         isOutgoingKeyError: false,
         isUnidentifiedDelivery: false,
-        status: 'sent',
+        status: SendStatus.Sent,
       },
       {
         ...getDefaultConversation({
-          color: 'blue',
           title: 'Sally',
         }),
         isOutgoingKeyError: false,
         isUnidentifiedDelivery: false,
-        status: 'sending',
+        status: SendStatus.Pending,
       },
       {
         ...getDefaultConversation({
-          color: 'burlap',
           title: 'Terry',
         }),
         isOutgoingKeyError: false,
         isUnidentifiedDelivery: false,
-        status: 'partial-sent',
+        status: SendStatus.Failed,
       },
       {
         ...getDefaultConversation({
-          color: 'wintergreen',
           title: 'Theo',
         }),
         isOutgoingKeyError: false,
         isUnidentifiedDelivery: false,
-        status: 'delivered',
+        status: SendStatus.Delivered,
       },
       {
         ...getDefaultConversation({
-          color: 'steel',
           title: 'Nikki',
         }),
         isOutgoingKeyError: false,
         isUnidentifiedDelivery: false,
-        status: 'read',
+        status: SendStatus.Read,
       },
     ],
     message: {
@@ -204,16 +212,14 @@ story.add('All Errors', () => {
     contacts: [
       {
         ...getDefaultConversation({
-          color: 'forest',
           title: 'Max',
         }),
         isOutgoingKeyError: true,
         isUnidentifiedDelivery: false,
-        status: 'error',
+        status: SendStatus.Failed,
       },
       {
         ...getDefaultConversation({
-          color: 'blue',
           title: 'Sally',
         }),
         errors: [
@@ -224,16 +230,15 @@ story.add('All Errors', () => {
         ],
         isOutgoingKeyError: false,
         isUnidentifiedDelivery: true,
-        status: 'error',
+        status: SendStatus.Failed,
       },
       {
         ...getDefaultConversation({
-          color: 'taupe',
           title: 'Terry',
         }),
         isOutgoingKeyError: true,
         isUnidentifiedDelivery: true,
-        status: 'error',
+        status: SendStatus.Failed,
       },
     ],
   });

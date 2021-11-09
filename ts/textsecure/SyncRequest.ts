@@ -6,10 +6,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-classes-per-file */
 
+import type { EventHandler } from './EventTarget';
 import EventTarget from './EventTarget';
 import MessageReceiver from './MessageReceiver';
+import type { ContactSyncEvent, GroupSyncEvent } from './messageReceiverEvents';
 import MessageSender from './SendMessage';
 import { assert } from '../util/assert';
+import { getSendOptions } from '../util/getSendOptions';
+import { handleMessageSend } from '../util/handleMessageSend';
+import * as log from '../logging/log';
 
 class SyncRequestInner extends EventTarget {
   private started = false;
@@ -20,9 +25,9 @@ class SyncRequestInner extends EventTarget {
 
   timeout: any;
 
-  oncontact: Function;
+  oncontact: (event: ContactSyncEvent) => void;
 
-  ongroup: Function;
+  ongroup: (event: GroupSyncEvent) => void;
 
   timeoutMillis: number;
 
@@ -43,10 +48,10 @@ class SyncRequestInner extends EventTarget {
     }
 
     this.oncontact = this.onContactSyncComplete.bind(this);
-    receiver.addEventListener('contactsync', this.oncontact);
+    receiver.addEventListener('contactSync', this.oncontact);
 
     this.ongroup = this.onGroupSyncComplete.bind(this);
-    receiver.addEventListener('groupsync', this.ongroup);
+    receiver.addEventListener('groupSync', this.ongroup);
 
     this.timeoutMillis = timeoutMillis || 60000;
   }
@@ -60,28 +65,42 @@ class SyncRequestInner extends EventTarget {
 
     const { sender } = this;
 
-    const ourNumber = window.textsecure.storage.user.getNumber();
-    const {
-      wrap,
-      sendOptions,
-    } = await window.ConversationController.prepareForSend(ourNumber, {
+    const ourConversation = window.ConversationController.getOurConversationOrThrow();
+    const sendOptions = await getSendOptions(ourConversation.attributes, {
       syncMessage: true,
     });
 
-    window.log.info('SyncRequest created. Sending config sync request...');
-    wrap(sender.sendRequestConfigurationSyncMessage(sendOptions));
+    if (window.ConversationController.areWePrimaryDevice()) {
+      log.warn('SyncRequest.start: We are primary device; returning early');
+      return;
+    }
 
-    window.log.info('SyncRequest now sending block sync request...');
-    wrap(sender.sendRequestBlockSyncMessage(sendOptions));
+    log.info('SyncRequest created. Sending config sync request...');
+    handleMessageSend(sender.sendRequestConfigurationSyncMessage(sendOptions), {
+      messageIds: [],
+      sendType: 'otherSync',
+    });
 
-    window.log.info('SyncRequest now sending contact sync message...');
-    wrap(sender.sendRequestContactSyncMessage(sendOptions))
+    log.info('SyncRequest now sending block sync request...');
+    handleMessageSend(sender.sendRequestBlockSyncMessage(sendOptions), {
+      messageIds: [],
+      sendType: 'otherSync',
+    });
+
+    log.info('SyncRequest now sending contact sync message...');
+    handleMessageSend(sender.sendRequestContactSyncMessage(sendOptions), {
+      messageIds: [],
+      sendType: 'otherSync',
+    })
       .then(() => {
-        window.log.info('SyncRequest now sending group sync message...');
-        return wrap(sender.sendRequestGroupSyncMessage(sendOptions));
+        log.info('SyncRequest now sending group sync message...');
+        return handleMessageSend(
+          sender.sendRequestGroupSyncMessage(sendOptions),
+          { messageIds: [], sendType: 'otherSync' }
+        );
       })
       .catch((error: Error) => {
-        window.log.error(
+        log.error(
           'SyncRequest error:',
           error && error.stack ? error.stack : error
         );
@@ -126,9 +145,15 @@ class SyncRequestInner extends EventTarget {
 export default class SyncRequest {
   private inner: SyncRequestInner;
 
-  addEventListener: (name: string, handler: Function) => void;
+  addEventListener: (
+    name: 'success' | 'timeout',
+    handler: EventHandler
+  ) => void;
 
-  removeEventListener: (name: string, handler: Function) => void;
+  removeEventListener: (
+    name: 'success' | 'timeout',
+    handler: EventHandler
+  ) => void;
 
   constructor(
     sender: MessageSender,

@@ -40,6 +40,10 @@ export class Bytes {
     return Buffer.from(data).toString();
   }
 
+  public byteLength(value: string): number {
+    return Buffer.byteLength(value);
+  }
+
   public concatenate(list: ReadonlyArray<Uint8Array>): Uint8Array {
     return Buffer.concat(list);
   }
@@ -53,5 +57,16 @@ export class Bytes {
 
   public isNotEmpty(data: Uint8Array | null | undefined): data is Uint8Array {
     return !this.isEmpty(data);
+  }
+
+  public areEqual(
+    a: Uint8Array | null | undefined,
+    b: Uint8Array | null | undefined
+  ): boolean {
+    if (!a || !b) {
+      return !a && !b;
+    }
+
+    return Buffer.compare(a, b) === 0;
   }
 }

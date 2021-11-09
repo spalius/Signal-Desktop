@@ -16,7 +16,7 @@
         "description": "Shown as the name of a contact if we don't have any displayable information about them"
     },
     "unknownGroup": {
-        "message": "未知群",
+        "message": "未知群组",
         "description": "Shown as the name of a group if we don't have any information about it"
     },
     "databaseError": {
@@ -177,11 +177,15 @@
     },
     "avatarMenuViewArchive": {
         "message": "查看存档",
-        "description": "One of the menu options available in the Avatar Popup menu"
+        "description": "One of the menu options available in the Avatar popup menu"
     },
     "avatarMenuChatColors": {
         "message": "聊天颜色",
-        "description": "One of the menu options available in the Avatar Popup menu"
+        "description": "One of the menu options available in the Avatar popup menu"
+    },
+    "avatarMenuUpdateAvailable": {
+        "message": "升级 Signal",
+        "description": "One of the menu options available in the Avatar popup menu"
     },
     "loading": {
         "message": "加载中...",
@@ -411,6 +415,20 @@
         "message": "以下用户可能重新安装了 Signal 或更换了设备，请重新与之验证安全码以保护您的隐私。",
         "description": "Shown on confirmation dialog when user attempts to send a message"
     },
+    "safetyNumberChangeDialog__pending-messages--1": {
+        "message": "Send pending message",
+        "description": "Shown on confirmation dialog when user attempts to send a message in the outbox"
+    },
+    "safetyNumberChangeDialog__pending-messages--many": {
+        "message": "Send $count$ pending messages",
+        "description": "Shown on confirmation dialog when user attempts to send a message in the outbox",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": 123
+            }
+        }
+    },
     "identityKeyErrorOnSend": {
         "message": "您与$name1$的安全码已改变。这可能表明有人试图窃听您的对话，也可能只是$name2$重新安装了 Signal。您可以重新验证与联系人的安全码。",
         "description": "Shown when user clicks on a failed recipient in the message detail view after an identity key change",
@@ -452,27 +470,35 @@
         "description": "Shown in conversation banner when more than one group member's safety number has changed, but they were previously verified."
     },
     "debugLogExplanation": {
-        "message": "该日志将公开发布以供参考，您可以在提交之前检查和编辑。",
+        "message": "This log will be posted publicly online for contributors to view. You may download the full log before submitting.",
         "description": ""
     },
     "debugLogError": {
-        "message": "上传出错！您可以手动将日志添加到要反馈的 bug 中。",
+        "message": "Something went wrong with the upload! Please email support@signal.org and attach your log as a text file.",
         "description": ""
     },
+    "debugLogSuccess": {
+        "message": "Debug log submitted",
+        "description": "Title of the success page for submitting a debug log"
+    },
+    "debugLogSuccessNextSteps": {
+        "message": "Debug log uploaded. When you contact support, copy the link below and attach it along with a description of the problem you saw and steps to reproduce it.",
+        "description": "Explanation of next steps to take when submitting debug log"
+    },
     "debugLogCopy": {
-        "message": "复制",
+        "message": "复制链接",
         "description": "Shown as the text for the copy button on the debug log screen"
     },
-    "debugLogCopyAlt": {
-        "message": "复制链接至剪贴板",
-        "description": "Shown as the alt text for the copy button on the debug log screen"
+    "debugLogSave": {
+        "message": "保存",
+        "description": "Shown as the text for the download button on the debug log screen"
     },
     "debugLogLinkCopied": {
         "message": "链接已复制至您的剪贴板",
         "description": "Shown in a toast to let the user know that the link to the debug log has been copied to their clipboard"
     },
     "reportIssue": {
-        "message": "反馈错误信息",
+        "message": "联系支持",
         "description": "Link to open the issue tracker"
     },
     "gotIt": {
@@ -621,6 +647,14 @@
             }
         }
     },
+    "decryptionErrorToast": {
+        "message": "Desktop ran into a decryption error.",
+        "description": "An error popup when we haven't added an error for decryption error."
+    },
+    "decryptionErrorToastAction": {
+        "message": "Submit log",
+        "description": "Label for the decryption error toast button"
+    },
     "oneNonImageAtATimeToast": {
         "message": "每条消息只能添加一个非图片的附件。",
         "description": "An error popup when the user has attempted to add an attachment"
@@ -646,15 +680,15 @@
         "description": "Displayed when the desktop client cannot connect to the server."
     },
     "connecting": {
-        "message": "正在连接",
+        "message": "连接中……",
         "description": "Displayed when the desktop client is currently connecting to the server."
     },
     "connect": {
-        "message": "连接",
+        "message": "Click to reconnect.",
         "description": "Shown to allow the user to manually attempt a reconnect."
     },
     "connectingHangOn": {
-        "message": "请稍等…",
+        "message": "Shouldn't be long",
         "description": "Subtext description for when the client is connecting to the server."
     },
     "offline": {
@@ -672,6 +706,10 @@
     "debugLog": {
         "message": "调试日志",
         "description": "View menu item to open the debug log (title case)"
+    },
+    "forceUpdate": {
+        "message": "强制更新",
+        "description": "View menu item to force the app to update download and install"
     },
     "helpMenuShowKeyboardShortcuts": {
         "message": "显示快捷键",
@@ -799,6 +837,20 @@
         "message": "欢迎来到 Signal",
         "description": ""
     },
+    "whatsNew": {
+        "message": "See $whatsNew$ in this update",
+        "description": "Shown in the main window",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "what's new"
+            }
+        }
+    },
+    "viewReleaseNotes": {
+        "message": "what's new",
+        "description": "Clickable link that displays the latest release notes"
+    },
     "selectAContact": {
         "message": "选择一个联系人或群组来开始聊天。",
         "description": ""
@@ -835,7 +887,7 @@
     },
     "mobile": {
         "message": "手机",
-        "description": "Shown on contact detail screen as a label for aa phone or email"
+        "description": "Shown on contact detail screen as a label for a phone or email"
     },
     "email": {
         "message": "邮箱",
@@ -881,6 +933,18 @@
         "message": "原始消息可用，但尚未加载。向上滑动可加载。",
         "description": "Shown in toast if user clicks on quote references messages not loaded in view, but in database"
     },
+    "voiceRecording--start": {
+        "message": "Start recording voice message",
+        "description": "Tooltip for microphone button to start voice message"
+    },
+    "voiceRecording--complete": {
+        "message": "Complete voice message and send",
+        "description": "Tooltip for green complete voice message and send"
+    },
+    "voiceRecording--cancel": {
+        "message": "Cancel voice message",
+        "description": "Tooltip for red button to cancel voice message"
+    },
     "voiceRecordingInterruptedMax": {
         "message": "语音消息录制已停止，因为已达到最大时间限制。",
         "description": "Confirmation dialog message for when the voice recording is interrupted due to max time limit"
@@ -897,15 +961,17 @@
         "message": "语音消息只允许有一个附件。",
         "description": "Shown in toast if tries to record a voice note with any staged attachments"
     },
+    "voiceNoteError": {
+        "message": "There was an error with the voice recorder.",
+        "description": "Shown in a dialog to inform user that we experienced an unrecoverable error"
+    },
     "attachmentSaved": {
-        "message": "附件已保存。点击以在文件夹中显示。",
-        "description": "Shown after user selects to save to downloads",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "proof.jpg"
-            }
-        }
+        "message": "Attachment saved.",
+        "description": "Shown after user selects to save to downloads"
+    },
+    "attachmentSavedShow": {
+        "message": "Show in folder",
+        "description": "Button label for showing the attachment in your file system"
     },
     "you": {
         "message": "您",
@@ -953,9 +1019,21 @@
         "message": "照片",
         "description": "Shown in a quotation of a message containing a photo if no text was originally provided with that image"
     },
+    "text": {
+        "message": "文本",
+        "description": "Label for the word 'text'"
+    },
     "cannotUpdate": {
         "message": "无法更新",
         "description": "Shown as the title of our update error dialogs on windows"
+    },
+    "muted": {
+        "message": "已静音",
+        "description": "Shown in a button when a conversation is muted"
+    },
+    "mute": {
+        "message": "静音",
+        "description": "Shown in a button when a conversation is unmuted and can be muted"
     },
     "cannotUpdateDetail": {
         "message": "Signal Desktop 升级失败。请到$url$下载安装新版本，并联系支持或者提交 bug 报告。",
@@ -1013,6 +1091,10 @@
         "message": "接受",
         "description": ""
     },
+    "done": {
+        "message": "完成",
+        "description": "Label for done"
+    },
     "on": {
         "message": "开",
         "description": "Label for when something is turned on"
@@ -1028,10 +1110,6 @@
     "deleteForEveryoneWarning": {
         "message": "将对所有使用较新版本 Signal 的群组用户永久删除此消息，群成员将看到您删除了一条消息。",
         "description": "Text shown in the confirmation dialog for deleting a message for everyone"
-    },
-    "deleteThisMessage": {
-        "message": "删除这条消息。",
-        "description": ""
     },
     "from": {
         "message": "来自",
@@ -1065,10 +1143,6 @@
         "message": "显示成员",
         "description": ""
     },
-    "resetSession": {
-        "message": "重置会话",
-        "description": "This is a menu item for resetting the session, using the imperative case, as in a command."
-    },
     "showSafetyNumber": {
         "message": "查看安全码",
         "description": ""
@@ -1078,7 +1152,7 @@
         "description": "This is a menu item for viewing all media (images + video) in a conversation, using the imperative case, as in a command."
     },
     "verifyHelp": {
-        "message": "如果您想要确认与$name$端对端加密是否安全，请将以上数字和对方设备的数字进行比对。",
+        "message": "To verify the security of your end-to-end encryption with $name$, compare the numbers above with their device.",
         "description": "",
         "placeholders": {
             "name": {
@@ -1171,11 +1245,31 @@
     },
     "DeliveryIssue--summary": {
         "message": "无法将来自 $sender$ 的消息、贴纸、反应、已读回执或媒体发送给您。它们可能是直接发送或在群组中发送。",
-        "description": "Shown on explainer dialog available from delivery issue timeline events",
+        "description": "Shown on explainer dialog available from delivery issue timeline events in 1:1 conversations",
         "placeholders": {
             "name": {
                 "content": "$1",
                 "example": "Alice"
+            }
+        }
+    },
+    "DeliveryIssue--summary--group": {
+        "message": "A message, sticker, reaction, read receipt or media couldn’t be delivered to you from $sender$ in this chat.",
+        "description": "Shown on explainer dialog available from delivery issue timeline events in groups",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "ChangeNumber--notification": {
+        "message": "$sender$ changed their number to a new number",
+        "description": "Shown in timeline when a member of a conversation changes their phone number",
+        "placeholders": {
+            "sender": {
+                "content": "$1",
+                "example": "Sam"
             }
         }
     },
@@ -1205,7 +1299,11 @@
     },
     "save": {
         "message": "保存",
-        "description": "Used as a 'commit changes' button in the Caption Editor for outgoing image attachments"
+        "description": "Used as a 'commit changes' button in the caption editor for outgoing image attachments"
+    },
+    "reset": {
+        "message": "重置",
+        "description": "Used on reset buttons"
     },
     "fileIconAlt": {
         "message": "文件图标",
@@ -1239,7 +1337,11 @@
         "message": "关联新设备",
         "description": "The menu option shown in Signal iOS to add a new linked device"
     },
-    "deviceName": {
+    "LinkScreen__scan-this-code": {
+        "message": "Scan this code in the Signal app on your phone",
+        "description": "Alt text for the QR code on the device link screen"
+    },
+    "Preferences--device-name": {
         "message": "设备名称",
         "description": "The label in settings panel shown for the user-provided name for this desktop instance"
     },
@@ -1275,13 +1377,21 @@
         "message": "重试",
         "description": ""
     },
-    "theme": {
+    "Preferences--theme": {
         "message": "主题",
         "description": "Header for theme settings"
     },
     "calling": {
         "message": "呼叫时",
         "description": "Header for calling options on the settings screen"
+    },
+    "calling__call-back": {
+        "message": "回拨",
+        "description": "Button to call someone back"
+    },
+    "calling__call-again": {
+        "message": "重拨",
+        "description": "Button to call someone again"
     },
     "calling__start": {
         "message": "发起通话",
@@ -1297,7 +1407,11 @@
     },
     "calling__call-is-full": {
         "message": "通话人数已满",
-        "description": "Button label in the call lobby when you can't join because the call is full"
+        "description": "Text in the call lobby when you can't join because the call is full"
+    },
+    "calling__button--video__label": {
+        "message": "相机",
+        "description": "Label under the video button"
     },
     "calling__button--video-disabled": {
         "message": "摄像头已禁用",
@@ -1311,6 +1425,10 @@
         "message": "开启摄像头",
         "description": "Button tooltip label for turning on the camera"
     },
+    "calling__button--audio__label": {
+        "message": "静音",
+        "description": "Label under the audio button"
+    },
     "calling__button--audio-disabled": {
         "message": "麦克风已禁用",
         "description": "Button tooltip label when the microphone is disabled"
@@ -1322,6 +1440,10 @@
     "calling__button--audio-on": {
         "message": "麦克风取消静音",
         "description": "Button tooltip label for turning on the microphone"
+    },
+    "calling__button--presenting__label": {
+        "message": "分享",
+        "description": "Label under the share screen button"
     },
     "calling__button--presenting-disabled": {
         "message": "演示已禁用",
@@ -1335,15 +1457,31 @@
         "message": "停止演示",
         "description": "Button tooltip label for stopping screen sharing"
     },
+    "calling__button--ring__label": {
+        "message": "Ring",
+        "description": "Label under the ring button"
+    },
+    "calling__button--ring__disabled-because-group-is-too-large": {
+        "message": "Group is too large to ring the participants.",
+        "description": "Button tooltip label when you can't ring because the group is too large"
+    },
+    "calling__button--ring__off": {
+        "message": "Notify, don't ring",
+        "description": "Button tooltip label for turning ringing off"
+    },
+    "calling__button--ring__on": {
+        "message": "Enable ringing",
+        "description": "Button tooltip label for turning ringing on"
+    },
     "calling__your-video-is-off": {
         "message": "摄像头已关闭",
         "description": "Label in the calling lobby indicating that your camera is off"
     },
-    "calling__lobby-summary--zero": {
+    "calling__pre-call-info--empty-group": {
         "message": "没有人在这里",
         "description": "Shown in the calling lobby to describe who is in the call"
     },
-    "calling__lobby-summary--single": {
+    "calling__pre-call-info--1-person-in-call": {
         "message": "$first$ 参与该通话",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1353,11 +1491,11 @@
             }
         }
     },
-    "calling__lobby-summary--self": {
+    "calling__pre-call-info--another-device-in-call": {
         "message": "你的另一设备参与该通话",
         "description": "Shown in the calling lobby to describe when it is just you"
     },
-    "calling__lobby-summary--double": {
+    "calling__pre-call-info--2-people-in-call": {
         "message": "$first$ 和 $second$ 参与该通话",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1371,7 +1509,7 @@
             }
         }
     },
-    "calling__lobby-summary--triple": {
+    "calling__pre-call-info--3-people-in-call": {
         "message": "$first$、$second$ 和 $third$ 参与该通话",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1389,11 +1527,131 @@
             }
         }
     },
-    "calling__lobby-summary--many": {
+    "calling__pre-call-info--many-people-in-call": {
         "message": "$first$、$second$ 和其他 $others$ 人参与该通话",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
             "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "others": {
+                "content": "$3",
+                "example": "5"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-1": {
+        "message": "Signal will ring $person$",
+        "description": "Shown in the calling lobby to describe who will be rung",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-2": {
+        "message": "Signal will ring $first$ and $second$",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-3": {
+        "message": "Signal will ring $first$, $second$, and $third$",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "third": {
+                "content": "$3",
+                "example": "April"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-many": {
+        "message": "Signal will ring $first$, $second$, and $others$ others",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "others": {
+                "content": "$3",
+                "example": "5"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-1": {
+        "message": "$person$ will be notified",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-2": {
+        "message": "$first$ and $second$ will be notified",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-3": {
+        "message": "$first$, $second$, and $third$ will be notified",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "third": {
+                "content": "$3",
+                "example": "April"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-many": {
+        "message": "$first$, $second$, and $others$ others will be notified",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "person": {
                 "content": "$1",
                 "example": "Sam"
             },
@@ -1437,7 +1695,7 @@
     },
     "calling__block-info": {
         "message": "你将不会收到他们的音频或视频，他们也不会收到你的。",
-        "description": "Shown in the modal dialog to describe how blocking works in a gorup call"
+        "description": "Shown in the modal dialog to describe how blocking works in a group call"
     },
     "calling__overflow__scroll-up": {
         "message": "向上滚动",
@@ -1546,7 +1804,7 @@
         "description": "Header for general options on the settings screen"
     },
     "spellCheckDescription": {
-        "message": "启用拼写检查",
+        "message": "Spell check text entered in message composition box",
         "description": "Description of the spell check setting"
     },
     "spellCheckWillBeEnabled": {
@@ -1557,12 +1815,20 @@
         "message": "拼写检查将在 Signal 下次启动时禁用。",
         "description": "Shown when the user disables spellcheck to indicate that they must restart Signal."
     },
+    "SystemTraySetting__minimize-to-system-tray": {
+        "message": "最小化至系统托盘",
+        "description": "In the settings, shown next to the checkbox option for minimizing to the system tray"
+    },
+    "SystemTraySetting__minimize-to-and-start-in-system-tray": {
+        "message": "启动最小化至托盘",
+        "description": "In the settings, shown next to the checkbox option for starting in the system tray"
+    },
     "autoLaunchDescription": {
         "message": "计算机登录时打开",
         "description": "Description for the automatic launch setting"
     },
     "clearDataHeader": {
-        "message": "清空数据",
+        "message": "Clear application data",
         "description": "Header in the settings dialog for the section dealing with data deletion"
     },
     "clearDataExplanation": {
@@ -1700,7 +1966,7 @@
         "description": "Warning notification that this version of the app has expired"
     },
     "upgrade": {
-        "message": "升级",
+        "message": "Click to go to signal.org/download",
         "description": "Label text for button to upgrade the app to the latest version"
     },
     "mediaMessage": {
@@ -1712,7 +1978,7 @@
         "description": "Error message displayed when sending to an unregistered user."
     },
     "sync": {
-        "message": "联系人",
+        "message": "Import contacts",
         "description": "Label for contact and group sync settings"
     },
     "syncExplanation": {
@@ -1837,7 +2103,7 @@
     },
     "disappearingMessages": {
         "message": "阅后即焚",
-        "description": "Conversation menu option to enable disappearing messages. Title of the settings section for Disappearing Messages"
+        "description": "Conversation menu option to enable disappearing messages. Title of the settings section for Disappearing Messages. Label of the disappearing timer select in group creation flow"
     },
     "disappearingMessagesDisabled": {
         "message": "阅后即焚已停用",
@@ -1872,7 +2138,7 @@
         }
     },
     "audioNotificationDescription": {
-        "message": "播放语音通知",
+        "message": "Play notification sounds",
         "description": "Description for audio notification setting"
     },
     "callRingtoneNotificationDescription": {
@@ -1918,6 +2184,10 @@
                 "example": "Bob Smith"
             }
         }
+    },
+    "SafetyNumberModal__title": {
+        "message": "验证安全码",
+        "description": "Title for the modal for safety number verification"
     },
     "safetyNumberChanged": {
         "message": "安全码已改变",
@@ -2110,7 +2380,7 @@
         "description": "When a person inputs a number that is invalid"
     },
     "unlinkedWarning": {
-        "message": "重新链接桌面版Signal到您的移动设备来继续。",
+        "message": "Click to relink Signal Desktop to your mobile device to continue messaging.",
         "description": ""
     },
     "unlinked": {
@@ -2122,11 +2392,15 @@
         "description": ""
     },
     "autoUpdateNewVersionTitle": {
-        "message": "Signal 有可用更新",
+        "message": "Update available",
         "description": ""
     },
     "autoUpdateNewVersionMessage": {
-        "message": "有新版的 Signal 可用。",
+        "message": "Click to restart Signal",
+        "description": ""
+    },
+    "downloadNewVersionMessage": {
+        "message": "Click to download update",
         "description": ""
     },
     "autoUpdateNewVersionInstructions": {
@@ -2139,6 +2413,10 @@
     },
     "autoUpdateLaterButtonLabel": {
         "message": "稍后",
+        "description": ""
+    },
+    "autoUpdateIgnoreButtonLabel": {
+        "message": "Ignore update",
         "description": ""
     },
     "leftTheGroup": {
@@ -2210,6 +2488,38 @@
             "names": {
                 "content": "$1",
                 "example": "Alice, Bob"
+            }
+        }
+    },
+    "ConversationList__aria-label": {
+        "message": "Conversation with $title$, $unreadCount$ new messages, last message: $lastMessage$.",
+        "description": "Aria label for the conversation list item",
+        "placeholders": {
+            "title": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "unreadCount": {
+                "content": "$2",
+                "example": "23"
+            },
+            "lastMessage": {
+                "content": "$3",
+                "example": "How about Friday?"
+            }
+        }
+    },
+    "ConversationList__last-message-undefined": {
+        "message": "The last message may have been deleted.",
+        "description": "For aria-label within conversation list. Describes if last message is not defined."
+    },
+    "BaseConversationListItem__aria-label": {
+        "message": "Go to conversation with $title$",
+        "description": "Aria label for the conversation list item button",
+        "placeholders": {
+            "title": {
+                "content": "$1",
+                "example": "Alice"
             }
         }
     },
@@ -2444,6 +2754,10 @@
     "confirmation-dialog--Cancel": {
         "message": "取消",
         "description": "Appears on the cancel button in confirmation dialogs."
+    },
+    "MessageBody--read-more": {
+        "message": "Read more",
+        "description": "When a message is too long this is the affordance to expand the message"
     },
     "Message--unsupported-message": {
         "message": "$contact$ 给您发送的信息无法被处理，因为它用到了新的 Signal 功能。",
@@ -2721,6 +3035,10 @@
         "message": "已存档对话",
         "description": "A toast that shows up when user archives a conversation"
     },
+    "conversationArchivedUndo": {
+        "message": "撤消",
+        "description": "Undo button for archiving a conversation"
+    },
     "conversationReturnedToInbox": {
         "message": "对话已还原至收件箱",
         "description": "A toast that shows up when the user unarchives a conversation"
@@ -2780,6 +3098,14 @@
     "StickerCreator--DropStage--title": {
         "message": "添加贴纸",
         "description": "Title for the drop stage of the sticker creator"
+    },
+    "StickerCreator--DropStage--removeSticker": {
+        "message": "Remove sticker",
+        "description": "Label for the X button used to remove a staged sticker"
+    },
+    "StickerCreator--DropStage--dragDrop": {
+        "message": "Click or drag/drop a file to add a sticker",
+        "description": "Shown on the + section of the file addition stage of sticker pack creation"
     },
     "StickerCreator--DropStage--help": {
         "message": "贴纸必须是：PNG、APNG 或 WebP 格式，背景透明，512x512 像素。推荐边距为 16 像素。",
@@ -2955,11 +3281,15 @@
         "message": "如需使用贴纸包创建器，请在手机和桌面电脑上设置 Signal",
         "description": "The error message which appears when the user has not linked their account and attempts to use the Sticker Creator"
     },
+    "Reactions--remove": {
+        "message": "Remove reaction",
+        "description": ""
+    },
     "Reactions--error": {
         "message": "发送反应失败，请重试。",
         "description": "Shown when a reaction fails to send"
     },
-    "ReactionsViewer--more": {
+    "Reactions--more": {
         "message": "更多",
         "description": "Use in the reaction picker as the alt text for the 'more' button"
     },
@@ -2989,13 +3319,7 @@
     },
     "MessageRequests--message-group": {
         "message": "是否加入此群组并与之分享您的名字和头像？接收邀请前群成员无法知道您是否阅读了他们发来的消息。",
-        "description": "Shown as the message for a message request in a group",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the message for a message request in a group"
     },
     "MessageRequests--message-group-blocked": {
         "message": "是否解除对该群组的屏蔽并与之分享您的名字和头像？解除屏蔽前您将不会收到其发来的消息。",
@@ -3021,23 +3345,11 @@
     },
     "MessageRequests--unblock-direct-confirm-body": {
         "message": "彼此将可以收发消息并呼叫。",
-        "description": "Shown as the body in the confirmation modal for unblocking a private message request",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the body in the confirmation modal for unblocking a private message request"
     },
     "MessageRequests--unblock-group-confirm-body": {
         "message": "群组成员可再次将您添加至该群组。",
-        "description": "Shown as the body in the confirmation modal for unblocking a group message request",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the body in the confirmation modal for unblocking a group message request"
     },
     "MessageRequests--block-and-report-spam": {
         "message": "举报垃圾与屏蔽",
@@ -3177,7 +3489,7 @@
     },
     "member-of-2-groups": {
         "message": "$group1$ 和 $group2$ 的成员",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least two mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of two mutual groups",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3191,7 +3503,7 @@
     },
     "member-of-3-groups": {
         "message": "$group1$、$group2$ 和 $group3$ 的成员",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least three mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of three mutual groups",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3207,9 +3519,27 @@
             }
         }
     },
-    "member-of-more-than-3-groups": {
+    "member-of-more-than-3-groups--one-more": {
+        "message": "Member of $group1$, $group2$, $group3$ and one more",
+        "description": "Shown in the conversation hero to indicate this user is a member of four mutual groups",
+        "placeholders": {
+            "group1": {
+                "content": "$1",
+                "example": "NYC Rock Climbers"
+            },
+            "group2": {
+                "content": "$2",
+                "example": "Dinner Party"
+            },
+            "group3": {
+                "content": "$3",
+                "example": "Friends 🌿"
+            }
+        }
+    },
+    "member-of-more-than-3-groups--multiple-more": {
         "message": "$group1$、$group2$、$group3$ 以及其他 $remainingCount$ 个群组的成员",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least three mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of 5+ mutual groups.",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3307,9 +3637,87 @@
         "message": "视频来电…",
         "description": "Shown in both the incoming call bar and notification for an incoming video call"
     },
-    "outgoingCallPrering": {
-        "message": "呼叫中…",
-        "description": "Shown in the call screen when placing an outgoing call that isn't ringing yet"
+    "incomingGroupCall__ringing-you": {
+        "message": "$ringer$ is calling you",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-1-other": {
+        "message": "$ringer$ is calling you and $otherMember$",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "otherMember": {
+                "content": "$2",
+                "example": "Bob"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-2-others": {
+        "message": "$ringer$ is calling you, $first$, and $second$",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-3-others": {
+        "message": "$ringer$ is calling you, $first$, $second$, and 1 other",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-many": {
+        "message": "$ringer$ is calling you, $first$, $second$, and $remaining$ others",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            },
+            "remaining": {
+                "content": "$4",
+                "example": "5"
+            }
+        }
     },
     "outgoingCallRinging": {
         "message": "响铃中…",
@@ -3426,7 +3834,7 @@
         "description": "Title for the select your screen sharing sources modal"
     },
     "calling__SelectPresentingSourcesModal--confirm": {
-        "message": "共享屏幕",
+        "message": "Start sharing",
         "description": "Confirm button for sharing screen modal"
     },
     "calling__SelectPresentingSourcesModal--entireScreen": {
@@ -3470,6 +3878,10 @@
     "muteNotificationsTitle": {
         "message": "静音通知",
         "description": "Label for the mute notifications drop-down selector"
+    },
+    "notMuted": {
+        "message": "未被静音",
+        "description": "Label when the conversation is not muted"
     },
     "muteHour": {
         "message": "静音一小时",
@@ -3515,19 +3927,31 @@
     },
     "ErrorModal--title": {
         "message": "出错了！",
-        "description": "Title of pop-up dialog when user-initiated task has gone wrong"
+        "description": "Title of popup dialog when user-initiated task has gone wrong"
     },
     "ErrorModal--description": {
         "message": "请重试或联系支持人员。",
-        "description": "Description text in pop-up dialog when user-initiated task has gone wrong"
+        "description": "Description text in popup dialog when user-initiated task has gone wrong"
     },
     "Confirmation--confirm": {
         "message": "好的",
-        "description": "Button to dismiss pop-up dialog when user-initiated task has gone wrong"
+        "description": "Button to dismiss popup dialog when user-initiated task has gone wrong"
     },
     "unknown-sgnl-link": {
         "message": "抱歉， sgnl:// 链接无法解析！",
         "description": "Shown if you click on a sgnl:// link not currently supported by Desktop"
+    },
+    "GroupV2--cannot-send": {
+        "message": "You cannot send messages to that group.",
+        "description": "Shown in toast when you attempt to forward a message to an announcement only group"
+    },
+    "GroupV2--add--missing-capability": {
+        "message": "These people cannot be added to the group until they upgrade Signal.",
+        "description": "Shown in a confirmation dialog when members who cannot view announcement only group cannot be added"
+    },
+    "GroupV2--cannot-start-group-call": {
+        "message": "Only admins of the group can start a call.",
+        "description": "Shown in toast when a non-admin starts a group call in an announcements only group"
     },
     "GroupV2--join--invalid-link--title": {
         "message": "无效链接",
@@ -3626,7 +4050,7 @@
         "description": "Shown if something went wrong when you try to join via a group link"
     },
     "GroupV2--join--general-join-failure": {
-        "message": "通过该链接加入失败，请稍后尝试再次加入。",
+        "message": "Couldn't join group. Try again later.",
         "description": "Shown if something went wrong when you try to join via a group link"
     },
     "GroupV2--admin": {
@@ -4191,7 +4615,13 @@
     },
     "GroupV2--member-privilege--demote--other--unknown": {
         "message": "一位管理员撤销了 $memberName$ 的管理员权限。",
-        "description": "Shown in timeline or conversation preview when v2 group changes"
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "memberName": {
+                "content": "$1",
+                "example": "Bob"
+            }
+        }
     },
     "GroupV2--member-privilege--demote--you--other": {
         "message": "$adminName$ 撤销了你的管理员权限。",
@@ -4701,6 +5131,42 @@
         "message": "群组描述已更改。",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
+    "GroupV2--announcements--admin--you": {
+        "message": "您已将群组设置更改为仅允许管理员发送消息。",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--admin--other": {
+        "message": "$memberName$ changed the group settings to only allow admins to send messages.",
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "adminName": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "GroupV2--announcements--admin--unknown": {
+        "message": "The group was changed to only allow admins to send messages.",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--member--you": {
+        "message": "您已将群组设置更改为允许全部成员发送消息。",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--member--other": {
+        "message": "$memberName$ changed the group settings to allow all members to send messages.",
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "adminName": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "GroupV2--announcements--member--unknown": {
+        "message": "The group was changed to allow all members to send messages.",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
     "GroupV1--Migration--disabled": {
         "message": "升级群组可激活新功能，如 @提及和管理员。未与群组分享名称或图片的成员将受邀加入。$learnMore$",
         "description": "Shown instead of composition area when user is forced to migrate a legacy group (GV1).",
@@ -4848,7 +5314,7 @@
         "description": "Displayed while checking if the contact is SMS-only"
     },
     "countMutedConversationsDescription": {
-        "message": "在标记计数中显示静音对话数量",
+        "message": "Include muted conversations in badge count",
         "description": "Description for counting muted conversations in badge setting"
     },
     "ContactModal--message": {
@@ -4874,7 +5340,7 @@
         }
     },
     "ContactModal--rm-admin-info": {
-        "message": "移除 $contact$ 的群组管理员权限",
+        "message": "Remove $contact$ as group admin?",
         "description": "Shown in a confirmation dialog when you are about to remove admin privileges from someone",
         "placeholders": {
             "contact": {
@@ -4895,6 +5361,14 @@
         "message": "群组设置",
         "description": "This is a button in the conversation context menu to show group settings"
     },
+    "showConversationDetails--direct": {
+        "message": "聊天设置",
+        "description": "This is a button in the conversation context menu to show chat settings"
+    },
+    "ConversationDetails__unmute--title": {
+        "message": "Unmute this chat?",
+        "description": "Title for the modal to unmute a chat"
+    },
     "ConversationDetails--group-link": {
         "message": "群组链接",
         "description": "This is the label for the group link management panel"
@@ -4906,6 +5380,10 @@
     "ConversationDetails--disappearing-messages-info": {
         "message": "启用时，该群组收发的消息将在查看之后消失。",
         "description": "This is the info about the disappearing messages setting"
+    },
+    "ConversationDetails--notifications": {
+        "message": "通知",
+        "description": "This is the label for notifications in the conversation details screen"
     },
     "ConversationDetails--group-info-label": {
         "message": "谁可以编辑群组信息",
@@ -4922,6 +5400,14 @@
     "ConversationDetails--add-members-info": {
         "message": "选择谁可以添加群组成员。",
         "description": "This is the additional info for the 'who can add members' panel"
+    },
+    "ConversationDetails--announcement-label": {
+        "message": "Who can send messages",
+        "description": "This is the additional info for the 'who can send messages' panel"
+    },
+    "ConversationDetails--announcement-info": {
+        "message": "Choose who can send messages to the group.",
+        "description": "This is the additional info for the 'who can send messages' panel"
     },
     "ConversationDetails--requests-and-invites": {
         "message": "请求与邀请",
@@ -5004,6 +5490,22 @@
     "ConversationDetailsMembershipList--show-all": {
         "message": "查看全部",
         "description": "This is a button on the conversation details to show all members"
+    },
+    "ConversationNotificationsSettings__mentions__label": {
+        "message": "提及我",
+        "description": "In the conversation notifications settings, this is the label for the mentions option"
+    },
+    "ConversationNotificationsSettings__mentions__info": {
+        "message": "Receive notifications when you're mentioned in muted chats",
+        "description": "In the conversation notifications settings, this is the sub-label for the mentions option"
+    },
+    "ConversationNotificationsSettings__mentions__select__always-notify": {
+        "message": "总是通知",
+        "description": "In the conversation notifications settings, this is the option that always notifies you for @mentions"
+    },
+    "ConversationNotificationsSettings__mentions__select__dont-notify-for-mentions-if-muted": {
+        "message": "静音时取消通知",
+        "description": "In the conversation notifications settings, this is the option that doesn't notify you for @mentions if the conversation is muted"
     },
     "GroupLinkManagement--clipboard": {
         "message": "群组链接已复制。",
@@ -5120,7 +5622,7 @@
         }
     },
     "PendingInvites--revoke-from-plural": {
-        "message": "撤销“$name$”发送的 $number$ 个邀请？",
+        "message": "Revoke $number$ invites sent by \"$name$\"?",
         "description": "This is the modal content when confirming revoking multiple invites",
         "placeholders": {
             "number": {
@@ -5147,7 +5649,7 @@
     },
     "PendingRequests--info": {
         "message": "该列表人员尝试通过群组链接加入“$name$”。",
-        "description": "Inforamtion shown below the pending admin approval list",
+        "description": "Information shown below the pending admin approval list",
         "placeholders": {
             "name": {
                 "content": "$1",
@@ -5162,6 +5664,10 @@
     "AvatarInput--no-photo-label--group": {
         "message": "添加群组头像",
         "description": "The label for the avatar uploader when no group photo is selected"
+    },
+    "AvatarInput--no-photo-label--profile": {
+        "message": "Add a photo",
+        "description": "The label for the avatar uploader when no profile photo is selected"
     },
     "AvatarInput--change-photo-label": {
         "message": "更改头像",
@@ -5268,16 +5774,34 @@
         "description": "The text of the button to create new groups"
     },
     "selectContact": {
-        "message": "选择联系人",
-        "description": "The label for contact checkboxes that are non-selected (clicking them should select the contact)"
+        "message": "Select contact $name$",
+        "description": "The label for contact checkboxes that are non-selected (clicking them should select the contact)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "deselectContact": {
-        "message": "取消选择联系人",
-        "description": "The label for contact checkboxes that are selected (clicking them should de-select the contact)"
+        "message": "De-select contact $name$",
+        "description": "The label for contact checkboxes that are selected (clicking them should de-select the contact)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "cannotSelectContact": {
-        "message": "无法选择联系人",
-        "description": "The label for contact checkboxes that are disabled"
+        "message": "Cannot select contact $name$",
+        "description": "The label for contact checkboxes that are disabled",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "alreadyAMember": {
         "message": "已是成员",
@@ -5434,7 +5958,7 @@
         "description": "First paragraph in the captcha dialog"
     },
     "CaptchaDialog--can-close__title": {
-        "message": "是否继续且不验证？",
+        "message": "Continue without verifying?",
         "description": "Header in the captcha dialog that can be closed"
     },
     "CaptchaDialog--can-close__body": {
@@ -5455,7 +5979,7 @@
     },
     "deleteForEveryoneFailed": {
         "message": "删除所有人的消息失败，请稍后重试。",
-        "description": "Displayed when delete-for-everyone has failed to send to all recepients"
+        "description": "Displayed when delete-for-everyone has failed to send to all recipients"
     },
     "ChatColorPicker__delete--title": {
         "message": "删除颜色",
@@ -5597,7 +6121,7 @@
     },
     "settings__DisappearingMessages__timer__label": {
         "message": "新聊天的默认计时器",
-        "description": "Label for the Disapearring Messages default timer setting"
+        "description": "Label for the Disappearing Messages default timer setting"
     },
     "UniversalTimerNotification__text": {
         "message": "发送消息时，限时消息将设置为 $timeValue$。",
@@ -5608,6 +6132,10 @@
                 "example": "1 week"
             }
         }
+    },
+    "ErrorBoundaryNotification__text": {
+        "message": "Couldn't display this message. Click to submit a debug log.",
+        "description": "An error notification displayed when message fails to render due to an internal error"
     },
     "GroupDescription__read-more": {
         "message": "查看更多",
@@ -5620,5 +6148,365 @@
     "ConversationDetailsHeader--add-group-description": {
         "message": "添加群组描述...",
         "description": "Placeholder text in the details header for those that can edit the group description"
+    },
+    "MediaQualitySelector--button": {
+        "message": "选择媒体质量",
+        "description": "aria-label for the media quality selector button"
+    },
+    "MediaQualitySelector--title": {
+        "message": "媒体质量",
+        "description": "Popup selector title"
+    },
+    "MediaQualitySelector--standard-quality-title": {
+        "message": "标准",
+        "description": "Title for option for standard quality"
+    },
+    "MediaQualitySelector--standard-quality-description": {
+        "message": "速度更快，数据更少",
+        "description": "Description of standard quality selector"
+    },
+    "MediaQualitySelector--high-quality-title": {
+        "message": "高",
+        "description": "Title for option for high quality"
+    },
+    "MediaQualitySelector--high-quality-description": {
+        "message": "速度更慢，数据更多",
+        "description": "Description of high quality selector"
+    },
+    "MessageDetailsHeader--Failed": {
+        "message": "未发",
+        "description": "In the message details screen, shown above contacts where the message failed to deliver"
+    },
+    "MessageDetailsHeader--Pending": {
+        "message": "处理中",
+        "description": "In the message details screen, shown above contacts where the message is still sending"
+    },
+    "MessageDetailsHeader--Sent": {
+        "message": "发至",
+        "description": "In the message details screen, shown above contacts where the message has been sent (but not delivered, read, or viewed)"
+    },
+    "MessageDetailsHeader--Delivered": {
+        "message": "送达",
+        "description": "In the message details screen, shown above contacts who have received your message"
+    },
+    "MessageDetailsHeader--Read": {
+        "message": "已读",
+        "description": "In the message details screen, shown above contacts who have read this message"
+    },
+    "MessageDetailsHeader--Viewed": {
+        "message": "已查看：",
+        "description": "In the message details screen, shown above contacts who have viewed this message"
+    },
+    "ProfileEditor--about": {
+        "message": "关于",
+        "description": "Default text for about field"
+    },
+    "ProfileEditor--about-placeholder": {
+        "message": "Write something about yourself...",
+        "description": "Placeholder text for about input field"
+    },
+    "ProfileEditor--first-name": {
+        "message": "名（必须）",
+        "description": "Placeholder text for first name field"
+    },
+    "ProfileEditor--last-name": {
+        "message": "姓（可选）",
+        "description": "Placeholder text for last name field"
+    },
+    "ConfirmDiscardDialog--discard": {
+        "message": "您是否要撤销这些修改？",
+        "description": "ConfirmationDialog text for discarding changes"
+    },
+    "ProfileEditor--info": {
+        "message": "Your profile is encrypted. Your profile and changes to it will be visible to your contacts and when you start or accept new chats. $learnMore$",
+        "description": "Information shown at the bottom of the profile editor section",
+        "placeholders": {
+            "learnMore": {
+                "content": "$1",
+                "example": "Learn More."
+            }
+        }
+    },
+    "ProfileEditor--learnMore": {
+        "message": "了解更多",
+        "description": "Text that links to a support article"
+    },
+    "Bio--speak-freely": {
+        "message": "畅所欲言",
+        "description": "A default bio option"
+    },
+    "Bio--encrypted": {
+        "message": "已加密",
+        "description": "A default bio option"
+    },
+    "Bio--free-to-chat": {
+        "message": "陪聊不收费",
+        "description": "A default bio option"
+    },
+    "Bio--coffee-lover": {
+        "message": "咖啡爱好者",
+        "description": "A default bio option"
+    },
+    "Bio--taking-break": {
+        "message": "休息一下下",
+        "description": "A default bio option"
+    },
+    "ProfileEditorModal--profile": {
+        "message": "个人资料",
+        "description": "Title for profile editing"
+    },
+    "ProfileEditorModal--name": {
+        "message": "你的名字",
+        "description": "Title for editing your name"
+    },
+    "ProfileEditorModal--about": {
+        "message": "关于",
+        "description": "Title for about editing"
+    },
+    "ProfileEditorModal--error": {
+        "message": "Your profile could not be updated. Please try again.",
+        "description": "Error message when something goes wrong updating your profile."
+    },
+    "AnnouncementsOnlyGroupBanner--modal": {
+        "message": "Message an admin",
+        "description": "Modal title for the list of admins in a group"
+    },
+    "AnnouncementsOnlyGroupBanner--announcements-only": {
+        "message": "Only $admins$ can send messages",
+        "description": "Displayed if sending of messages is disabled to non-admins",
+        "placeholders": {
+            "admins": {
+                "content": "$1",
+                "example": "admins"
+            }
+        }
+    },
+    "AnnouncementsOnlyGroupBanner--admins": {
+        "message": "管理员",
+        "description": "Clickable text describing administrators of a group, used in the message an admin label"
+    },
+    "AvatarEditor--choose": {
+        "message": "Select an avatar",
+        "description": "Label for the avatar selector"
+    },
+    "AvatarColorPicker--choose": {
+        "message": "Choose a color",
+        "description": "Label for when you need to choose your fighter, err color"
+    },
+    "LeftPaneSetGroupMetadataHelper__avatar-modal-title": {
+        "message": "Group Avatar",
+        "description": "Title for the avatar picker in the group creation flow"
+    },
+    "Preferences__button--general": {
+        "message": "通用",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--appearance": {
+        "message": "外观",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--chats": {
+        "message": "聊天",
+        "description": "Button to switch the settings view (and a title of pane)"
+    },
+    "Preferences__button--calls": {
+        "message": "通话",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--notifications": {
+        "message": "通知",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--privacy": {
+        "message": "隐私",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences--lastSynced": {
+        "message": "Last import at $date$ $time$",
+        "description": "Label for date and time of last sync operation",
+        "placeholders": {
+            "date": {
+                "content": "$1",
+                "example": "6/9/2020"
+            },
+            "time": {
+                "content": "$2",
+                "example": "7:37:25 PM"
+            }
+        }
+    },
+    "Preferences--system": {
+        "message": "系统",
+        "description": "Title for system type settings"
+    },
+    "Preferences--zoom": {
+        "message": "Zoom level",
+        "description": "Label for changing the zoom level"
+    },
+    "Preferences__link-previews--title": {
+        "message": "生成链接预览",
+        "description": "Title for the generate link previews setting"
+    },
+    "Preferences__link-previews--description": {
+        "message": "To change this setting, open the Signal app on your mobile device and navigate to Settings > Chats",
+        "description": "Description for the generate link previews setting"
+    },
+    "Preferences--advanced": {
+        "message": "高级",
+        "description": "Title for advanced settings"
+    },
+    "Preferences--notification-content": {
+        "message": "Notification content",
+        "description": "Label for the notification content setting select box"
+    },
+    "Preferences--blocked": {
+        "message": "已屏蔽",
+        "description": "Label for blocked contacts setting"
+    },
+    "Preferences--blocked-count-singular": {
+        "message": "$num$ contact",
+        "description": "Number of contacts blocked singular",
+        "placeholders": {
+            "num": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "Preferences--blocked-count-plural": {
+        "message": "$num$ contacts",
+        "description": "Number of contacts blocked plural",
+        "placeholders": {
+            "num": {
+                "content": "$1",
+                "example": "20"
+            }
+        }
+    },
+    "Preferences__who-can--title": {
+        "message": "谁能...",
+        "description": "Title for the 'who can do X' setting"
+    },
+    "Preferences__privacy--description": {
+        "message": "To change these settings, open the Signal app on your mobile device and navigate to Settings > Privacy",
+        "description": "Description for the 'who can do X' setting"
+    },
+    "Preferences__who-can--everybody": {
+        "message": "所有人",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences__who-can--contacts": {
+        "message": "我的联系人",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences__who-can--nobody": {
+        "message": "没有人",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences--messaging": {
+        "message": "消息传输",
+        "description": "Title for the messaging settings"
+    },
+    "Preferences--see-me": {
+        "message": "查看我的电话号码",
+        "description": "Label for the see my phone number setting"
+    },
+    "Preferences--find-me": {
+        "message": "Find me by my phone number",
+        "description": "Label for the find me by my phone number setting"
+    },
+    "Preferences--read-receipts": {
+        "message": "已读回执",
+        "description": "Label for the read receipts setting"
+    },
+    "Preferences--typing-indicators": {
+        "message": "“正在输入”提示",
+        "description": "Label for the typing indicators setting"
+    },
+    "Preferences--updates": {
+        "message": "Updates",
+        "description": "Header for settings having to do with updates"
+    },
+    "Preferences__download-update": {
+        "message": "Automatically download updates",
+        "description": "Label for checkbox for the auto download updates setting"
+    },
+    "Preferences__enable-notifications": {
+        "message": "Enable notifications",
+        "description": "Label for checkbox for the notifications setting"
+    },
+    "Preferences__devices": {
+        "message": "设备",
+        "description": "Label for Device list in call settings pane"
+    },
+    "DialogUpdate--version-available": {
+        "message": "Update to version $version$ available",
+        "description": "Tooltip for new update available",
+        "placeholders": {
+            "status": {
+                "content": "$1",
+                "example": "v7.7.7"
+            }
+        }
+    },
+    "NSIS__retry-dialog--first-line": {
+        "message": "Signal cannot be closed.",
+        "description": "First line of the dialog displayed when Windows installer can't close application automatically and needs user intervention to complete the installation."
+    },
+    "NSIS__retry-dialog--second-line": {
+        "message": "Please close it manually and click Retry to continue.",
+        "description": "Second line of the dialog displayed when Windows installer can't close application automatically and needs user intervention to complete the installation."
+    },
+    "CustomizingPreferredReactions__title": {
+        "message": "自定义反应",
+        "description": "Shown in the header of the modal for customizing the preferred reactions. Also shown in the tooltip for the button that opens this modal."
+    },
+    "CustomizingPreferredReactions__subtitle": {
+        "message": "Click to replace an emoji",
+        "description": "Instructions in the modal for customizing the preferred reactions."
+    },
+    "CustomizingPreferredReactions__had-save-error": {
+        "message": "There was an error when saving your settings. Please try again.",
+        "description": "Shown if there is an error when saving your preferred reaction settings. Should be very rare to see this message."
+    },
+    "WhatsNew__modal-title": {
+        "message": "What's New",
+        "description": "Title for the whats new modal"
+    },
+    "WhatsNew__v5.19--1": {
+        "message": "Take a breath and relax into the new animations for dialogs and popups. Ease in. Ease out. Ease in. Ease out.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--2": {
+        "message": "Switching keyboard layouts is always a bit tricky, but keyboard shortcuts now track right along with you, reaching beyond the specific letter pressed to honor your intent.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--3": {
+        "message": "When a group call starts, you now get a notification. You'll never be late again, unless you want to be.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--4": {
+        "message": "This feature goes out to everyone who reacts with 💅 more than 👍: you can now customize the emojis that appear by default when you want to react to a message.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.20": {
+        "message": "This version contains a number of small tweaks and bug fixes to keep Signal running smoothly.",
+        "description": "Release notes for v5.20"
+    },
+    "WhatsNew__v5.21--1": {
+        "message": "Get more information at a glance 👀. The left pane has got a fresh new look and style 😎.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__v5.21--2": {
+        "message": "Know the when to the what. The timestamp, if available, associated with delivered, read, sent, and other status messages are now displayed in the message's details screen.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__v5.21--3": {
+        "message": "Screen reader users should now find it easier to navigate through the conversation list on the left pane.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__bugfixes": {
+        "message": "This version contains a number of small tweaks and bug fixes to keep Signal running smoothly.",
+        "description": "Release notes for releases that only include bug fixes"
     }
 }

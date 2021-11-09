@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import Delta from 'quill-delta';
-import { RefObject } from 'react';
-import { MemberRepository } from '../memberRepository';
+import type { RefObject } from 'react';
+import type { MemberRepository } from '../memberRepository';
 
 export const matchMention = (
   memberRepositoryRef: RefObject<MemberRepository>
@@ -13,7 +13,7 @@ export const matchMention = (
   if (memberRepository) {
     const { title } = node.dataset;
 
-    if (node.classList.contains('module-message-body__at-mention')) {
+    if (node.classList.contains('MessageBody__at-mention')) {
       const { id } = node.dataset;
       const conversation = memberRepository.getMemberById(id);
 

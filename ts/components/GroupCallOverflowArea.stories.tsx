@@ -1,15 +1,15 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { memoize, times } from 'lodash';
-import { v4 as generateUuid } from 'uuid';
 import { storiesOf } from '@storybook/react';
 import { number } from '@storybook/addon-knobs';
 
 import { GroupCallOverflowArea } from './GroupCallOverflowArea';
-import { setup as setupI18n } from '../../js/modules/i18n';
-import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
+import { setupI18n } from '../util/setupI18n';
+import { getDefaultConversationWithUuid } from '../test-both/helpers/getDefaultConversation';
 import { fakeGetGroupCallVideoFrameSource } from '../test-both/helpers/fakeGetGroupCallVideoFrameSource';
 import { FRAME_BUFFER_SIZE } from '../calling/constants';
 import enMessages from '../../_locales/en/messages.json';
@@ -25,10 +25,9 @@ const allRemoteParticipants = times(MAX_PARTICIPANTS).map(index => ({
   presenting: false,
   sharingScreen: false,
   videoAspectRatio: 1.3,
-  ...getDefaultConversation({
+  ...getDefaultConversationWithUuid({
     isBlocked: index === 10 || index === MAX_PARTICIPANTS - 1,
     title: `Participant ${index + 1}`,
-    uuid: generateUuid(),
   }),
 }));
 

@@ -5,7 +5,7 @@ import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { setup as setupI18n } from '../../../../js/modules/i18n';
+import { setupI18n } from '../../../util/setupI18n';
 import enMessages from '../../../../_locales/en/messages.json';
 
 import {
@@ -15,7 +15,8 @@ import {
   days,
   now,
 } from './AttachmentSection.stories';
-import { MediaGallery, Props } from './MediaGallery';
+import type { Props } from './MediaGallery';
+import { MediaGallery } from './MediaGallery';
 
 const i18n = setupI18n('en', enMessages);
 

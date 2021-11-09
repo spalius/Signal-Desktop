@@ -4,7 +4,8 @@
 import { connect } from 'react-redux';
 import { mapDispatchToProps } from '../actions';
 import { TypingBubble } from '../../components/conversation/TypingBubble';
-import { StateType } from '../reducer';
+import { strictAssert } from '../../util/assert';
+import type { StateType } from '../reducer';
 
 import { getIntl } from '../selectors/user';
 import { getConversationSelector } from '../selectors/conversations';
@@ -20,6 +21,8 @@ const mapStateToProps = (state: StateType, props: ExternalProps) => {
   if (!conversation) {
     throw new Error(`Did not find conversation ${id} in state!`);
   }
+
+  strictAssert(conversation.typingContact, 'Missing typingContact');
 
   return {
     ...conversation.typingContact,

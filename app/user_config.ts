@@ -7,8 +7,10 @@ import { app } from 'electron';
 import { start } from './base_config';
 import config from './config';
 
-// Use separate data directory for development
-if (config.has('storageProfile')) {
+// Use separate data directory for benchmarks & development
+if (config.has('storagePath')) {
+  app.setPath('userData', String(config.get('storagePath')));
+} else if (config.has('storageProfile')) {
   const userData = join(
     app.getPath('appData'),
     `Signal-${config.get('storageProfile')}`
@@ -22,7 +24,7 @@ console.log(`userData: ${app.getPath('userData')}`);
 const userDataPath = app.getPath('userData');
 const targetPath = join(userDataPath, 'config.json');
 
-const userConfig = start('user', targetPath);
+export const userConfig = start('user', targetPath);
 
 export const get = userConfig.get.bind(userConfig);
 export const remove = userConfig.remove.bind(userConfig);

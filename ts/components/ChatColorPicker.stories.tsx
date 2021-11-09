@@ -8,9 +8,10 @@ import { action } from '@storybook/addon-actions';
 import { select } from '@storybook/addon-knobs';
 
 import enMessages from '../../_locales/en/messages.json';
-import { ChatColorPicker, PropsType } from './ChatColorPicker';
+import type { PropsType } from './ChatColorPicker';
+import { ChatColorPicker } from './ChatColorPicker';
 import { ConversationColors } from '../types/Colors';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { setupI18n } from '../util/setupI18n';
 
 const story = storiesOf('Components/ChatColorPicker', module);
 
@@ -26,7 +27,7 @@ const createProps = (): PropsType => ({
   addCustomColor: action('addCustomColor'),
   colorSelected: action('colorSelected'),
   editCustomColor: action('editCustomColor'),
-  getConversationsWithCustomColor: (_: string) => [],
+  getConversationsWithCustomColor: (_: string) => Promise.resolve([]),
   i18n,
   removeCustomColor: action('removeCustomColor'),
   removeCustomColorOnConversations: action('removeCustomColorOnConversations'),

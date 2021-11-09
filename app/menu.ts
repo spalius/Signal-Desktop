@@ -2,21 +2,22 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { isString } from 'lodash';
-import { MenuItemConstructorOptions } from 'electron';
+import type { MenuItemConstructorOptions } from 'electron';
 
-import { LocaleMessagesType } from '../ts/types/I18N';
+import type { LocaleMessagesType } from '../ts/types/I18N';
 
 export type MenuListType = Array<MenuItemConstructorOptions>;
 
-type OptionsType = {
+export type MenuOptionsType = {
   // options
   development: boolean;
   devTools: boolean;
   includeSetup: boolean;
-  isBeta: (version: string) => boolean;
+  isProduction: boolean;
   platform: string;
 
   // actions
+  forceUpdate: () => unknown;
   openContactUs: () => unknown;
   openForums: () => unknown;
   openJoinTheBeta: () => unknown;
@@ -24,7 +25,6 @@ type OptionsType = {
   openSupportPage: () => unknown;
   setupAsNewDevice: () => unknown;
   setupAsStandalone: () => unknown;
-  forceUpdate: () => unknown;
   showAbout: () => unknown;
   showDebugLog: () => unknown;
   showKeyboardShortcuts: () => unknown;
@@ -34,7 +34,7 @@ type OptionsType = {
 };
 
 export const createTemplate = (
-  options: OptionsType,
+  options: MenuOptionsType,
   messages: LocaleMessagesType
 ): MenuListType => {
   if (!isString(options.platform)) {
@@ -42,7 +42,7 @@ export const createTemplate = (
   }
 
   const {
-    isBeta,
+    isProduction,
     devTools,
     includeSetup,
     openContactUs,
@@ -212,7 +212,7 @@ export const createTemplate = (
           label: messages.goToSupportPage.message,
           click: openSupportPage,
         },
-        ...(!isBeta
+        ...(isProduction
           ? [
               {
                 label: messages.joinTheBeta.message,
@@ -265,7 +265,7 @@ export const createTemplate = (
 function updateForMac(
   template: MenuListType,
   messages: LocaleMessagesType,
-  options: OptionsType
+  options: MenuOptionsType
 ): MenuListType {
   const { showAbout, showSettings, showWindow } = options;
 

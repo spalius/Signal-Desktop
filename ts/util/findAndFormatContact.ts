@@ -1,14 +1,14 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ConversationType } from '../state/ducks/conversations';
+import type { ConversationType } from '../state/ducks/conversations';
 import { format, isValidNumber } from '../types/PhoneNumber';
-import { normalizeUuid } from './normalizeUuid';
 
 type FormattedContact = Partial<ConversationType> &
   Pick<
     ConversationType,
     | 'acceptedMessageRequest'
+    | 'badges'
     | 'id'
     | 'isMe'
     | 'sharedGroupNames'
@@ -19,6 +19,7 @@ type FormattedContact = Partial<ConversationType> &
 
 const PLACEHOLDER_CONTACT: FormattedContact = {
   acceptedMessageRequest: false,
+  badges: [],
   id: 'placeholder-contact',
   isMe: false,
   sharedGroupNames: [],
@@ -32,7 +33,7 @@ export function findAndFormatContact(identifier?: string): FormattedContact {
   }
 
   const contactModel = window.ConversationController.get(
-    normalizeUuid(identifier, 'findAndFormatContact')
+    identifier.toLowerCase()
   );
   if (contactModel) {
     return contactModel.format();
@@ -48,6 +49,7 @@ export function findAndFormatContact(identifier?: string): FormattedContact {
 
   return {
     acceptedMessageRequest: false,
+    badges: [],
     id: 'phone-only',
     isMe: false,
     phoneNumber,

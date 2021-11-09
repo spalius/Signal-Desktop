@@ -11,14 +11,7 @@ module.exports = {
 
   globals: {
     assert: true,
-    assertEqualArrayBuffers: true,
-    dcodeIO: true,
     getString: true,
-    hexToArrayBuffer: true,
-    MockServer: true,
-    MockSocket: true,
-    PROTO_ROOT: true,
-    stringToArrayBuffer: true,
   },
 
   parserOptions: {

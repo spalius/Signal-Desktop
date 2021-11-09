@@ -3,19 +3,23 @@
 
 import React from 'react';
 
-import { RenderEmojiPickerProps } from '../../components/conversation/ReactionPicker';
+import type { RenderEmojiPickerProps } from '../../components/conversation/ReactionPicker';
 import { SmartEmojiPicker } from './EmojiPicker';
 
 export function renderEmojiPicker({
   ref,
+  onClickSettings,
   onPickEmoji,
+  onSetSkinTone,
   onClose,
   style,
 }: RenderEmojiPickerProps): JSX.Element {
   return (
     <SmartEmojiPicker
       ref={ref}
+      onClickSettings={onClickSettings}
       onPickEmoji={onPickEmoji}
+      onSetSkinTone={onSetSkinTone}
       onClose={onClose}
       style={style}
     />

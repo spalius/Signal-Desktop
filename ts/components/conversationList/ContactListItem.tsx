@@ -1,11 +1,15 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { CSSProperties, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
-import { BaseConversationListItem } from './BaseConversationListItem';
-import { ConversationType } from '../../state/ducks/conversations';
-import { LocalizerType } from '../../types/Util';
+import {
+  BaseConversationListItem,
+  HEADER_CONTACT_NAME_CLASS_NAME,
+} from './BaseConversationListItem';
+import type { ConversationType } from '../../state/ducks/conversations';
+import type { LocalizerType } from '../../types/Util';
 import { ContactName } from '../conversation/ContactName';
 import { About } from '../conversation/About';
 
@@ -28,14 +32,13 @@ export type PropsDataType = Pick<
 
 type PropsHousekeepingType = {
   i18n: LocalizerType;
-  style: CSSProperties;
   onClick?: (id: string) => void;
 };
 
 type PropsType = PropsDataType & PropsHousekeepingType;
 
 export const ContactListItem: FunctionComponent<PropsType> = React.memo(
-  ({
+  function ContactListItem({
     about,
     acceptedMessageRequest,
     avatarPath,
@@ -48,21 +51,16 @@ export const ContactListItem: FunctionComponent<PropsType> = React.memo(
     phoneNumber,
     profileName,
     sharedGroupNames,
-    style,
     title,
     type,
     unblurredAvatarPath,
-  }) => {
+  }) {
     const headerName = isMe ? (
-      i18n('noteToSelf')
+      <span className={HEADER_CONTACT_NAME_CLASS_NAME}>
+        {i18n('noteToSelf')}
+      </span>
     ) : (
-      <ContactName
-        phoneNumber={phoneNumber}
-        name={name}
-        profileName={profileName}
-        title={title}
-        i18n={i18n}
-      />
+      <ContactName module={HEADER_CONTACT_NAME_CLASS_NAME} title={title} />
     );
 
     const messageText =
@@ -85,7 +83,6 @@ export const ContactListItem: FunctionComponent<PropsType> = React.memo(
         phoneNumber={phoneNumber}
         profileName={profileName}
         sharedGroupNames={sharedGroupNames}
-        style={style}
         title={title}
         unblurredAvatarPath={unblurredAvatarPath}
       />

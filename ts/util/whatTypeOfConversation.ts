@@ -1,8 +1,10 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ConversationAttributesType } from '../model-types.d';
-import { base64ToArrayBuffer, fromEncodedBinaryToArrayBuffer } from '../Crypto';
+import type { ConversationAttributesType } from '../model-types.d';
+import type { ConversationType } from '../state/ducks/conversations';
+import * as Bytes from '../Bytes';
+import * as log from '../logging/log';
 
 export enum ConversationTypes {
   Me = 'Me',
@@ -12,32 +14,39 @@ export enum ConversationTypes {
 }
 
 export function isDirectConversation(
-  conversationAttrs: ConversationAttributesType
+  conversationAttrs:
+    | Pick<ConversationAttributesType, 'type'>
+    | Pick<ConversationType, 'type'>
 ): boolean {
-  return conversationAttrs.type === 'private';
+  return (
+    conversationAttrs.type === 'private' || conversationAttrs.type === 'direct'
+  );
 }
 
 export function isMe(conversationAttrs: ConversationAttributesType): boolean {
   const { e164, uuid } = conversationAttrs;
   const ourNumber = window.textsecure.storage.user.getNumber();
-  const ourUuid = window.textsecure.storage.user.getUuid();
+  const ourUuid = window.textsecure.storage.user.getUuid()?.toString();
   return Boolean((e164 && e164 === ourNumber) || (uuid && uuid === ourUuid));
 }
 
 export function isGroupV1(
-  conversationAttrs: ConversationAttributesType
+  conversationAttrs: Pick<ConversationAttributesType, 'groupId'>
 ): boolean {
   const { groupId } = conversationAttrs;
   if (!groupId) {
     return false;
   }
 
-  const buffer = fromEncodedBinaryToArrayBuffer(groupId);
+  const buffer = Bytes.fromBinary(groupId);
   return buffer.byteLength === window.Signal.Groups.ID_V1_LENGTH;
 }
 
 export function isGroupV2(
-  conversationAttrs: ConversationAttributesType
+  conversationAttrs: Pick<
+    ConversationAttributesType,
+    'groupId' | 'groupVersion'
+  >
 ): boolean {
   const { groupId, groupVersion = 0 } = conversationAttrs;
   if (!groupId) {
@@ -47,10 +56,10 @@ export function isGroupV2(
   try {
     return (
       groupVersion === 2 &&
-      base64ToArrayBuffer(groupId).byteLength === window.Signal.Groups.ID_LENGTH
+      Bytes.fromBase64(groupId).byteLength === window.Signal.Groups.ID_LENGTH
     );
   } catch (error) {
-    window.log.error('isGroupV2: Failed to process groupId in base64!');
+    log.error('isGroupV2: Failed to process groupId in base64!');
     return false;
   }
 }

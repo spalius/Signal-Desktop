@@ -1,12 +1,13 @@
-// Copyright 2019-2020 Signal Messenger, LLC
+// Copyright 2019-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import * as React from 'react';
-import { PopperArrowProps } from 'react-popper';
-import { Placement } from 'popper.js';
+import type { PopperArrowProps } from 'react-popper';
+import type { Placement } from '@popperjs/core';
 import * as styles from './StickerPreview.scss';
 import { MessageBubble } from './MessageBubble';
-import { MessageSticker, Props as MessageStickerProps } from './MessageSticker';
+import type { Props as MessageStickerProps } from './MessageSticker';
+import { MessageSticker } from './MessageSticker';
 import { useI18n } from '../util/i18n';
 
 export type Props = Pick<React.HTMLProps<HTMLDivElement>, 'style'> & {
@@ -25,22 +26,6 @@ const renderMessages = (
     <MessageSticker image={image} kind={kind} minutesAgo={2} />
   </>
 );
-
-const getBaseClass = (placement?: Placement) => {
-  if (placement === 'top') {
-    return styles.top;
-  }
-
-  if (placement === 'right') {
-    return styles.right;
-  }
-
-  if (placement === 'left') {
-    return styles.left;
-  }
-
-  return styles.bottom;
-};
 
 const getArrowClass = (placement?: Placement) => {
   if (placement === 'top') {
@@ -64,7 +49,7 @@ export const StickerPreview = React.memo(
       const i18n = useI18n();
 
       return (
-        <div className={getBaseClass(placement)} ref={ref} style={style}>
+        <div className={styles.base} ref={ref} style={style}>
           {arrowProps ? (
             <div
               ref={arrowProps.ref}

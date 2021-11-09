@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /* eslint-disable max-classes-per-file */
-/* eslint-disable no-restricted-syntax */
 
 import { getOwn } from './getOwn';
 
@@ -119,6 +118,9 @@ export function groupBy<T>(
   return result;
 }
 
+export const isEmpty = (iterable: Iterable<unknown>): boolean =>
+  Boolean(iterable[Symbol.iterator]().next().done);
+
 export function map<T, ResultT>(
   iterable: Iterable<T>,
   fn: (value: T) => ResultT
@@ -167,6 +169,33 @@ export function reduce<T, TResult>(
   return result;
 }
 
+export function repeat<T>(value: T): Iterable<T> {
+  return new RepeatIterable(value);
+}
+
+class RepeatIterable<T> implements Iterable<T> {
+  constructor(private readonly value: T) {}
+
+  [Symbol.iterator](): Iterator<T> {
+    return new RepeatIterator(this.value);
+  }
+}
+
+class RepeatIterator<T> implements Iterator<T> {
+  private readonly iteratorResult: IteratorResult<T>;
+
+  constructor(value: Readonly<T>) {
+    this.iteratorResult = {
+      done: false,
+      value,
+    };
+  }
+
+  next(): IteratorResult<T> {
+    return this.iteratorResult;
+  }
+}
+
 export function take<T>(iterable: Iterable<T>, amount: number): Iterable<T> {
   return new TakeIterable(iterable, amount);
 }
@@ -193,4 +222,30 @@ class TakeIterator<T> implements Iterator<T> {
     this.amount -= 1;
     return nextIteration;
   }
+}
+
+// In the future, this could support number and symbol property names.
+export function zipObject<ValueT>(
+  props: Iterable<string>,
+  values: Iterable<ValueT>
+): Record<string, ValueT> {
+  const result: Record<string, ValueT> = {};
+
+  const propsIterator = props[Symbol.iterator]();
+  const valuesIterator = values[Symbol.iterator]();
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const propIteration = propsIterator.next();
+    if (propIteration.done) {
+      break;
+    }
+    const valueIteration = valuesIterator.next();
+    if (valueIteration.done) {
+      break;
+    }
+
+    result[propIteration.value] = valueIteration.value;
+  }
+
+  return result;
 }

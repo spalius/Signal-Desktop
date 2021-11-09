@@ -1,7 +1,7 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { AttachmentType } from '../Attachment';
+import type { AttachmentType } from '../Attachment';
 
 export type LinkPreviewType = {
   title: string;
@@ -9,6 +9,6 @@ export type LinkPreviewType = {
   domain: string;
   url: string;
   isStickerPack: boolean;
-  image?: AttachmentType;
+  image?: Readonly<AttachmentType>;
   date?: number;
 };

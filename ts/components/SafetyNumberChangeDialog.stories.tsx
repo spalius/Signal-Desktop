@@ -7,7 +7,7 @@ import { storiesOf } from '@storybook/react';
 
 import { SafetyNumberChangeDialog } from './SafetyNumberChangeDialog';
 import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 
 const i18n = setupI18n('en', enMessages);
@@ -15,7 +15,6 @@ const i18n = setupI18n('en', enMessages);
 const contactWithAllData = getDefaultConversation({
   id: 'abc',
   avatarPath: undefined,
-  color: 'ultramarine',
   profileName: '-*Smartest Dude*-',
   title: 'Rick Sanchez',
   name: 'Rick Sanchez',
@@ -25,7 +24,6 @@ const contactWithAllData = getDefaultConversation({
 const contactWithJustProfile = getDefaultConversation({
   id: 'def',
   avatarPath: undefined,
-  color: 'ultramarine',
   title: '-*Smartest Dude*-',
   profileName: '-*Smartest Dude*-',
   name: undefined,
@@ -35,7 +33,6 @@ const contactWithJustProfile = getDefaultConversation({
 const contactWithJustNumber = getDefaultConversation({
   id: 'xyz',
   avatarPath: undefined,
-  color: 'ultramarine',
   profileName: undefined,
   name: undefined,
   title: '(305) 123-4567',
@@ -45,7 +42,6 @@ const contactWithJustNumber = getDefaultConversation({
 const contactWithNothing = getDefaultConversation({
   id: 'some-guid',
   avatarPath: undefined,
-  color: 'ultramarine',
   profileName: undefined,
   name: undefined,
   phoneNumber: undefined,

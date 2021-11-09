@@ -1,15 +1,16 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { FunctionComponent, useMemo, useReducer } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useMemo, useReducer } from 'react';
 import { without } from 'lodash';
 
-import { LocalizerType } from '../../../types/Util';
+import type { LocalizerType, ThemeType } from '../../../types/Util';
 import {
   AddGroupMemberErrorDialog,
   AddGroupMemberErrorDialogMode,
 } from '../../AddGroupMemberErrorDialog';
-import { ConversationType } from '../../../state/ducks/conversations';
+import type { ConversationType } from '../../../state/ducks/conversations';
 import {
   getGroupSizeRecommendedLimit,
   getGroupSizeHardLimit,
@@ -21,7 +22,7 @@ import {
 import { makeLookup } from '../../../util/makeLookup';
 import { deconstructLookup } from '../../../util/deconstructLookup';
 import { missingCaseError } from '../../../util/missingCaseError';
-import { RequestState } from './util';
+import type { RequestState } from './util';
 import { ChooseGroupMembersModal } from './AddGroupMembersModal/ChooseGroupMembersModal';
 import { ConfirmAdditionsModal } from './AddGroupMembersModal/ConfirmAdditionsModal';
 
@@ -34,6 +35,7 @@ type PropsType = {
   makeRequest: (conversationIds: ReadonlyArray<string>) => Promise<void>;
   onClose: () => void;
   requestState: RequestState;
+  theme: ThemeType;
 };
 
 enum Stage {
@@ -150,6 +152,7 @@ export const AddGroupMembersModal: FunctionComponent<PropsType> = ({
   onClose,
   makeRequest,
   requestState,
+  theme,
 }) => {
   const maxGroupSize = getMaximumNumberOfContacts();
   const maxRecommendedGroupSize = getRecommendedMaximumNumberOfContacts();
@@ -283,6 +286,7 @@ export const AddGroupMembersModal: FunctionComponent<PropsType> = ({
           selectedContacts={selectedContacts}
           setCantAddContactForModal={setCantAddContactForModal}
           setSearchTerm={setSearchTerm}
+          theme={theme}
           toggleSelectedContact={toggleSelectedContact}
         />
       );

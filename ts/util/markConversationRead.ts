@@ -1,10 +1,12 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ConversationAttributesType } from '../model-types.d';
-import { handleMessageSend } from './handleMessageSend';
+import type { ConversationAttributesType } from '../model-types.d';
 import { sendReadReceiptsFor } from './sendReadReceiptsFor';
 import { hasErrors } from '../state/selectors/message';
+import { readSyncJobQueue } from '../jobs/readSyncJobQueue';
+import { notificationService } from '../services/notifications';
+import * as log from '../logging/log';
 
 export async function markConversationRead(
   conversationAttrs: ConversationAttributesType,
@@ -27,7 +29,7 @@ export async function markConversationRead(
     ),
   ]);
 
-  window.log.info('markConversationRead', {
+  log.info('markConversationRead', {
     conversationId,
     newestUnreadId,
     unreadMessages: unreadMessages.length,
@@ -38,11 +40,12 @@ export async function markConversationRead(
     return false;
   }
 
-  window.Whisper.Notifications.removeBy({ conversationId });
+  notificationService.removeBy({ conversationId });
 
   const unreadReactionSyncData = new Map<
     string,
     {
+      messageId?: string;
       senderUuid?: string;
       senderE164?: string;
       timestamp: number;
@@ -54,6 +57,7 @@ export async function markConversationRead(
       return;
     }
     unreadReactionSyncData.set(targetKey, {
+      messageId: reaction.messageId,
       senderE164: undefined,
       senderUuid: reaction.targetAuthorUuid,
       timestamp: reaction.targetTimestamp,
@@ -68,6 +72,7 @@ export async function markConversationRead(
     }
 
     return {
+      messageId: messageSyncData.id,
       senderE164: messageSyncData.source,
       senderUuid: messageSyncData.sourceUuid,
       senderId: window.ConversationController.ensureContactIds({
@@ -89,27 +94,32 @@ export async function markConversationRead(
     item => Boolean(item.senderId) && !item.hasErrors
   );
 
-  const readSyncs = [
-    ...unreadMessagesSyncData,
-    ...Array.from(unreadReactionSyncData.values()),
-  ];
+  const readSyncs: Array<{
+    messageId?: string;
+    senderE164?: string;
+    senderUuid?: string;
+    senderId?: string;
+    timestamp: number;
+    hasErrors?: string;
+  }> = [...unreadMessagesSyncData, ...unreadReactionSyncData.values()];
 
   if (readSyncs.length && options.sendReadReceipts) {
-    window.log.info(`Sending ${readSyncs.length} read syncs`);
+    log.info(`Sending ${readSyncs.length} read syncs`);
     // Because syncReadMessages sends to our other devices, and sendReadReceipts goes
     //   to a contact, we need accessKeys for both.
-    const {
-      sendOptions,
-    } = await window.ConversationController.prepareForSend(
-      window.ConversationController.getOurConversationId(),
-      { syncMessage: true }
-    );
+    if (window.ConversationController.areWePrimaryDevice()) {
+      log.warn(
+        'markConversationRead: We are primary device; not sending read syncs'
+      );
+    } else {
+      readSyncJobQueue.add({ readSyncs });
+    }
 
-    await handleMessageSend(
-      window.textsecure.messaging.syncReadMessages(readSyncs, sendOptions)
-    );
     await sendReadReceiptsFor(conversationAttrs, unreadMessagesSyncData);
   }
+
+  window.Whisper.ExpiringMessagesListener.update();
+  window.Whisper.TapToViewMessagesListener.update();
 
   return true;
 }

@@ -2,15 +2,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 
 import { assert } from 'chai';
 
-import {
-  MaybeAsyncIterable,
-  concat,
-  wrapPromise,
-} from '../../util/asyncIterables';
+import type { MaybeAsyncIterable } from '../../util/asyncIterables';
+import { concat, wrapPromise } from '../../util/asyncIterables';
 
 describe('async iterable utilities', () => {
   describe('concat', () => {

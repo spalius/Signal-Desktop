@@ -6,8 +6,9 @@ import * as React from 'react';
 import { text } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 
-import { Intl, Props } from './Intl';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import type { Props } from './Intl';
+import { Intl } from './Intl';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 
 const i18n = setupI18n('en', enMessages);

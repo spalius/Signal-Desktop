@@ -4,8 +4,8 @@
 export type BodyRangeType = {
   start: number;
   length: number;
-  mentionUuid: string;
-  replacementText: string;
+  mentionUuid?: string;
+  replacementText?: string;
   conversationID?: string;
 };
 
@@ -17,11 +17,11 @@ export type RenderTextCallbackType = (options: {
 }) => JSX.Element | string;
 
 export type ReplacementValuesType = {
-  [key: string]: string | undefined;
+  [key: string]: string | number | undefined;
 };
 
 export type LocalizerType = {
-  (key: string, values?: Array<string | null> | ReplacementValuesType): string;
+  (key: string, values?: Array<string> | ReplacementValuesType): string;
   getLocale(): string;
 };
 
@@ -35,3 +35,21 @@ export enum ScrollBehavior {
   Default = 'default',
   Hard = 'hard',
 }
+
+type InternalAssertProps<
+  Result,
+  Value,
+  Missing = Omit<Result, keyof Value>
+> = keyof Missing extends never
+  ? Result
+  : Result &
+      {
+        [key in keyof Required<Missing>]: [
+          never,
+          'AssertProps: missing property'
+        ];
+      };
+
+export type AssertProps<Result, Value> = InternalAssertProps<Result, Value>;
+
+export type UnwrapPromise<Value> = Value extends Promise<infer T> ? T : Value;

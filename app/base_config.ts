@@ -7,22 +7,28 @@ import { get, set } from 'lodash';
 
 const ENCODING = 'utf8';
 
-type ConfigType = Record<string, unknown>;
+type InternalConfigType = Record<string, unknown>;
+
+export type ConfigType = {
+  set: (keyPath: string, value: unknown) => void;
+  get: (keyPath: string) => unknown;
+  remove: () => void;
+
+  // Test-only
+  _getCachedValue: () => InternalConfigType | undefined;
+};
 
 export function start(
   name: string,
   targetPath: string,
   options?: { allowMalformedOnStartup?: boolean }
-): {
-  set: (keyPath: string, value: unknown) => void;
-  get: (keyPath: string) => unknown;
-  remove: () => void;
-} {
-  let cachedValue: ConfigType | undefined;
+): ConfigType {
+  let cachedValue: InternalConfigType | undefined;
+  let incomingJson: string | undefined;
 
   try {
-    const text = readFileSync(targetPath, ENCODING);
-    cachedValue = JSON.parse(text);
+    incomingJson = readFileSync(targetPath, ENCODING);
+    cachedValue = incomingJson ? JSON.parse(incomingJson) : undefined;
     console.log(`config/get: Successfully read ${name} config file`);
 
     if (!cachedValue) {
@@ -36,9 +42,15 @@ export function start(
       throw error;
     }
 
-    console.log(
-      `config/get: Did not find ${name} config file, cache is now empty object`
-    );
+    if (incomingJson) {
+      console.log(
+        `config/get: ${name} config file was malformed, starting afresh`
+      );
+    } else {
+      console.log(
+        `config/get: Did not find ${name} config file (or it was empty), cache is now empty object`
+      );
+    }
     cachedValue = Object.create(null);
   }
 
@@ -53,8 +65,8 @@ export function start(
 
     set(cachedValue, keyPath, value);
     console.log(`config/set: Saving ${name} config to disk`);
-    const text = JSON.stringify(cachedValue, null, '  ');
-    writeFileSync(targetPath, text, ENCODING);
+    const outgoingJson = JSON.stringify(cachedValue, null, '  ');
+    writeFileSync(targetPath, outgoingJson, ENCODING);
   }
 
   function remove(): void {
@@ -67,5 +79,6 @@ export function start(
     set: ourSet,
     get: ourGet,
     remove,
+    _getCachedValue: () => cachedValue,
   };
 }

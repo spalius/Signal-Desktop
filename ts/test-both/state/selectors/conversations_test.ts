@@ -6,10 +6,12 @@ import { assert } from 'chai';
 import {
   OneTimeModalState,
   ComposerStep,
+} from '../../../state/ducks/conversationsEnums';
+import type {
   ConversationLookupType,
   ConversationType,
-  getEmptyState,
 } from '../../../state/ducks/conversations';
+import { getEmptyState } from '../../../state/ducks/conversations';
 import {
   _getConversationComparator,
   _getLeftPaneLists,
@@ -27,11 +29,14 @@ import {
   getConversationByIdSelector,
   getConversationsByTitleSelector,
   getConversationSelector,
+  getConversationsStoppingMessageSendBecauseOfVerification,
   getFilteredCandidateContactsForNewGroup,
   getFilteredComposeContacts,
   getFilteredComposeGroups,
   getInvitedContactsForNewlyCreatedGroup,
   getMaximumGroupSizeModalState,
+  getMessageIdsPendingBecauseOfVerification,
+  getNumberOfMessagesPendingBecauseOfVerification,
   getPlaceholderContact,
   getRecommendedGroupSizeModalState,
   getSelectedConversation,
@@ -40,10 +45,21 @@ import {
   isCreatingGroup,
 } from '../../../state/selectors/conversations';
 import { noopAction } from '../../../state/ducks/noop';
-import { StateType, reducer as rootReducer } from '../../../state/reducer';
-import { setup as setupI18n } from '../../../../js/modules/i18n';
+import type { StateType } from '../../../state/reducer';
+import { reducer as rootReducer } from '../../../state/reducer';
+import { setupI18n } from '../../../util/setupI18n';
+import { UUID } from '../../../types/UUID';
+import type { UUIDStringType } from '../../../types/UUID';
 import enMessages from '../../../../_locales/en/messages.json';
-import { getDefaultConversation } from '../../helpers/getDefaultConversation';
+import {
+  getDefaultConversation,
+  getDefaultConversationWithUuid,
+} from '../../helpers/getDefaultConversation';
+import {
+  defaultStartDirectConversationComposerState,
+  defaultChooseGroupMembersComposerState,
+  defaultSetGroupMetadataComposerState,
+} from '../../helpers/defaultComposerStates';
 
 describe('both/state/selectors/conversations', () => {
   const getEmptyRootState = (): StateType => {
@@ -56,6 +72,19 @@ describe('both/state/selectors/conversations', () => {
       searchableTitle: `${id} title`,
       title: `${id} title`,
     });
+  }
+
+  function makeConversationWithUuid(
+    id: string
+  ): ConversationType & { uuid: UUIDStringType } {
+    return getDefaultConversationWithUuid(
+      {
+        id,
+        searchableTitle: `${id} title`,
+        title: `${id} title`,
+      },
+      UUID.fromPrefix(id).toString()
+    );
   }
 
   const i18n = setupI18n('en', enMessages);
@@ -102,7 +131,7 @@ describe('both/state/selectors/conversations', () => {
       assert.deepEqual(actual, getPlaceholderContact());
     });
 
-    it('returns conversation by e164 first', () => {
+    it('returns conversation by uuid first', () => {
       const id = 'id';
 
       const conversation = makeConversation(id);
@@ -116,10 +145,10 @@ describe('both/state/selectors/conversations', () => {
             [id]: wrongConversation,
           },
           conversationsByE164: {
-            [id]: conversation,
+            [id]: wrongConversation,
           },
           conversationsByUuid: {
-            [id]: wrongConversation,
+            [id]: conversation,
           },
           conversationsByGroupId: {
             [id]: wrongConversation,
@@ -133,7 +162,7 @@ describe('both/state/selectors/conversations', () => {
 
       assert.strictEqual(actual, conversation);
     });
-    it('returns conversation by uuid', () => {
+    it('returns conversation by e164', () => {
       const id = 'id';
 
       const conversation = makeConversation(id);
@@ -146,7 +175,7 @@ describe('both/state/selectors/conversations', () => {
           conversationLookup: {
             [id]: wrongConversation,
           },
-          conversationsByUuid: {
+          conversationsByE164: {
             [id]: conversation,
           },
           conversationsByGroupId: {
@@ -261,6 +290,100 @@ describe('both/state/selectors/conversations', () => {
     });
   });
 
+  describe('#getConversationsStoppingMessageSendBecauseOfVerification', () => {
+    it('returns an empty array if there are no conversations stopping send', () => {
+      const state = getEmptyRootState();
+
+      assert.isEmpty(
+        getConversationsStoppingMessageSendBecauseOfVerification(state)
+      );
+    });
+
+    it('returns all conversations stopping message send', () => {
+      const convo1 = makeConversation('abc');
+      const convo2 = makeConversation('def');
+      const state = {
+        ...getEmptyRootState(),
+        conversations: {
+          ...getEmptyState(),
+          conversationLookup: {
+            def: convo2,
+            abc: convo1,
+          },
+          outboundMessagesPendingConversationVerification: {
+            def: ['message 2', 'message 3'],
+            abc: ['message 1', 'message 2'],
+          },
+        },
+      };
+
+      assert.deepEqual(
+        getConversationsStoppingMessageSendBecauseOfVerification(state),
+        [convo1, convo2]
+      );
+    });
+  });
+
+  describe('#getMessageIdsPendingBecauseOfVerification', () => {
+    it('returns an empty set if there are no conversations stopping send', () => {
+      const state = getEmptyRootState();
+
+      assert.deepEqual(
+        getMessageIdsPendingBecauseOfVerification(state),
+        new Set()
+      );
+    });
+
+    it('returns a set of unique pending messages', () => {
+      const state = {
+        ...getEmptyRootState(),
+        conversations: {
+          ...getEmptyState(),
+          outboundMessagesPendingConversationVerification: {
+            abc: ['message 2', 'message 3'],
+            def: ['message 1', 'message 2'],
+            ghi: ['message 4'],
+          },
+        },
+      };
+
+      assert.deepEqual(
+        getMessageIdsPendingBecauseOfVerification(state),
+        new Set(['message 1', 'message 2', 'message 3', 'message 4'])
+      );
+    });
+  });
+
+  describe('#getNumberOfMessagesPendingBecauseOfVerification', () => {
+    it('returns 0 if there are no conversations stopping send', () => {
+      const state = getEmptyRootState();
+
+      assert.strictEqual(
+        getNumberOfMessagesPendingBecauseOfVerification(state),
+        0
+      );
+    });
+
+    it('returns a count of unique pending messages', () => {
+      const state = {
+        ...getEmptyRootState(),
+        conversations: {
+          ...getEmptyState(),
+          outboundMessagesPendingConversationVerification: {
+            abc: ['message 2', 'message 3'],
+            def: ['message 1', 'message 2'],
+            ghi: ['message 4'],
+          },
+        },
+      };
+
+      assert.strictEqual(
+        getNumberOfMessagesPendingBecauseOfVerification(state),
+        4
+      );
+    });
+  });
+
   describe('#getInvitedContactsForNewlyCreatedGroup', () => {
     it('returns an empty array if there are no invited contacts', () => {
       const state = getEmptyRootState();
@@ -269,15 +392,17 @@ describe('both/state/selectors/conversations', () => {
     });
 
     it('returns "hydrated" invited contacts', () => {
+      const abc = makeConversationWithUuid('abc');
+      const def = makeConversationWithUuid('def');
       const state = {
         ...getEmptyRootState(),
         conversations: {
           ...getEmptyState(),
-          conversationLookup: {
-            abc: makeConversation('abc'),
-            def: makeConversation('def'),
+          conversationsByUuid: {
+            [abc.uuid]: abc,
+            [def.uuid]: def,
           },
-          invitedConversationIdsForNewlyCreatedGroup: ['def', 'abc'],
+          invitedUuidsForNewlyCreatedGroup: [def.uuid, abc.uuid],
         },
       };
       const result = getInvitedContactsForNewlyCreatedGroup(state);
@@ -300,10 +425,7 @@ describe('both/state/selectors/conversations', () => {
         ...getEmptyRootState(),
         conversations: {
           ...getEmptyState(),
-          composer: {
-            step: ComposerStep.StartDirectConversation as const,
-            searchTerm: 'foo',
-          },
+          composer: defaultStartDirectConversationComposerState,
         },
       };
       const result = getComposerStep(state);
@@ -316,17 +438,7 @@ describe('both/state/selectors/conversations', () => {
         ...getEmptyRootState(),
         conversations: {
           ...getEmptyState(),
-          composer: {
-            step: ComposerStep.ChooseGroupMembers as const,
-            searchTerm: 'foo',
-            selectedConversationIds: ['abc'],
-            cantAddContactIdForModal: undefined,
-            recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-            maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-            groupName: '',
-            groupAvatar: undefined,
-            groupExpireTimer: 0,
-          },
+          composer: defaultChooseGroupMembersComposerState,
         },
       };
       const result = getComposerStep(state);
@@ -339,18 +451,7 @@ describe('both/state/selectors/conversations', () => {
         ...getEmptyRootState(),
         conversations: {
           ...getEmptyState(),
-          composer: {
-            step: ComposerStep.SetGroupMetadata as const,
-            selectedConversationIds: ['abc'],
-            cantAddContactIdForModal: undefined,
-            recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-            maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-            groupName: '',
-            groupAvatar: undefined,
-            groupExpireTimer: 0,
-            isCreating: false,
-            hasError: false as const,
-          },
+          composer: defaultSetGroupMetadataComposerState,
         },
       };
       const result = getComposerStep(state);
@@ -368,10 +469,7 @@ describe('both/state/selectors/conversations', () => {
           ...getEmptyRootState(),
           conversations: {
             ...getEmptyState(),
-            composer: {
-              step: ComposerStep.StartDirectConversation,
-              searchTerm: '',
-            },
+            composer: defaultStartDirectConversationComposerState,
           },
         })
       );
@@ -383,17 +481,7 @@ describe('both/state/selectors/conversations', () => {
           ...getEmptyRootState(),
           conversations: {
             ...getEmptyState(),
-            composer: {
-              step: ComposerStep.SetGroupMetadata as const,
-              selectedConversationIds: [],
-              recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-              maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-              groupName: '',
-              groupAvatar: undefined,
-              groupExpireTimer: 0,
-              isCreating: false as const,
-              hasError: false as const,
-            },
+            composer: defaultSetGroupMetadataComposerState,
           },
         })
       );
@@ -406,15 +494,8 @@ describe('both/state/selectors/conversations', () => {
           conversations: {
             ...getEmptyState(),
             composer: {
-              step: ComposerStep.SetGroupMetadata as const,
-              selectedConversationIds: [],
-              recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-              maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-              groupName: '',
-              groupAvatar: undefined,
-              groupExpireTimer: 0,
-              isCreating: false as const,
-              hasError: true as const,
+              ...defaultSetGroupMetadataComposerState,
+              hasError: true,
             },
           },
         })
@@ -431,10 +512,7 @@ describe('both/state/selectors/conversations', () => {
           ...getEmptyRootState(),
           conversations: {
             ...getEmptyState(),
-            composer: {
-              step: ComposerStep.StartDirectConversation,
-              searchTerm: '',
-            },
+            composer: defaultStartDirectConversationComposerState,
           },
         })
       );
@@ -446,17 +524,7 @@ describe('both/state/selectors/conversations', () => {
           ...getEmptyRootState(),
           conversations: {
             ...getEmptyState(),
-            composer: {
-              step: ComposerStep.SetGroupMetadata as const,
-              selectedConversationIds: [],
-              recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-              maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-              groupName: '',
-              groupAvatar: undefined,
-              groupExpireTimer: 0,
-              isCreating: false as const,
-              hasError: true as const,
-            },
+            composer: defaultSetGroupMetadataComposerState,
           },
         })
       );
@@ -469,15 +537,9 @@ describe('both/state/selectors/conversations', () => {
           conversations: {
             ...getEmptyState(),
             composer: {
-              step: ComposerStep.SetGroupMetadata as const,
-              selectedConversationIds: [],
-              recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-              maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-              groupName: '',
-              groupAvatar: undefined,
-              groupExpireTimer: 0,
-              isCreating: true as const,
-              hasError: false as const,
+              ...defaultSetGroupMetadataComposerState,
+              isCreating: true,
+              hasError: false,
             },
           },
         })
@@ -843,7 +905,7 @@ describe('both/state/selectors/conversations', () => {
             },
           },
           composer: {
-            step: ComposerStep.StartDirectConversation,
+            ...defaultStartDirectConversationComposerState,
             searchTerm,
           },
         },
@@ -1002,7 +1064,7 @@ describe('both/state/selectors/conversations', () => {
             },
           },
           composer: {
-            step: ComposerStep.StartDirectConversation,
+            ...defaultStartDirectConversationComposerState,
             searchTerm,
           },
         },
@@ -1078,15 +1140,8 @@ describe('both/state/selectors/conversations', () => {
             },
           },
           composer: {
-            step: ComposerStep.ChooseGroupMembers,
+            ...defaultChooseGroupMembersComposerState,
             searchTerm,
-            selectedConversationIds: ['abc'],
-            cantAddContactIdForModal: undefined,
-            recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-            maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-            groupName: '',
-            groupAvatar: undefined,
-            groupExpireTimer: 0,
           },
         },
         user: {
@@ -1123,10 +1178,7 @@ describe('both/state/selectors/conversations', () => {
           ...getEmptyRootState(),
           conversations: {
             ...getEmptyState(),
-            composer: {
-              step: ComposerStep.StartDirectConversation,
-              searchTerm: '',
-            },
+            composer: defaultStartDirectConversationComposerState,
           },
         })
       );
@@ -1138,17 +1190,7 @@ describe('both/state/selectors/conversations', () => {
           ...getEmptyRootState(),
           conversations: {
             ...getEmptyState(),
-            composer: {
-              cantAddContactIdForModal: undefined,
-              searchTerm: '',
-              groupAvatar: undefined,
-              groupExpireTimer: 0,
-              groupName: '',
-              maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-              recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-              selectedConversationIds: [],
-              step: ComposerStep.ChooseGroupMembers as const,
-            },
+            composer: defaultChooseGroupMembersComposerState,
           },
         })
       );
@@ -1164,15 +1206,8 @@ describe('both/state/selectors/conversations', () => {
             ...getEmptyState(),
             conversationLookup: { abc123: conversation },
             composer: {
+              ...defaultChooseGroupMembersComposerState,
               cantAddContactIdForModal: 'abc123',
-              searchTerm: '',
-              groupAvatar: undefined,
-              groupExpireTimer: 0,
-              groupName: '',
-              maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-              recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-              selectedConversationIds: [],
-              step: ComposerStep.ChooseGroupMembers as const,
             },
           },
         }),
@@ -1189,7 +1224,7 @@ describe('both/state/selectors/conversations', () => {
           conversations: {
             ...getEmptyState(),
             composer: {
-              step: ComposerStep.StartDirectConversation,
+              ...defaultStartDirectConversationComposerState,
               searchTerm: 'foo bar',
             },
           },
@@ -1220,6 +1255,7 @@ describe('both/state/selectors/conversations', () => {
           unreadCount: 1,
           isSelected: false,
           typingContact: {
+            ...getDefaultConversation(),
             name: 'Someone There',
             phoneNumber: '+18005551111',
           },
@@ -1244,6 +1280,7 @@ describe('both/state/selectors/conversations', () => {
           unreadCount: 1,
           isSelected: false,
           typingContact: {
+            ...getDefaultConversation(),
             name: 'Someone There',
             phoneNumber: '+18005551111',
           },
@@ -1268,6 +1305,7 @@ describe('both/state/selectors/conversations', () => {
           unreadCount: 1,
           isSelected: false,
           typingContact: {
+            ...getDefaultConversation(),
             name: 'Someone There',
             phoneNumber: '+18005551111',
           },
@@ -1292,6 +1330,7 @@ describe('both/state/selectors/conversations', () => {
           unreadCount: 1,
           isSelected: false,
           typingContact: {
+            ...getDefaultConversation(),
             name: 'Someone There',
             phoneNumber: '+18005551111',
           },
@@ -1316,6 +1355,7 @@ describe('both/state/selectors/conversations', () => {
           unreadCount: 1,
           isSelected: false,
           typingContact: {
+            ...getDefaultConversation(),
             name: 'Someone There',
             phoneNumber: '+18005551111',
           },
@@ -1364,6 +1404,7 @@ describe('both/state/selectors/conversations', () => {
             unreadCount: 1,
             isSelected: false,
             typingContact: {
+              ...getDefaultConversation(),
               name: 'Someone There',
               phoneNumber: '+18005551111',
             },
@@ -1389,6 +1430,7 @@ describe('both/state/selectors/conversations', () => {
             unreadCount: 1,
             isSelected: false,
             typingContact: {
+              ...getDefaultConversation(),
               name: 'Someone There',
               phoneNumber: '+18005551111',
             },
@@ -1414,6 +1456,7 @@ describe('both/state/selectors/conversations', () => {
             unreadCount: 1,
             isSelected: false,
             typingContact: {
+              ...getDefaultConversation(),
               name: 'Someone There',
               phoneNumber: '+18005551111',
             },
@@ -1464,6 +1507,7 @@ describe('both/state/selectors/conversations', () => {
             unreadCount: 1,
             isSelected: false,
             typingContact: {
+              ...getDefaultConversation(),
               name: 'Someone There',
               phoneNumber: '+18005551111',
             },
@@ -1488,6 +1532,7 @@ describe('both/state/selectors/conversations', () => {
             unreadCount: 1,
             isSelected: false,
             typingContact: {
+              ...getDefaultConversation(),
               name: 'Someone There',
               phoneNumber: '+18005551111',
             },
@@ -1512,6 +1557,7 @@ describe('both/state/selectors/conversations', () => {
             unreadCount: 1,
             isSelected: false,
             typingContact: {
+              ...getDefaultConversation(),
               name: 'Someone There',
               phoneNumber: '+18005551111',
             },
@@ -1537,6 +1583,7 @@ describe('both/state/selectors/conversations', () => {
             unreadCount: 1,
             isSelected: false,
             typingContact: {
+              ...getDefaultConversation(),
               name: 'Someone There',
               phoneNumber: '+18005551111',
             },
@@ -1561,6 +1608,7 @@ describe('both/state/selectors/conversations', () => {
             unreadCount: 1,
             isSelected: false,
             typingContact: {
+              ...getDefaultConversation(),
               name: 'Someone There',
               phoneNumber: '+18005551111',
             },
@@ -1602,15 +1650,8 @@ describe('both/state/selectors/conversations', () => {
         conversations: {
           ...getEmptyState(),
           composer: {
-            cantAddContactIdForModal: undefined,
-            searchTerm: 'to be cleared',
-            groupAvatar: undefined,
-            groupExpireTimer: 0,
-            groupName: '',
+            ...defaultChooseGroupMembersComposerState,
             maximumGroupSizeModalState: OneTimeModalState.Showing,
-            recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-            selectedConversationIds: [],
-            step: ComposerStep.ChooseGroupMembers as const,
           },
         },
       };
@@ -1628,15 +1669,8 @@ describe('both/state/selectors/conversations', () => {
         conversations: {
           ...getEmptyState(),
           composer: {
-            cantAddContactIdForModal: undefined,
-            searchTerm: 'to be cleared',
-            groupAvatar: undefined,
-            groupExpireTimer: 0,
-            groupName: '',
-            maximumGroupSizeModalState: OneTimeModalState.NeverShown,
+            ...defaultChooseGroupMembersComposerState,
             recommendedGroupSizeModalState: OneTimeModalState.Showing,
-            selectedConversationIds: [],
-            step: ComposerStep.ChooseGroupMembers as const,
           },
         },
       };
@@ -1654,16 +1688,8 @@ describe('both/state/selectors/conversations', () => {
         conversations: {
           ...getEmptyState(),
           composer: {
-            step: ComposerStep.SetGroupMetadata as const,
-            selectedConversationIds: ['abc'],
-            cantAddContactIdForModal: undefined,
-            recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-            maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-            groupName: '',
+            ...defaultSetGroupMetadataComposerState,
             groupAvatar: undefined,
-            groupExpireTimer: 0,
-            isCreating: false,
-            hasError: false as const,
           },
         },
       };
@@ -1676,23 +1702,12 @@ describe('both/state/selectors/conversations', () => {
         conversations: {
           ...getEmptyState(),
           composer: {
-            step: ComposerStep.SetGroupMetadata as const,
-            selectedConversationIds: ['abc'],
-            cantAddContactIdForModal: undefined,
-            recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-            maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-            groupName: '',
-            groupAvatar: new Uint8Array([1, 2, 3]).buffer,
-            groupExpireTimer: 0,
-            isCreating: false,
-            hasError: false as const,
+            ...defaultSetGroupMetadataComposerState,
+            groupAvatar: new Uint8Array([1, 2, 3]),
           },
         },
       };
-      assert.deepEqual(
-        getComposeGroupAvatar(state),
-        new Uint8Array([1, 2, 3]).buffer
-      );
+      assert.deepEqual(getComposeGroupAvatar(state), new Uint8Array([1, 2, 3]));
     });
   });
 
@@ -1703,16 +1718,8 @@ describe('both/state/selectors/conversations', () => {
         conversations: {
           ...getEmptyState(),
           composer: {
-            step: ComposerStep.SetGroupMetadata as const,
-            selectedConversationIds: ['abc'],
-            cantAddContactIdForModal: undefined,
-            recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-            maximumGroupSizeModalState: OneTimeModalState.NeverShown,
+            ...defaultSetGroupMetadataComposerState,
             groupName: 'foo bar',
-            groupAvatar: undefined,
-            groupExpireTimer: 0,
-            isCreating: false,
-            hasError: false as const,
           },
         },
       };
@@ -1737,16 +1744,8 @@ describe('both/state/selectors/conversations', () => {
             },
           },
           composer: {
-            step: ComposerStep.SetGroupMetadata as const,
+            ...defaultSetGroupMetadataComposerState,
             selectedConversationIds: ['convo-2', 'convo-1'],
-            cantAddContactIdForModal: undefined,
-            recommendedGroupSizeModalState: OneTimeModalState.NeverShown,
-            maximumGroupSizeModalState: OneTimeModalState.NeverShown,
-            groupName: 'foo bar',
-            groupAvatar: undefined,
-            groupExpireTimer: 0,
-            isCreating: false,
-            hasError: false as const,
           },
         },
       };
@@ -1847,22 +1846,17 @@ describe('both/state/selectors/conversations', () => {
   });
 
   describe('#getContactNameColorSelector', () => {
-    function makeConversationWithUuid(id: string): ConversationType {
-      const convo = makeConversation(id);
-      convo.uuid = id;
-      return convo;
-    }
-
     it('returns the right color order sorted by UUID ASC', () => {
       const group = makeConversation('group');
+      group.type = 'group';
       group.sortedGroupMembers = [
-        makeConversationWithUuid('zyx'),
-        makeConversationWithUuid('vut'),
-        makeConversationWithUuid('srq'),
-        makeConversationWithUuid('pon'),
-        makeConversationWithUuid('mlk'),
-        makeConversationWithUuid('jih'),
-        makeConversationWithUuid('gfe'),
+        makeConversationWithUuid('fff'),
+        makeConversationWithUuid('f00'),
+        makeConversationWithUuid('e00'),
+        makeConversationWithUuid('d00'),
+        makeConversationWithUuid('c00'),
+        makeConversationWithUuid('b00'),
+        makeConversationWithUuid('a00'),
       ];
       const state = {
         ...getEmptyRootState(),
@@ -1876,13 +1870,36 @@ describe('both/state/selectors/conversations', () => {
 
       const contactNameColorSelector = getContactNameColorSelector(state);
 
-      assert.equal(contactNameColorSelector('group', 'gfe'), '200');
-      assert.equal(contactNameColorSelector('group', 'jih'), '120');
-      assert.equal(contactNameColorSelector('group', 'mlk'), '300');
-      assert.equal(contactNameColorSelector('group', 'pon'), '010');
-      assert.equal(contactNameColorSelector('group', 'srq'), '210');
-      assert.equal(contactNameColorSelector('group', 'vut'), '330');
-      assert.equal(contactNameColorSelector('group', 'zyx'), '230');
+      assert.equal(contactNameColorSelector('group', 'a00'), '200');
+      assert.equal(contactNameColorSelector('group', 'b00'), '120');
+      assert.equal(contactNameColorSelector('group', 'c00'), '300');
+      assert.equal(contactNameColorSelector('group', 'd00'), '010');
+      assert.equal(contactNameColorSelector('group', 'e00'), '210');
+      assert.equal(contactNameColorSelector('group', 'f00'), '330');
+      assert.equal(contactNameColorSelector('group', 'fff'), '230');
+    });
+
+    it('returns the right colors for direct conversation', () => {
+      const direct = makeConversation('theirId');
+      const emptyState = getEmptyRootState();
+      const state = {
+        ...emptyState,
+        user: {
+          ...emptyState.user,
+          ourConversationId: 'us',
+        },
+        conversations: {
+          ...getEmptyState(),
+          conversationLookup: {
+            direct,
+          },
+        },
+      };
+
+      const contactNameColorSelector = getContactNameColorSelector(state);
+
+      assert.equal(contactNameColorSelector('direct', 'theirId'), '200');
+      assert.equal(contactNameColorSelector('direct', 'us'), '200');
     });
   });
 });

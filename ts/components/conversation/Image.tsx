@@ -1,4 +1,4 @@
-// Copyright 2018-2020 Signal Messenger, LLC
+// Copyright 2018-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import React from 'react';
@@ -6,18 +6,16 @@ import classNames from 'classnames';
 import { Blurhash } from 'react-blurhash';
 
 import { Spinner } from '../Spinner';
-import { LocalizerType, ThemeType } from '../../types/Util';
-import {
-  AttachmentType,
-  hasNotDownloaded,
-  defaultBlurHash,
-} from '../../types/Attachment';
+import type { LocalizerType, ThemeType } from '../../types/Util';
+import type { AttachmentType } from '../../types/Attachment';
+import { hasNotDownloaded, defaultBlurHash } from '../../types/Attachment';
 
 export type Props = {
   alt: string;
   attachment: AttachmentType;
   url?: string;
 
+  className?: string;
   height?: number;
   width?: number;
   cropWidth?: number;
@@ -140,6 +138,7 @@ export class Image extends React.Component<Props> {
       attachment,
       blurHash,
       bottomOverlay,
+      className,
       closeButton,
       curveBottomLeft,
       curveBottomRight,
@@ -202,6 +201,7 @@ export class Image extends React.Component<Props> {
       <div
         className={classNames(
           'module-image',
+          className,
           !noBackground ? 'module-image--with-background' : null,
           curveBottomLeft ? 'module-image--curved-bottom-left' : null,
           curveBottomRight ? 'module-image--curved-bottom-right' : null,
@@ -248,7 +248,7 @@ export class Image extends React.Component<Props> {
             )}
           />
         ) : null}
-        {!pending && playIconOverlay ? (
+        {!pending && !imgNotDownloaded && playIconOverlay ? (
           <div className="module-image__play-overlay__circle">
             <div className="module-image__play-overlay__icon" />
           </div>

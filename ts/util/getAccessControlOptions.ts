@@ -1,8 +1,10 @@
 // Copyright 2020 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { LocalizerType } from '../types/Util';
-import { AccessControlClass } from '../textsecure.d';
+import type { LocalizerType } from '../types/Util';
+import { SignalService as Proto } from '../protobuf';
+
+const AccessControlEnum = Proto.AccessControl.AccessRequired;
 
 type AccessControlOption = {
   text: string;
@@ -10,17 +12,16 @@ type AccessControlOption = {
 };
 
 export function getAccessControlOptions(
-  accessEnum: typeof AccessControlClass.AccessRequired,
   i18n: LocalizerType
 ): Array<AccessControlOption> {
   return [
     {
       text: i18n('GroupV2--all-members'),
-      value: accessEnum.MEMBER,
+      value: AccessControlEnum.MEMBER,
     },
     {
       text: i18n('GroupV2--only-admins'),
-      value: accessEnum.ADMINISTRATOR,
+      value: AccessControlEnum.ADMINISTRATOR,
     },
   ];
 }

@@ -1,14 +1,15 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { FunctionComponent, ReactNode } from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
+import React from 'react';
 
-import { LocalizerType } from '../../../../types/Util';
+import type { LocalizerType } from '../../../../types/Util';
 import { assert } from '../../../../util/assert';
 import { ModalHost } from '../../../ModalHost';
 import { Button, ButtonVariant } from '../../../Button';
 import { Spinner } from '../../../Spinner';
-import { ConversationType } from '../../../../state/ducks/conversations';
+import type { ConversationType } from '../../../../state/ducks/conversations';
 import { RequestState } from '../util';
 import { Intl } from '../../../Intl';
 import { Emojify } from '../../Emojify';
@@ -46,13 +47,7 @@ export const ConfirmAdditionsModal: FunctionComponent<PropsType> = ({
         i18n={i18n}
         id="AddGroupMembersModal--confirm-title--one"
         components={{
-          person: (
-            <ContactName
-              profileName={firstContact.profileName}
-              title={firstContact.title}
-              i18n={i18n}
-            />
-          ),
+          person: <ContactName title={firstContact.title} />,
           group: groupTitleNode,
         }}
       />

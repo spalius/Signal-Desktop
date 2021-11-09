@@ -5,13 +5,13 @@ import * as React from 'react';
 import { sample } from 'lodash';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { v4 as generateUuid } from 'uuid';
 
-import { CallingParticipantsList, PropsType } from './CallingParticipantsList';
+import type { PropsType } from './CallingParticipantsList';
+import { CallingParticipantsList } from './CallingParticipantsList';
 import { AvatarColors } from '../types/Colors';
-import { GroupCallRemoteParticipantType } from '../types/Calling';
-import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import type { GroupCallRemoteParticipantType } from '../types/Calling';
+import { getDefaultConversationWithUuid } from '../test-both/helpers/getDefaultConversation';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 
 const i18n = setupI18n('en', enMessages);
@@ -26,14 +26,13 @@ function createParticipant(
     presenting: Boolean(participantProps.presenting),
     sharingScreen: Boolean(participantProps.sharingScreen),
     videoAspectRatio: 1.3,
-    ...getDefaultConversation({
+    ...getDefaultConversationWithUuid({
       avatarPath: participantProps.avatarPath,
       color: sample(AvatarColors),
       isBlocked: Boolean(participantProps.isBlocked),
       name: participantProps.name,
       profileName: participantProps.title,
       title: String(participantProps.title),
-      uuid: generateUuid(),
     }),
   };
 }

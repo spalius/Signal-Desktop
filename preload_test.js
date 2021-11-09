@@ -1,3 +1,6 @@
+// Copyright 2021 Signal Messenger, LLC
+// SPDX-License-Identifier: AGPL-3.0-only
+
 /* global window */
 
 // This is a hack to let us run TypeScript tests in the renderer process. See the
@@ -24,7 +27,6 @@ window.test = {
   fastGlob,
   normalizePath: require('normalize-path'),
   fse: require('fs-extra'),
-  tmp: require('tmp'),
   path: require('path'),
   basePath: __dirname,
   attachmentsPath: window.Signal.Migrations.attachmentsPath,

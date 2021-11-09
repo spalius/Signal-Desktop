@@ -3,7 +3,8 @@
 
 import { isNumber } from 'lodash';
 import { parseIntOrThrow } from '../util/parseIntOrThrow';
-import { getValue, ConfigKeyType } from '../RemoteConfig';
+import type { ConfigKeyType } from '../RemoteConfig';
+import { getValue } from '../RemoteConfig';
 
 function makeGetter(configKey: ConfigKeyType): (fallback?: number) => number {
   return fallback => {
@@ -24,6 +25,7 @@ function makeGetter(configKey: ConfigKeyType): (fallback?: number) => number {
 export const getGroupSizeRecommendedLimit = makeGetter(
   'global.groupsv2.maxGroupSize'
 );
+
 export const getGroupSizeHardLimit = makeGetter(
   'global.groupsv2.groupSizeHardLimit'
 );

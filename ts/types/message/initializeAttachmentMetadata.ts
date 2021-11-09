@@ -3,10 +3,10 @@
 
 import * as Attachment from '../Attachment';
 import * as IndexedDB from '../IndexedDB';
-import { Message, UserMessage } from '../Message';
+import type { Message, UserMessage } from '../Message';
 
 const hasAttachment = (
-  predicate: (value: Attachment.Attachment) => boolean
+  predicate: (value: Attachment.AttachmentType) => boolean
 ) => (message: UserMessage): IndexedDB.IndexablePresence =>
   IndexedDB.toIndexablePresence(message.attachments.some(predicate));
 
@@ -30,7 +30,7 @@ export const initializeAttachmentMetadata = async (
   }
 
   const attachments = message.attachments.filter(
-    (attachment: Attachment.Attachment) =>
+    (attachment: Attachment.AttachmentType) =>
       attachment.contentType !== 'text/x-signal-plain'
   );
   const hasAttachments = IndexedDB.toIndexableBoolean(attachments.length > 0);

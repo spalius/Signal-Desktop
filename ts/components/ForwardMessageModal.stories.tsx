@@ -8,22 +8,24 @@ import { action } from '@storybook/addon-actions';
 import { text } from '@storybook/addon-knobs';
 
 import enMessages from '../../_locales/en/messages.json';
-import { AttachmentType } from '../types/Attachment';
-import { ForwardMessageModal, PropsType } from './ForwardMessageModal';
-import { IMAGE_JPEG, MIMEType, VIDEO_MP4 } from '../types/MIME';
+import type { AttachmentType } from '../types/Attachment';
+import type { PropsType } from './ForwardMessageModal';
+import { ForwardMessageModal } from './ForwardMessageModal';
+import { IMAGE_JPEG, VIDEO_MP4, stringToMIMEType } from '../types/MIME';
 import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { setupI18n } from '../util/setupI18n';
+import { StorybookThemeContext } from '../../.storybook/StorybookThemeContext';
 
 const createAttachment = (
   props: Partial<AttachmentType> = {}
 ): AttachmentType => ({
-  contentType: text(
-    'attachment contentType',
-    props.contentType || ''
-  ) as MIMEType,
+  contentType: stringToMIMEType(
+    text('attachment contentType', props.contentType || '')
+  ),
   fileName: text('attachment fileName', props.fileName || ''),
   screenshot: props.screenshot,
   url: text('attachment url', props.url || ''),
+  size: 3433,
 });
 
 const story = storiesOf('Components/ForwardMessageModal', module);
@@ -38,8 +40,9 @@ const candidateConversations = Array.from(Array(100), () =>
   getDefaultConversation()
 );
 
-const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
+const useProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
   attachments: overrideProps.attachments,
+  conversationId: 'conversation-id',
   candidateConversations,
   doForwardMessage: action('doForwardMessage'),
   i18n,
@@ -54,24 +57,25 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
   recentEmojis: [],
   removeLinkPreview: action('removeLinkPreview'),
   skinTone: 0,
+  theme: React.useContext(StorybookThemeContext),
 });
 
 story.add('Modal', () => {
-  return <ForwardMessageModal {...createProps()} />;
+  return <ForwardMessageModal {...useProps()} />;
 });
 
 story.add('with text', () => {
-  return <ForwardMessageModal {...createProps({ messageBody: 'sup' })} />;
+  return <ForwardMessageModal {...useProps({ messageBody: 'sup' })} />;
 });
 
 story.add('a sticker', () => {
-  return <ForwardMessageModal {...createProps({ isSticker: true })} />;
+  return <ForwardMessageModal {...useProps({ isSticker: true })} />;
 });
 
 story.add('link preview', () => {
   return (
     <ForwardMessageModal
-      {...createProps({
+      {...useProps({
         linkPreview: {
           description: LONG_DESCRIPTION,
           date: Date.now(),
@@ -93,7 +97,7 @@ story.add('link preview', () => {
 story.add('media attachments', () => {
   return (
     <ForwardMessageModal
-      {...createProps({
+      {...useProps({
         attachments: [
           createAttachment({
             contentType: IMAGE_JPEG,
@@ -118,3 +122,15 @@ story.add('media attachments', () => {
     />
   );
 });
+
+story.add('announcement only groups non-admin', () => (
+  <ForwardMessageModal
+    {...useProps()}
+    candidateConversations={[
+      getDefaultConversation({
+        announcementsOnly: true,
+        areWeAdmin: false,
+      }),
+    ]}
+  />
+));

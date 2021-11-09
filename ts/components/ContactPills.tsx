@@ -1,15 +1,10 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, {
-  useRef,
-  useEffect,
-  Children,
-  FunctionComponent,
-  ReactNode,
-} from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
+import React, { useRef, useEffect, Children } from 'react';
 
-import { usePrevious } from '../util/hooks';
+import { usePrevious } from '../hooks/usePrevious';
 import { scrollToBottom } from '../util/scrollToBottom';
 
 type PropsType = {

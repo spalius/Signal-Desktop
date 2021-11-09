@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { assert } from 'chai';
+import { Response } from 'node-fetch';
 import * as sinon from 'sinon';
 import * as fs from 'fs';
 import * as path from 'path';
 import AbortController from 'abort-controller';
-import { MIMEType, IMAGE_JPEG } from '../../types/MIME';
-
-import { typedArrayToArrayBuffer } from '../../Crypto';
+import { IMAGE_JPEG, stringToMIMEType } from '../../types/MIME';
+import * as log from '../../logging/log';
 
 import {
   fetchLinkPreviewImage,
@@ -29,7 +29,7 @@ describe('link preview fetching', () => {
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
-    warn = sandbox.stub(window.log, 'warn');
+    warn = sandbox.stub(log, 'warn');
   });
 
   afterEach(() => {
@@ -843,9 +843,7 @@ describe('link preview fetching', () => {
       sinon.assert.notCalled(shouldNeverBeCalled);
     });
 
-    it('stops reading bodies after 500 kilobytes', async function test() {
-      this.timeout(10000);
-
+    it('stops reading bodies after 1000 kilobytes', async function test() {
       const shouldNeverBeCalled = sinon.stub();
 
       const fakeFetch = stub().resolves(
@@ -854,10 +852,12 @@ describe('link preview fetching', () => {
             yield new TextEncoder().encode(
               '<!doctype html><head><title>foo bar</title>'
             );
-            const spaces = new Uint8Array(1024).fill(32);
-            for (let i = 0; i < 500; i += 1) {
-              yield spaces;
-            }
+            const spaces = new Uint8Array(250 * 1024).fill(32);
+            yield spaces;
+            yield spaces;
+            yield spaces;
+            yield spaces;
+            yield spaces;
             shouldNeverBeCalled();
             yield new TextEncoder().encode(
               '<meta property="og:description" content="should be ignored">'
@@ -1157,8 +1157,8 @@ describe('link preview fetching', () => {
             new AbortController().signal
           ),
           {
-            data: typedArrayToArrayBuffer(fixture),
-            contentType: contentType as MIMEType,
+            data: fixture,
+            contentType: stringToMIMEType(contentType),
           }
         );
       });
@@ -1219,7 +1219,7 @@ describe('link preview fetching', () => {
 
       const fakeFetch = stub();
       fakeFetch.onFirstCall().resolves(
-        new Response(null, {
+        new Response(Buffer.from(''), {
           status: 301,
           headers: {
             Location: '/result.jpg',
@@ -1242,7 +1242,7 @@ describe('link preview fetching', () => {
           new AbortController().signal
         ),
         {
-          data: typedArrayToArrayBuffer(fixture),
+          data: fixture,
           contentType: IMAGE_JPEG,
         }
       );
@@ -1338,7 +1338,7 @@ describe('link preview fetching', () => {
     });
 
     it('sends WhatsApp as the User-Agent for compatibility', async () => {
-      const fakeFetch = stub().resolves(new Response(null));
+      const fakeFetch = stub().resolves(new Response(Buffer.from('')));
 
       await fetchLinkPreviewImage(
         fakeFetch,
@@ -1370,7 +1370,7 @@ describe('link preview fetching', () => {
           },
         });
         sinon
-          .stub(response, 'arrayBuffer')
+          .stub(response, 'buffer')
           .rejects(new Error('Should not be called'));
         sinon.stub(response, 'blob').rejects(new Error('Should not be called'));
         sinon.stub(response, 'text').rejects(new Error('Should not be called'));
@@ -1404,9 +1404,9 @@ describe('link preview fetching', () => {
             'Content-Length': fixture.length.toString(),
           },
         });
-        const oldArrayBufferMethod = response.arrayBuffer.bind(response);
-        sinon.stub(response, 'arrayBuffer').callsFake(async () => {
-          const data = await oldArrayBufferMethod();
+        const oldBufferMethod = response.buffer.bind(response);
+        sinon.stub(response, 'buffer').callsFake(async () => {
+          const data = await oldBufferMethod();
           abortController.abort();
           return data;
         });

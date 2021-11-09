@@ -2,21 +2,21 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import * as React from 'react';
-import { ContactName, PropsType as ContactNameProps } from './ContactName';
+import type { PropsType as ContactNameProps } from './ContactName';
+import { ContactName } from './ContactName';
 import { Button, ButtonVariant } from '../Button';
+import type { Props as MessageRequestActionsConfirmationProps } from './MessageRequestActionsConfirmation';
 import {
   MessageRequestActionsConfirmation,
   MessageRequestState,
-  Props as MessageRequestActionsConfirmationProps,
 } from './MessageRequestActionsConfirmation';
 import { Intl } from '../Intl';
-import { LocalizerType } from '../../types/Util';
+import type { LocalizerType } from '../../types/Util';
 
 export type Props = {
   i18n: LocalizerType;
-  firstName?: string;
   onAccept(): unknown;
-} & Omit<ContactNameProps, 'module' | 'i18n'> &
+} & Omit<ContactNameProps, 'module'> &
   Omit<
     MessageRequestActionsConfirmationProps,
     'i18n' | 'state' | 'onChangeState'
@@ -27,14 +27,11 @@ export const MessageRequestActions = ({
   firstName,
   i18n,
   isBlocked,
-  name,
   onAccept,
   onBlock,
   onBlockAndReportSpam,
   onDelete,
   onUnblock,
-  phoneNumber,
-  profileName,
   title,
 }: Props): JSX.Element => {
   const [mrState, setMrState] = React.useState(MessageRequestState.default);
@@ -48,9 +45,6 @@ export const MessageRequestActions = ({
           onBlockAndReportSpam={onBlockAndReportSpam}
           onUnblock={onUnblock}
           onDelete={onDelete}
-          name={name}
-          profileName={profileName}
-          phoneNumber={phoneNumber}
           title={title}
           conversationType={conversationType}
           state={mrState}
@@ -70,11 +64,9 @@ export const MessageRequestActions = ({
                 className="module-message-request-actions__message__name"
               >
                 <ContactName
-                  name={name}
-                  profileName={profileName}
-                  phoneNumber={phoneNumber}
-                  title={firstName || title}
-                  i18n={i18n}
+                  firstName={firstName}
+                  title={title}
+                  preferFirstName
                 />
               </strong>,
             ]}

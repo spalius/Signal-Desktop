@@ -1,10 +1,10 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
-/* eslint-disable no-restricted-syntax */
 
-import { ipcMain as ipc, nativeTheme, BrowserWindow } from 'electron';
+import type { BrowserWindow } from 'electron';
+import { ipcMain as ipc, nativeTheme } from 'electron';
 
-import { NativeThemeState } from '../types/NativeThemeNotifier.d';
+import type { NativeThemeState } from '../types/NativeThemeNotifier.d';
 
 function getState(): NativeThemeState {
   return {

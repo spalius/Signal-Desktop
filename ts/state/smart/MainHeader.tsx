@@ -1,16 +1,15 @@
-// Copyright 2019-2020 Signal Messenger, LLC
+// Copyright 2019-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { connect } from 'react-redux';
 import { mapDispatchToProps } from '../actions';
 
 import { MainHeader } from '../../components/MainHeader';
-import { StateType } from '../reducer';
+import type { StateType } from '../reducer';
 
 import {
   getQuery,
-  getSearchConversationId,
-  getSearchConversationName,
+  getSearchConversation,
   getStartSearchCounter,
 } from '../selectors/search';
 import {
@@ -25,9 +24,9 @@ import { getMe, getSelectedConversation } from '../selectors/conversations';
 const mapStateToProps = (state: StateType) => {
   return {
     disabled: state.network.challengeStatus !== 'idle',
+    hasPendingUpdate: Boolean(state.updates.didSnooze),
     searchTerm: getQuery(state),
-    searchConversationId: getSearchConversationId(state),
-    searchConversationName: getSearchConversationName(state),
+    searchConversation: getSearchConversation(state),
     selectedConversation: getSelectedConversation(state),
     startSearchCounter: getStartSearchCounter(state),
     regionCode: getRegionCode(state),

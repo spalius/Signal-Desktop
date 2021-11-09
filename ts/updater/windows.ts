@@ -2,35 +2,35 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { dirname, join } from 'path';
-import { spawn as spawnEmitter, SpawnOptions } from 'child_process';
+import type { SpawnOptions } from 'child_process';
+import { spawn as spawnEmitter } from 'child_process';
 import { readdir as readdirCallback, unlink as unlinkCallback } from 'fs';
 
-import { app, BrowserWindow } from 'electron';
-import { get as getFromConfig } from 'config';
+import type { BrowserWindow } from 'electron';
+import { app } from 'electron';
+import config from 'config';
 import { gt } from 'semver';
 import pify from 'pify';
 
+import type { UpdaterInterface } from './common';
 import {
   checkForUpdates,
   deleteTempDir,
   downloadUpdate,
+  getAutoDownloadUpdateSetting,
   getPrintableError,
   setUpdateListener,
-  showCannotUpdateDialog,
-  showUpdateDialog,
-  UpdaterInterface,
 } from './common';
-import { LocaleType } from '../types/I18N';
-import { LoggerType } from '../types/Logging';
+import * as durations from '../util/durations';
+import type { LoggerType } from '../types/Logging';
 import { hexToBinary, verifySignature } from './signature';
 import { markShouldQuit } from '../../app/window_state';
+import { DialogType } from '../types/Dialogs';
 
 const readdir = pify(readdirCallback);
 const unlink = pify(unlinkCallback);
 
-const SECOND = 1000;
-const MINUTE = SECOND * 60;
-const INTERVAL = MINUTE * 30;
+const INTERVAL = 30 * durations.MINUTE;
 
 let fileName: string;
 let version: string;
@@ -39,8 +39,7 @@ let installing: boolean;
 let loggerForQuitHandler: LoggerType;
 
 export async function start(
-  getMainWindow: () => BrowserWindow,
-  locale: LocaleType,
+  getMainWindow: () => BrowserWindow | undefined,
   logger: LoggerType
 ): Promise<UpdaterInterface> {
   logger.info('windows/start: starting checks...');
@@ -48,48 +47,110 @@ export async function start(
   loggerForQuitHandler = logger;
   app.once('quit', quitHandler);
 
-  setUpdateListener(createUpdater(getMainWindow, locale, logger));
-
   setInterval(async () => {
     try {
-      await checkDownloadAndInstall(getMainWindow, locale, logger);
+      await checkForUpdatesMaybeInstall(getMainWindow, logger);
     } catch (error) {
-      logger.error('windows/start: error:', getPrintableError(error));
+      logger.error(`windows/start: ${getPrintableError(error)}`);
     }
   }, INTERVAL);
 
   await deletePreviousInstallers(logger);
-  await checkDownloadAndInstall(getMainWindow, locale, logger);
+  await checkForUpdatesMaybeInstall(getMainWindow, logger);
 
   return {
     async force(): Promise<void> {
-      return checkDownloadAndInstall(getMainWindow, locale, logger, true);
+      return checkForUpdatesMaybeInstall(getMainWindow, logger, true);
     },
   };
 }
 
-async function checkDownloadAndInstall(
-  getMainWindow: () => BrowserWindow,
-  locale: LocaleType,
+async function checkForUpdatesMaybeInstall(
+  getMainWindow: () => BrowserWindow | undefined,
   logger: LoggerType,
   force = false
 ) {
-  try {
-    logger.info('checkDownloadAndInstall: checking for update...');
-    const result = await checkForUpdates(logger, force);
-    if (!result) {
+  logger.info('checkForUpdatesMaybeInstall: checking for update...');
+  const result = await checkForUpdates(logger, force);
+  if (!result) {
+    return;
+  }
+
+  const { fileName: newFileName, version: newVersion } = result;
+
+  if (
+    force ||
+    fileName !== newFileName ||
+    !version ||
+    gt(newVersion, version)
+  ) {
+    const autoDownloadUpdates = await getAutoDownloadUpdateSetting(
+      getMainWindow(),
+      logger
+    );
+    if (!autoDownloadUpdates) {
+      setUpdateListener(async () => {
+        logger.info(
+          'checkForUpdatesMaybeInstall: have not downloaded update, going to download'
+        );
+        await downloadAndInstall(
+          newFileName,
+          newVersion,
+          getMainWindow,
+          logger,
+          true
+        );
+      });
+      const mainWindow = getMainWindow();
+      if (mainWindow) {
+        mainWindow.webContents.send(
+          'show-update-dialog',
+          DialogType.DownloadReady,
+          {
+            downloadSize: result.size,
+            version: result.version,
+          }
+        );
+      } else {
+        logger.warn(
+          'checkForUpdatesMaybeInstall: No mainWindow, not showing update dialog'
+        );
+      }
       return;
     }
+    await downloadAndInstall(newFileName, newVersion, getMainWindow, logger);
+  }
+}
 
-    const { fileName: newFileName, version: newVersion } = result;
-    if (fileName !== newFileName || !version || gt(newVersion, version)) {
-      deleteCache(updateFilePath, logger);
-      fileName = newFileName;
-      version = newVersion;
-      updateFilePath = await downloadUpdate(fileName, logger);
+async function downloadAndInstall(
+  newFileName: string,
+  newVersion: string,
+  getMainWindow: () => BrowserWindow | undefined,
+  logger: LoggerType,
+  updateOnProgress?: boolean
+) {
+  try {
+    const oldFileName = fileName;
+    const oldVersion = version;
+
+    deleteCache(updateFilePath, logger);
+    fileName = newFileName;
+    version = newVersion;
+
+    try {
+      updateFilePath = await downloadUpdate(
+        fileName,
+        logger,
+        updateOnProgress ? getMainWindow() : undefined
+      );
+    } catch (error) {
+      // Restore state in case of download error
+      fileName = oldFileName;
+      version = oldVersion;
+      throw error;
     }
 
-    const publicKey = hexToBinary(getFromConfig('updatesPublicKey'));
+    const publicKey = hexToBinary(config.get('updatesPublicKey'));
     const verified = await verifySignature(updateFilePath, version, publicKey);
     if (!verified) {
       // Note: We don't delete the cache here, because we don't want to continually
@@ -99,14 +160,44 @@ async function checkDownloadAndInstall(
       );
     }
 
-    logger.info('checkDownloadAndInstall: showing dialog...');
-    showUpdateDialog(
-      getMainWindow(),
-      locale,
-      createUpdater(getMainWindow, locale, logger)
-    );
+    logger.info('downloadAndInstall: showing dialog...');
+    setUpdateListener(async () => {
+      try {
+        await verifyAndInstall(updateFilePath, newVersion, logger);
+        installing = true;
+      } catch (error) {
+        const mainWindow = getMainWindow();
+        if (mainWindow) {
+          logger.info(
+            'createUpdater: showing general update failure dialog...'
+          );
+          mainWindow.webContents.send(
+            'show-update-dialog',
+            DialogType.Cannot_Update
+          );
+        } else {
+          logger.warn('createUpdater: no mainWindow, just failing over...');
+        }
+
+        throw error;
+      }
+
+      markShouldQuit();
+      app.quit();
+    });
+
+    const mainWindow = getMainWindow();
+    if (mainWindow) {
+      mainWindow.webContents.send('show-update-dialog', DialogType.Update, {
+        version,
+      });
+    } else {
+      logger.warn(
+        'downloadAndInstall: no mainWindow, cannot show update dialog'
+      );
+    }
   } catch (error) {
-    logger.error('checkDownloadAndInstall: error', getPrintableError(error));
+    logger.error(`downloadAndInstall: ${getPrintableError(error)}`);
   }
 }
 
@@ -114,10 +205,7 @@ function quitHandler() {
   if (updateFilePath && !installing) {
     verifyAndInstall(updateFilePath, version, loggerForQuitHandler).catch(
       error => {
-        loggerForQuitHandler.error(
-          'quitHandler: error installing:',
-          getPrintableError(error)
-        );
+        loggerForQuitHandler.error(`quitHandler: ${getPrintableError(error)}`);
       }
     );
   }
@@ -158,7 +246,7 @@ async function verifyAndInstall(
     return;
   }
 
-  const publicKey = hexToBinary(getFromConfig('updatesPublicKey'));
+  const publicKey = hexToBinary(config.get('updatesPublicKey'));
   const verified = await verifySignature(updateFilePath, newVersion, publicKey);
   if (!verified) {
     throw new Error(
@@ -197,10 +285,7 @@ function deleteCache(filePath: string | null, logger: LoggerType) {
   if (filePath) {
     const tempDir = dirname(filePath);
     deleteTempDir(tempDir).catch(error => {
-      logger.error(
-        'deleteCache: error deleting temporary directory',
-        getPrintableError(error)
-      );
+      logger.error(`deleteCache: ${getPrintableError(error)}`);
     });
   }
 }
@@ -222,27 +307,4 @@ async function spawn(
 
     setTimeout(resolve, 200);
   });
-}
-
-function createUpdater(
-  getMainWindow: () => BrowserWindow,
-  locale: LocaleType,
-  logger: LoggerType
-) {
-  return async () => {
-    try {
-      await verifyAndInstall(updateFilePath, version, logger);
-      installing = true;
-    } catch (error) {
-      logger.info(
-        'checkDownloadAndInstall: showing general update failure dialog...'
-      );
-      showCannotUpdateDialog(getMainWindow(), locale);
-
-      throw error;
-    }
-
-    markShouldQuit();
-    app.quit();
-  };
 }

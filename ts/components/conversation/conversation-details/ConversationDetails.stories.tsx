@@ -7,11 +7,14 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { times } from 'lodash';
 
-import { setup as setupI18n } from '../../../../js/modules/i18n';
+import { setupI18n } from '../../../util/setupI18n';
+import { CapabilityError } from '../../../types/errors';
 import enMessages from '../../../../_locales/en/messages.json';
-import { ConversationDetails, Props } from './ConversationDetails';
-import { ConversationType } from '../../../state/ducks/conversations';
+import type { Props } from './ConversationDetails';
+import { ConversationDetails } from './ConversationDetails';
+import type { ConversationType } from '../../../state/ducks/conversations';
 import { getDefaultConversation } from '../../../test-both/helpers/getDefaultConversation';
+import { ThemeType } from '../../../types/Util';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -45,6 +48,7 @@ const createProps = (hasGroupLink = false, expireTimer?: number): Props => ({
   hasGroupLink,
   i18n,
   isAdmin: false,
+  isGroup: true,
   loadRecentMediaItems: action('loadRecentMediaItems'),
   memberships: times(32, i => ({
     isAdmin: i === 1,
@@ -52,6 +56,7 @@ const createProps = (hasGroupLink = false, expireTimer?: number): Props => ({
       isMe: i === 2,
     }),
   })),
+  preferredBadgeByConversation: {},
   pendingApprovalMemberships: times(8, () => ({
     member: getDefaultConversation(),
   })),
@@ -62,9 +67,12 @@ const createProps = (hasGroupLink = false, expireTimer?: number): Props => ({
   setDisappearingMessages: action('setDisappearingMessages'),
   showAllMedia: action('showAllMedia'),
   showContactModal: action('showContactModal'),
-  showGroupChatColorEditor: action('showGroupChatColorEditor'),
+  showChatColorEditor: action('showChatColorEditor'),
   showGroupLinkManagement: action('showGroupLinkManagement'),
   showGroupV2Permissions: action('showGroupV2Permissions'),
+  showConversationNotificationsSettings: action(
+    'showConversationNotificationsSettings'
+  ),
   showPendingInvites: action('showPendingInvites'),
   showLightboxForMedia: action('showLightboxForMedia'),
   updateGroupAttributes: async () => {
@@ -72,6 +80,21 @@ const createProps = (hasGroupLink = false, expireTimer?: number): Props => ({
   },
   onBlock: action('onBlock'),
   onLeave: action('onLeave'),
+  onUnblock: action('onUnblock'),
+  deleteAvatarFromDisk: action('deleteAvatarFromDisk'),
+  replaceAvatar: action('replaceAvatar'),
+  saveAvatarToDisk: action('saveAvatarToDisk'),
+  setMuteExpiration: action('setMuteExpiration'),
+  userAvatarData: [],
+  toggleSafetyNumberModal: action('toggleSafetyNumberModal'),
+  onOutgoingAudioCallInConversation: action(
+    'onOutgoingAudioCallInConversation'
+  ),
+  onOutgoingVideoCallInConversation: action(
+    'onOutgoingVideoCallInConversation'
+  ),
+  searchInConversation: action('searchInConversation'),
+  theme: ThemeType.light,
 });
 
 story.add('Basic', () => {
@@ -139,3 +162,17 @@ story.add('Group Links On', () => {
 
   return <ConversationDetails {...props} isAdmin />;
 });
+
+story.add('Group add with missing capabilities', () => (
+  <ConversationDetails
+    {...createProps()}
+    canEditGroupInfo
+    addMembers={async () => {
+      throw new CapabilityError('stories');
+    }}
+  />
+));
+
+story.add('1:1', () => (
+  <ConversationDetails {...createProps()} isGroup={false} />
+));

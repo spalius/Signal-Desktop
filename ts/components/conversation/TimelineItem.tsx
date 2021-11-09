@@ -1,66 +1,58 @@
 // Copyright 2019-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import type { RefObject } from 'react';
 import React from 'react';
-import { LocalizerType, ThemeType } from '../../types/Util';
+import { omit } from 'lodash';
 
-import { InteractionModeType } from '../../state/ducks/conversations';
-import {
-  Message,
+import type { LocalizerType, ThemeType } from '../../types/Util';
+
+import type { InteractionModeType } from '../../state/ducks/conversations';
+import type {
   Props as AllMessageProps,
   PropsActions as MessageActionsType,
   PropsData as MessageProps,
 } from './Message';
-import {
-  CallingNotification,
-  PropsActionsType as CallingNotificationActionsType,
-} from './CallingNotification';
-import {
-  ChatSessionRefreshedNotification,
-  PropsActionsType as PropsChatSessionRefreshedActionsType,
-} from './ChatSessionRefreshedNotification';
-import {
-  DeliveryIssueNotification,
+import { Message } from './Message';
+import type { PropsActionsType as CallingNotificationActionsType } from './CallingNotification';
+import { CallingNotification } from './CallingNotification';
+import type { PropsActionsType as PropsChatSessionRefreshedActionsType } from './ChatSessionRefreshedNotification';
+import { ChatSessionRefreshedNotification } from './ChatSessionRefreshedNotification';
+import type {
+  PropsActionsType as DeliveryIssueActionProps,
   PropsDataType as DeliveryIssueProps,
 } from './DeliveryIssueNotification';
-import { CallingNotificationType } from '../../util/callingNotification';
+import { DeliveryIssueNotification } from './DeliveryIssueNotification';
+import { LinkNotification } from './LinkNotification';
+import type { PropsData as ChangeNumberNotificationProps } from './ChangeNumberNotification';
+import { ChangeNumberNotification } from './ChangeNumberNotification';
+import type { CallingNotificationType } from '../../util/callingNotification';
 import { InlineNotificationWrapper } from './InlineNotificationWrapper';
-import {
+import type {
   PropsActions as UnsupportedMessageActionsType,
   PropsData as UnsupportedMessageProps,
-  UnsupportedMessage,
 } from './UnsupportedMessage';
-import {
-  PropsData as TimerNotificationProps,
-  TimerNotification,
-} from './TimerNotification';
-import {
+import { UnsupportedMessage } from './UnsupportedMessage';
+import type { PropsData as TimerNotificationProps } from './TimerNotification';
+import { TimerNotification } from './TimerNotification';
+import type {
   PropsActions as SafetyNumberActionsType,
   PropsData as SafetyNumberNotificationProps,
-  SafetyNumberNotification,
 } from './SafetyNumberNotification';
-import {
-  PropsData as VerificationNotificationProps,
-  VerificationNotification,
-} from './VerificationNotification';
-import {
-  GroupNotification,
-  PropsData as GroupNotificationProps,
-} from './GroupNotification';
-import {
-  GroupV2Change,
-  PropsDataType as GroupV2ChangeProps,
-} from './GroupV2Change';
-import {
-  GroupV1Migration,
-  PropsDataType as GroupV1MigrationProps,
-} from './GroupV1Migration';
-import { SmartContactRendererType } from '../../groupChange';
+import { SafetyNumberNotification } from './SafetyNumberNotification';
+import type { PropsData as VerificationNotificationProps } from './VerificationNotification';
+import { VerificationNotification } from './VerificationNotification';
+import type { PropsData as GroupNotificationProps } from './GroupNotification';
+import { GroupNotification } from './GroupNotification';
+import type { PropsDataType as GroupV2ChangeProps } from './GroupV2Change';
+import { GroupV2Change } from './GroupV2Change';
+import type { PropsDataType as GroupV1MigrationProps } from './GroupV1Migration';
+import { GroupV1Migration } from './GroupV1Migration';
+import type { SmartContactRendererType } from '../../groupChange';
 import { ResetSessionNotification } from './ResetSessionNotification';
-import {
-  ProfileChangeNotification,
-  PropsType as ProfileChangeNotificationPropsType,
-} from './ProfileChangeNotification';
+import type { PropsType as ProfileChangeNotificationPropsType } from './ProfileChangeNotification';
+import { ProfileChangeNotification } from './ProfileChangeNotification';
+import * as log from '../../logging/log';
 
 type CallHistoryType = {
   type: 'callHistory';
@@ -93,6 +85,10 @@ type TimerNotificationType = {
 type UniversalTimerNotificationType = {
   type: 'universalTimerNotification';
   data: null;
+};
+type ChangeNumberNotificationType = {
+  type: 'changeNumberNotification';
+  data: ChangeNumberNotificationProps;
 };
 type SafetyNumberNotificationType = {
   type: 'safetyNumberNotification';
@@ -137,12 +133,13 @@ export type TimelineItemType =
   | SafetyNumberNotificationType
   | TimerNotificationType
   | UniversalTimerNotificationType
+  | ChangeNumberNotificationType
   | UnsupportedMessageType
   | VerificationNotificationType;
 
 type PropsLocalType = {
+  containerElementRef: RefObject<HTMLElement>;
   conversationId: string;
-  conversationAccepted: boolean;
   item?: TimelineItemType;
   id: string;
   isSelected: boolean;
@@ -152,21 +149,31 @@ type PropsLocalType = {
   i18n: LocalizerType;
   interactionMode: InteractionModeType;
   theme?: ThemeType;
+  previousItem: undefined | TimelineItemType;
+  nextItem: undefined | TimelineItemType;
 };
 
 type PropsActionsType = MessageActionsType &
   CallingNotificationActionsType &
+  DeliveryIssueActionProps &
   PropsChatSessionRefreshedActionsType &
   UnsupportedMessageActionsType &
   SafetyNumberActionsType;
 
 export type PropsType = PropsLocalType &
   PropsActionsType &
-  Pick<AllMessageProps, 'renderEmojiPicker' | 'renderAudioAttachment'>;
+  Pick<
+    AllMessageProps,
+    | 'containerWidthBreakpoint'
+    | 'renderEmojiPicker'
+    | 'renderAudioAttachment'
+    | 'renderReactionPicker'
+  >;
 
 export class TimelineItem extends React.PureComponent<PropsType> {
   public render(): JSX.Element | null {
     const {
+      containerElementRef,
       conversationId,
       id,
       isSelected,
@@ -174,6 +181,7 @@ export class TimelineItem extends React.PureComponent<PropsType> {
       i18n,
       theme,
       messageSizeChanged,
+      nextItem,
       renderContact,
       renderUniversalTimerNotification,
       returnToActiveCall,
@@ -182,7 +190,7 @@ export class TimelineItem extends React.PureComponent<PropsType> {
     } = this.props;
 
     if (!item) {
-      window.log.warn(`TimelineItem: item ${id} provided was falsey`);
+      log.warn(`TimelineItem: item ${id} provided was falsey`);
 
       return null;
     }
@@ -190,8 +198,9 @@ export class TimelineItem extends React.PureComponent<PropsType> {
     if (item.type === 'message') {
       return (
         <Message
-          {...this.props}
+          {...omit(this.props, ['item'])}
           {...item.data}
+          containerElementRef={containerElementRef}
           i18n={i18n}
           theme={theme}
           renderingContext="conversation/TimelineItem"
@@ -212,6 +221,7 @@ export class TimelineItem extends React.PureComponent<PropsType> {
           i18n={i18n}
           messageId={id}
           messageSizeChanged={messageSizeChanged}
+          nextItem={nextItem}
           returnToActiveCall={returnToActiveCall}
           startCallingLobby={startCallingLobby}
           {...item.data}
@@ -226,20 +236,21 @@ export class TimelineItem extends React.PureComponent<PropsType> {
         />
       );
     } else if (item.type === 'deliveryIssue') {
-      notification = <DeliveryIssueNotification {...item.data} i18n={i18n} />;
-    } else if (item.type === 'linkNotification') {
       notification = (
-        <div className="module-message-unsynced">
-          <div className="module-message-unsynced__icon" />
-          {i18n('messageHistoryUnsynced')}
-        </div>
+        <DeliveryIssueNotification {...item.data} {...this.props} i18n={i18n} />
       );
+    } else if (item.type === 'linkNotification') {
+      notification = <LinkNotification i18n={i18n} />;
     } else if (item.type === 'timerNotification') {
       notification = (
         <TimerNotification {...this.props} {...item.data} i18n={i18n} />
       );
     } else if (item.type === 'universalTimerNotification') {
       notification = renderUniversalTimerNotification();
+    } else if (item.type === 'changeNumberNotification') {
+      notification = (
+        <ChangeNumberNotification {...this.props} {...item.data} i18n={i18n} />
+      );
     } else if (item.type === 'safetyNumberNotification') {
       notification = (
         <SafetyNumberNotification {...this.props} {...item.data} i18n={i18n} />

@@ -8,8 +8,9 @@ import {
   isImageTypeSupported,
   isVideoTypeSupported,
 } from '../../../util/GoogleChrome';
-import { LocalizerType } from '../../../types/Util';
-import { MediaItemType } from '../../LightboxGallery';
+import type { LocalizerType } from '../../../types/Util';
+import type { MediaItemType } from '../../../types/MediaItem';
+import * as log from '../../../logging/log';
 
 export type Props = {
   mediaItem: MediaItemType;
@@ -35,7 +36,7 @@ export class MediaGridItem extends React.Component<Props, State> {
   }
 
   public onImageError(): void {
-    window.log.info(
+    log.info(
       'MediaGridItem: Image failed to load; failing over to placeholder'
     );
     this.setState({

@@ -2,25 +2,19 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { join } from 'path';
-import {
-  compact,
-  Dictionary,
-  filter,
-  map,
-  orderBy,
-  reject,
-  sortBy,
-  values,
-} from 'lodash';
+import type { Dictionary } from 'lodash';
+import { compact, filter, map, orderBy, reject, sortBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 
-import { StateType } from '../reducer';
-import {
-  RecentStickerType,
-  StickerDBType,
-  StickerPackDBType,
-  StickerPackType,
+import type { RecentStickerType } from '../../types/Stickers';
+import type {
+  StickerType as StickerDBType,
+  StickerPackType as StickerPackDBType,
+} from '../../sql/Interface';
+import type { StateType } from '../reducer';
+import type {
   StickersStateType,
+  StickerPackType,
   StickerType,
 } from '../ducks/stickers';
 import { getStickersPath, getTempPath } from './user';
@@ -95,7 +89,7 @@ export const translatePackFromDB = (
 const filterAndTransformPacks = (
   packs: Dictionary<StickerPackDBType>,
   packFilter: (sticker: StickerPackDBType) => boolean,
-  packSort: (sticker: StickerPackDBType) => number | null,
+  packSort: (sticker: StickerPackDBType) => number | undefined,
   blessedPacks: Dictionary<boolean>,
   stickersPath: string,
   tempPath: string

@@ -3,9 +3,9 @@
 
 /* eslint-disable camelcase */
 
-import { Attachment } from './Attachment';
-import { ContactType } from './Contact';
-import { IndexableBoolean, IndexablePresence } from './IndexedDB';
+import type { AttachmentType } from './Attachment';
+import type { EmbeddedContactType } from './EmbeddedContact';
+import type { IndexableBoolean, IndexablePresence } from './IndexedDB';
 
 export type Message = (
   | UserMessage
@@ -19,7 +19,7 @@ export type IncomingMessage = Readonly<
   {
     type: 'incoming';
     // Required
-    attachments: Array<Attachment>;
+    attachments: Array<AttachmentType>;
     id: string;
     received_at: number;
 
@@ -44,22 +44,16 @@ export type OutgoingMessage = Readonly<
     type: 'outgoing';
 
     // Required
-    attachments: Array<Attachment>;
-    delivered: number;
-    delivered_to: Array<string>;
-    destination: string; // PhoneNumber
+    attachments: Array<AttachmentType>;
     expirationStartTimestamp: number;
     id: string;
     received_at: number;
-    sent: boolean;
-    sent_to: Array<string>; // Array<PhoneNumber>
 
     // Optional
     body?: string;
     expireTimer?: number;
     messageTimer?: number; // deprecated
     isViewOnce?: number;
-    recipients?: Array<string>; // Array<PhoneNumber>
     synced: boolean;
   } & SharedMessageProperties &
     MessageSchemaVersion5 &
@@ -116,7 +110,7 @@ type MessageSchemaVersion5 = Partial<
 
 type MessageSchemaVersion6 = Partial<
   Readonly<{
-    contact: Array<ContactType>;
+    contact: Array<EmbeddedContactType>;
   }>
 >;
 

@@ -5,8 +5,11 @@ import React from 'react';
 import classNames from 'classnames';
 import { noop } from 'lodash';
 import { Manager, Reference, Popper } from 'react-popper';
-import { Theme, themeClassName } from '../util/theme';
-import { multiRef } from '../util/multiRef';
+import type { StrictModifiers } from '@popperjs/core';
+import type { Theme } from '../util/theme';
+import { themeClassName } from '../util/theme';
+import { refMerger } from '../util/refMerger';
+import { offsetDistanceModifier } from '../util/popperUtil';
 
 type EventWrapperPropsType = {
   children: React.ReactNode;
@@ -51,7 +54,7 @@ const TooltipEventWrapper = React.forwardRef<
     <span
       onFocus={on}
       onBlur={off}
-      ref={multiRef<HTMLSpanElement>(ref, wrapperRef)}
+      ref={refMerger<HTMLSpanElement>(ref, wrapperRef)}
     >
       {children}
     </span>
@@ -67,17 +70,21 @@ export enum TooltipPlacement {
 
 export type PropsType = {
   content: string | JSX.Element;
+  className?: string;
   direction?: TooltipPlacement;
+  popperModifiers?: Array<StrictModifiers>;
   sticky?: boolean;
   theme?: Theme;
 };
 
 export const Tooltip: React.FC<PropsType> = ({
   children,
+  className,
   content,
   direction,
   sticky,
   theme,
+  popperModifiers = [],
 }) => {
   const [isHovering, setIsHovering] = React.useState(false);
 
@@ -96,11 +103,18 @@ export const Tooltip: React.FC<PropsType> = ({
           </TooltipEventWrapper>
         )}
       </Reference>
-      <Popper placement={direction}>
+      <Popper
+        placement={direction}
+        modifiers={[offsetDistanceModifier(12), ...popperModifiers]}
+      >
         {({ arrowProps, placement, ref, style }) =>
           showTooltip && (
             <div
-              className={classNames('module-tooltip', tooltipThemeClassName)}
+              className={classNames(
+                'module-tooltip',
+                tooltipThemeClassName,
+                className
+              )}
               ref={ref}
               style={style}
               data-placement={placement}

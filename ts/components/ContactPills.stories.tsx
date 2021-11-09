@@ -7,10 +7,11 @@ import { times } from 'lodash';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 import { ContactPills } from './ContactPills';
-import { ContactPill, PropsType as ContactPillPropsType } from './ContactPill';
+import type { PropsType as ContactPillPropsType } from './ContactPill';
+import { ContactPill } from './ContactPill';
 import { gifUrl } from '../storybook/Fixtures';
 import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
 
@@ -22,7 +23,6 @@ type ContactType = Omit<ContactPillPropsType, 'i18n' | 'onClickRemove'>;
 
 const contacts: Array<ContactType> = times(50, index =>
   getDefaultConversation({
-    color: 'crimson',
     id: `contact-${index}`,
     name: `Contact ${index}`,
     phoneNumber: '(202) 555-0001',
@@ -34,10 +34,9 @@ const contacts: Array<ContactType> = times(50, index =>
 const contactPillProps = (
   overrideProps?: ContactType
 ): ContactPillPropsType => ({
-  ...(overrideProps ||
+  ...(overrideProps ??
     getDefaultConversation({
       avatarPath: gifUrl,
-      color: 'crimson',
       firstName: 'John',
       id: 'abc123',
       isMe: false,

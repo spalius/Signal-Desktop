@@ -1,14 +1,17 @@
 // Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useContext } from 'react';
 
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { getDefaultConversation } from '../../test-both/helpers/getDefaultConversation';
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import { getRandomColor } from '../../test-both/helpers/getRandomColor';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
+import { StorybookThemeContext } from '../../../.storybook/StorybookThemeContext';
 import {
   ConversationHeader,
   OutgoingCallButtonStyle,
@@ -23,7 +26,7 @@ type ConversationHeaderStory = {
   description: string;
   items: Array<{
     title: string;
-    props: ComponentProps<typeof ConversationHeader>;
+    props: Omit<ComponentProps<typeof ConversationHeader>, 'theme'>;
   }>;
 };
 
@@ -38,7 +41,6 @@ const commonProps = {
   onShowConversationDetails: action('onShowConversationDetails'),
   onSetDisappearingMessages: action('onSetDisappearingMessages'),
   onDeleteMessages: action('onDeleteMessages'),
-  onResetSession: action('onResetSession'),
   onSearchInConversation: action('onSearchInConversation'),
   onSetMuteNotifications: action('onSetMuteNotifications'),
   onOutgoingAudioCallInConversation: action(
@@ -48,10 +50,7 @@ const commonProps = {
     'onOutgoingVideoCallInConversation'
   ),
 
-  onShowChatColorEditor: action('onShowChatColorEditor'),
-  onShowSafetyNumber: action('onShowSafetyNumber'),
   onShowAllMedia: action('onShowAllMedia'),
-  onShowContactModal: action('onShowContactModal'),
   onShowGroupMembers: action('onShowGroupMembers'),
   onGoBack: action('onGoBack'),
 
@@ -71,7 +70,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'With name and profile, verified',
         props: {
           ...commonProps,
-          color: 'crimson',
+          color: getRandomColor(),
           isVerified: true,
           avatarPath: gifUrl,
           title: 'Someone 🔥 Somewhere',
@@ -87,7 +86,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'With name, not verified, no avatar',
         props: {
           ...commonProps,
-          color: 'blue',
+          color: getRandomColor(),
           isVerified: false,
           title: 'Someone 🔥 Somewhere',
           name: 'Someone 🔥 Somewhere',
@@ -101,7 +100,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'With name, not verified, descenders',
         props: {
           ...commonProps,
-          color: 'blue',
+          color: getRandomColor(),
           isVerified: false,
           title: 'Joyrey 🔥 Leppey',
           name: 'Joyrey 🔥 Leppey',
@@ -115,7 +114,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'Profile, no name',
         props: {
           ...commonProps,
-          color: 'wintergreen',
+          color: getRandomColor(),
           isVerified: false,
           phoneNumber: '(202) 555-0003',
           type: 'direct',
@@ -141,7 +140,7 @@ const stories: Array<ConversationHeaderStory> = [
         props: {
           ...commonProps,
           showBackButton: true,
-          color: 'vermilion',
+          color: getRandomColor(),
           phoneNumber: '(202) 555-0004',
           title: '(202) 555-0004',
           type: 'direct',
@@ -153,7 +152,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'Disappearing messages set',
         props: {
           ...commonProps,
-          color: 'indigo',
+          color: getRandomColor(),
           title: '(202) 555-0005',
           phoneNumber: '(202) 555-0005',
           type: 'direct',
@@ -166,7 +165,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'Disappearing messages + verified',
         props: {
           ...commonProps,
-          color: 'indigo',
+          color: getRandomColor(),
           title: '(202) 555-0005',
           phoneNumber: '(202) 555-0005',
           type: 'direct',
@@ -181,7 +180,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'Muting Conversation',
         props: {
           ...commonProps,
-          color: 'ultramarine',
+          color: getRandomColor(),
           title: '(202) 555-0006',
           phoneNumber: '(202) 555-0006',
           type: 'direct',
@@ -194,7 +193,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'SMS-only conversation',
         props: {
           ...commonProps,
-          color: 'ultramarine',
+          color: getRandomColor(),
           title: '(202) 555-0006',
           phoneNumber: '(202) 555-0006',
           type: 'direct',
@@ -214,7 +213,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'Basic',
         props: {
           ...commonProps,
-          color: 'ultramarine',
+          color: getRandomColor(),
           title: 'Typescript support group',
           name: 'Typescript support group',
           phoneNumber: '',
@@ -229,7 +228,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'In a group you left - no disappearing messages',
         props: {
           ...commonProps,
-          color: 'ultramarine',
+          color: getRandomColor(),
           title: 'Typescript support group',
           name: 'Typescript support group',
           phoneNumber: '',
@@ -245,7 +244,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'In a group with an active group call',
         props: {
           ...commonProps,
-          color: 'ultramarine',
+          color: getRandomColor(),
           title: 'Typescript support group',
           name: 'Typescript support group',
           phoneNumber: '',
@@ -260,7 +259,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'In a forever muted group',
         props: {
           ...commonProps,
-          color: 'ultramarine',
+          color: getRandomColor(),
           title: 'Way too many messages',
           name: 'Way too many messages',
           phoneNumber: '',
@@ -282,7 +281,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: 'In chat with yourself',
         props: {
           ...commonProps,
-          color: 'blue',
+          color: getRandomColor(),
           title: '(202) 555-0007',
           phoneNumber: '(202) 555-0007',
           id: '15',
@@ -302,7 +301,7 @@ const stories: Array<ConversationHeaderStory> = [
         title: '1:1 conversation',
         props: {
           ...commonProps,
-          color: 'blue',
+          color: getRandomColor(),
           title: '(202) 555-0007',
           phoneNumber: '(202) 555-0007',
           id: '16',
@@ -319,15 +318,18 @@ const stories: Array<ConversationHeaderStory> = [
 stories.forEach(({ title, description, items }) =>
   book.add(
     title,
-    () =>
-      items.map(({ title: subtitle, props }, i) => {
+    () => {
+      const theme = useContext(StorybookThemeContext);
+
+      return items.map(({ title: subtitle, props }, i) => {
         return (
           <div key={i}>
             {subtitle ? <h3>{subtitle}</h3> : null}
-            <ConversationHeader {...props} />
+            <ConversationHeader {...props} theme={theme} />
           </div>
         );
-      }),
+      });
+    },
     {
       docs: description,
     }

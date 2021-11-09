@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Signal Messenger, LLC
+// Copyright 2019-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import * as React from 'react';
@@ -11,14 +11,15 @@ import {
   Reference as PopperReference,
 } from 'react-popper';
 import { AddEmoji } from '../elements/icons';
-import { DropZone, Props as DropZoneProps } from '../elements/DropZone';
+import type { Props as DropZoneProps } from '../elements/DropZone';
+import { DropZone } from '../elements/DropZone';
 import { StickerPreview } from '../elements/StickerPreview';
 import * as styles from './StickerFrame.scss';
-import {
+import type {
   EmojiPickDataType,
-  EmojiPicker,
   Props as EmojiPickerProps,
 } from '../../ts/components/emoji/EmojiPicker';
+import { EmojiPicker } from '../../ts/components/emoji/EmojiPicker';
 import { Emoji } from '../../ts/components/emoji/Emoji';
 import { PopperRootContext } from '../../ts/components/PopperRootContext';
 import { useI18n } from '../util/i18n';
@@ -202,11 +203,17 @@ export const StickerFrame = React.memo(
                 <div className={styles.guide} />
               ) : null}
               {mode === 'add' && onDrop ? (
-                <DropZone onDrop={onDrop} inner onDragActive={setDragActive} />
+                <DropZone
+                  label={i18n('StickerCreator--DropStage--dragDrop')}
+                  onDrop={onDrop}
+                  inner
+                  onDragActive={setDragActive}
+                />
               ) : null}
               {mode === 'removable' ? (
                 <button
                   type="button"
+                  aria-label={i18n('StickerCreator--DropStage--removeSticker')}
                   className={styles.closeButton}
                   onClick={handleRemove}
                   // Reverse the mouseenter/leave logic for the remove button so
@@ -260,7 +267,12 @@ export const StickerFrame = React.memo(
               previewActive &&
               previewPopperRoot
                 ? createPortal(
-                    <Popper placement="bottom">
+                    <Popper
+                      placement="bottom"
+                      modifiers={[
+                        { name: 'offset', options: { offset: [undefined, 8] } },
+                      ]}
+                    >
                       {({ ref, style, arrowProps, placement }) => (
                         <StickerPreview
                           ref={ref}

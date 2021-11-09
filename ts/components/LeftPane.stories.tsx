@@ -7,13 +7,15 @@ import { action } from '@storybook/addon-actions';
 import { select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 
-import { LeftPane, LeftPaneMode, PropsType } from './LeftPane';
+import type { PropsType } from './LeftPane';
+import { LeftPane, LeftPaneMode } from './LeftPane';
 import { CaptchaDialog } from './CaptchaDialog';
-import { ConversationType } from '../state/ducks/conversations';
+import type { ConversationType } from '../state/ducks/conversations';
 import { MessageSearchResult } from './conversationList/MessageSearchResult';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
+import { StorybookThemeContext } from '../../.storybook/StorybookThemeContext';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -72,19 +74,28 @@ const defaultModeSpecificProps = {
   pinnedConversations,
   conversations: defaultConversations,
   archivedConversations: defaultArchivedConversations,
+  isAboutToSearchInAConversation: false,
+  startSearchCounter: 0,
 };
 
 const emptySearchResultsGroup = { isLoading: false, results: [] };
 
-const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
+const useProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
+  badgesById: {},
   cantAddContactToGroup: action('cantAddContactToGroup'),
+  canResizeLeftPane: true,
   clearGroupCreationError: action('clearGroupCreationError'),
+  clearSearch: action('clearSearch'),
   closeCantAddContactToGroupModal: action('closeCantAddContactToGroupModal'),
   closeMaximumGroupSizeModal: action('closeMaximumGroupSizeModal'),
   closeRecommendedGroupSizeModal: action('closeRecommendedGroupSizeModal'),
+  composeDeleteAvatarFromDisk: action('composeDeleteAvatarFromDisk'),
+  composeReplaceAvatar: action('composeReplaceAvatar'),
+  composeSaveAvatarToDisk: action('composeSaveAvatarToDisk'),
   createGroup: action('createGroup'),
   i18n,
   modeSpecificProps: defaultModeSpecificProps,
+  preferredWidthFromStorage: 320,
   openConversationInternal: action('openConversationInternal'),
   regionCode: 'US',
   challengeStatus: select(
@@ -95,7 +106,7 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
   setChallengeStatus: action('setChallengeStatus'),
   renderExpiredBuildDialog: () => <div />,
   renderMainHeader: () => <div />,
-  renderMessageSearchResult: (id: string, style: React.CSSProperties) => (
+  renderMessageSearchResult: (id: string) => (
     <MessageSearchResult
       body="Lorem ipsum wow"
       bodyRanges={[]}
@@ -106,7 +117,6 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
       openConversationInternal={action('openConversationInternal')}
       sentAt={1587358800000}
       snippet="Lorem <<left>>ipsum<<right>> wow"
-      style={style}
       to={defaultConversations[1]}
     />
   ),
@@ -123,6 +133,8 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
   ),
   selectedConversationId: undefined,
   selectedMessageId: undefined,
+  savePreferredLeftPaneWidth: action('savePreferredLeftPaneWidth'),
+  searchInConversation: action('searchInConversation'),
   setComposeSearchTerm: action('setComposeSearchTerm'),
   setComposeGroupAvatar: action('setComposeGroupAvatar'),
   setComposeGroupName: action('setComposeGroupName'),
@@ -134,10 +146,14 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
   startNewConversationFromPhoneNumber: action(
     'startNewConversationFromPhoneNumber'
   ),
+  startSearch: action('startSearch'),
   startSettingGroupMetadata: action('startSettingGroupMetadata'),
+  theme: React.useContext(StorybookThemeContext),
+  toggleComposeEditingAvatar: action('toggleComposeEditingAvatar'),
   toggleConversationInChooseMembers: action(
     'toggleConversationInChooseMembers'
   ),
+  updateSearchTerm: action('updateSearchTerm'),
 
   ...overrideProps,
 });
@@ -146,12 +162,14 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
 
 story.add('Inbox: no conversations', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Inbox,
         pinnedConversations: [],
         conversations: [],
         archivedConversations: [],
+        isAboutToSearchInAConversation: false,
+        startSearchCounter: 0,
       },
     })}
   />
@@ -159,12 +177,14 @@ story.add('Inbox: no conversations', () => (
 
 story.add('Inbox: only pinned conversations', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Inbox,
         pinnedConversations,
         conversations: [],
         archivedConversations: [],
+        isAboutToSearchInAConversation: false,
+        startSearchCounter: 0,
       },
     })}
   />
@@ -172,12 +192,14 @@ story.add('Inbox: only pinned conversations', () => (
 
 story.add('Inbox: only non-pinned conversations', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Inbox,
         pinnedConversations: [],
         conversations: defaultConversations,
         archivedConversations: [],
+        isAboutToSearchInAConversation: false,
+        startSearchCounter: 0,
       },
     })}
   />
@@ -185,12 +207,14 @@ story.add('Inbox: only non-pinned conversations', () => (
 
 story.add('Inbox: only archived conversations', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Inbox,
         pinnedConversations: [],
         conversations: [],
         archivedConversations: defaultArchivedConversations,
+        isAboutToSearchInAConversation: false,
+        startSearchCounter: 0,
       },
     })}
   />
@@ -198,12 +222,14 @@ story.add('Inbox: only archived conversations', () => (
 
 story.add('Inbox: pinned and archived conversations', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Inbox,
         pinnedConversations,
         conversations: [],
         archivedConversations: defaultArchivedConversations,
+        isAboutToSearchInAConversation: false,
+        startSearchCounter: 0,
       },
     })}
   />
@@ -211,12 +237,14 @@ story.add('Inbox: pinned and archived conversations', () => (
 
 story.add('Inbox: non-pinned and archived conversations', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Inbox,
         pinnedConversations: [],
         conversations: defaultConversations,
         archivedConversations: defaultArchivedConversations,
+        isAboutToSearchInAConversation: false,
+        startSearchCounter: 0,
       },
     })}
   />
@@ -224,26 +252,28 @@ story.add('Inbox: non-pinned and archived conversations', () => (
 
 story.add('Inbox: pinned and non-pinned conversations', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Inbox,
         pinnedConversations,
         conversations: defaultConversations,
         archivedConversations: [],
+        isAboutToSearchInAConversation: false,
+        startSearchCounter: 0,
       },
     })}
   />
 ));
 
 story.add('Inbox: pinned, non-pinned, and archived conversations', () => (
-  <LeftPane {...createProps()} />
+  <LeftPane {...useProps()} />
 ));
 
 // Search stories
 
 story.add('Search: no results when searching everywhere', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Search,
         conversationResults: emptySearchResultsGroup,
@@ -258,7 +288,7 @@ story.add('Search: no results when searching everywhere', () => (
 
 story.add('Search: no results when searching everywhere (SMS)', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Search,
         conversationResults: emptySearchResultsGroup,
@@ -273,7 +303,7 @@ story.add('Search: no results when searching everywhere (SMS)', () => (
 
 story.add('Search: no results when searching in a conversation', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Search,
         conversationResults: emptySearchResultsGroup,
@@ -289,7 +319,7 @@ story.add('Search: no results when searching in a conversation', () => (
 
 story.add('Search: all results loading', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Search,
         conversationResults: { isLoading: true },
@@ -304,7 +334,7 @@ story.add('Search: all results loading', () => (
 
 story.add('Search: some results loading', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Search,
         conversationResults: {
@@ -322,7 +352,7 @@ story.add('Search: some results loading', () => (
 
 story.add('Search: has conversations and contacts, but not messages', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Search,
         conversationResults: {
@@ -340,7 +370,7 @@ story.add('Search: has conversations and contacts, but not messages', () => (
 
 story.add('Search: all results', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Search,
         conversationResults: {
@@ -366,10 +396,12 @@ story.add('Search: all results', () => (
 
 story.add('Archive: no archived conversations', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Archive,
         archivedConversations: [],
+        searchConversation: undefined,
+        searchTerm: '',
       },
     })}
   />
@@ -377,10 +409,29 @@ story.add('Archive: no archived conversations', () => (
 
 story.add('Archive: archived conversations', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Archive,
         archivedConversations: defaultConversations,
+        searchConversation: undefined,
+        searchTerm: '',
+      },
+    })}
+  />
+));
+
+story.add('Archive: searching a conversation', () => (
+  <LeftPane
+    {...useProps({
+      modeSpecificProps: {
+        mode: LeftPaneMode.Archive,
+        archivedConversations: defaultConversations,
+        searchConversation: defaultConversations[0],
+        searchTerm: 'foo bar',
+        conversationResults: { isLoading: true },
+        contactResults: { isLoading: true },
+        messageResults: { isLoading: true },
+        primarySendsSms: false,
       },
     })}
   />
@@ -390,7 +441,7 @@ story.add('Archive: archived conversations', () => (
 
 story.add('Compose: no contacts or groups', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Compose,
         composeContacts: [],
@@ -404,7 +455,7 @@ story.add('Compose: no contacts or groups', () => (
 
 story.add('Compose: some contacts, no groups, no search term', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Compose,
         composeContacts: defaultConversations,
@@ -418,7 +469,7 @@ story.add('Compose: some contacts, no groups, no search term', () => (
 
 story.add('Compose: some contacts, no groups, with a search term', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Compose,
         composeContacts: defaultConversations,
@@ -432,7 +483,7 @@ story.add('Compose: some contacts, no groups, with a search term', () => (
 
 story.add('Compose: some groups, no contacts, no search term', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Compose,
         composeContacts: [],
@@ -446,7 +497,7 @@ story.add('Compose: some groups, no contacts, no search term', () => (
 
 story.add('Compose: some groups, no contacts, with search term', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Compose,
         composeContacts: [],
@@ -460,7 +511,7 @@ story.add('Compose: some groups, no contacts, with search term', () => (
 
 story.add('Compose: some contacts, some groups, no search term', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Compose,
         composeContacts: defaultConversations,
@@ -474,7 +525,7 @@ story.add('Compose: some contacts, some groups, no search term', () => (
 
 story.add('Compose: some contacts, some groups, with a search term', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Compose,
         composeContacts: defaultConversations,
@@ -490,12 +541,14 @@ story.add('Compose: some contacts, some groups, with a search term', () => (
 
 story.add('Captcha dialog: required', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Inbox,
         pinnedConversations,
         conversations: defaultConversations,
         archivedConversations: [],
+        isAboutToSearchInAConversation: false,
+        startSearchCounter: 0,
       },
       challengeStatus: 'required',
     })}
@@ -504,12 +557,14 @@ story.add('Captcha dialog: required', () => (
 
 story.add('Captcha dialog: pending', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.Inbox,
         pinnedConversations,
         conversations: defaultConversations,
         archivedConversations: [],
+        isAboutToSearchInAConversation: false,
+        startSearchCounter: 0,
       },
       challengeStatus: 'pending',
     })}
@@ -520,7 +575,7 @@ story.add('Captcha dialog: pending', () => (
 
 story.add('Group Metadata: No Timer', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.SetGroupMetadata,
         groupAvatar: undefined,
@@ -528,7 +583,9 @@ story.add('Group Metadata: No Timer', () => (
         groupExpireTimer: 0,
         hasError: false,
         isCreating: false,
+        isEditingAvatar: false,
         selectedContacts: defaultConversations,
+        userAvatarData: [],
       },
     })}
   />
@@ -536,7 +593,7 @@ story.add('Group Metadata: No Timer', () => (
 
 story.add('Group Metadata: Regular Timer', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.SetGroupMetadata,
         groupAvatar: undefined,
@@ -544,7 +601,9 @@ story.add('Group Metadata: Regular Timer', () => (
         groupExpireTimer: 24 * 3600,
         hasError: false,
         isCreating: false,
+        isEditingAvatar: false,
         selectedContacts: defaultConversations,
+        userAvatarData: [],
       },
     })}
   />
@@ -552,7 +611,7 @@ story.add('Group Metadata: Regular Timer', () => (
 
 story.add('Group Metadata: Custom Timer', () => (
   <LeftPane
-    {...createProps({
+    {...useProps({
       modeSpecificProps: {
         mode: LeftPaneMode.SetGroupMetadata,
         groupAvatar: undefined,
@@ -560,7 +619,9 @@ story.add('Group Metadata: Custom Timer', () => (
         groupExpireTimer: 7 * 3600,
         hasError: false,
         isCreating: false,
+        isEditingAvatar: false,
         selectedContacts: defaultConversations,
+        userAvatarData: [],
       },
     })}
   />

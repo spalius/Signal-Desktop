@@ -1,18 +1,19 @@
 // Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import type { ReactNode } from 'react';
 import React from 'react';
 import classNames from 'classnames';
-import { LocalizerType } from '../types/Util';
+import type { LocalizerType } from '../types/Util';
 import { Tooltip } from './Tooltip';
 import { Theme } from '../util/theme';
 
 export type PropsType = {
-  canPip?: boolean;
   i18n: LocalizerType;
   isInSpeakerView?: boolean;
   isGroupCall?: boolean;
-  message?: string;
+  message?: ReactNode;
+  onCancel?: () => void;
   participantCount: number;
   showParticipantsList: boolean;
   title?: string;
@@ -23,11 +24,11 @@ export type PropsType = {
 };
 
 export const CallingHeader = ({
-  canPip = false,
   i18n,
   isInSpeakerView,
   isGroupCall = false,
   message,
+  onCancel,
   participantCount,
   showParticipantsList,
   title,
@@ -44,7 +45,7 @@ export const CallingHeader = ({
       <div className="module-ongoing-call__header-message">{message}</div>
     ) : null}
     <div className="module-calling-tools">
-      {isGroupCall ? (
+      {isGroupCall && participantCount ? (
         <div className="module-calling-tools__button">
           <Tooltip
             content={i18n('calling__participants', [String(participantCount)])}
@@ -111,13 +112,25 @@ export const CallingHeader = ({
           </Tooltip>
         </div>
       )}
-      {canPip && (
+      {togglePip && (
         <div className="module-calling-tools__button">
           <Tooltip content={i18n('calling__pip--on')} theme={Theme.Dark}>
             <button
               aria-label={i18n('calling__pip--on')}
               className="module-calling-button__pip"
               onClick={togglePip}
+              type="button"
+            />
+          </Tooltip>
+        </div>
+      )}
+      {onCancel && (
+        <div className="module-calling-tools__button">
+          <Tooltip content={i18n('cancel')} theme={Theme.Dark}>
+            <button
+              aria-label={i18n('cancel')}
+              className="module-calling-button__cancel"
+              onClick={onCancel}
               type="button"
             />
           </Tooltip>

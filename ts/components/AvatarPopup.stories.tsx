@@ -7,9 +7,11 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { boolean, select, text } from '@storybook/addon-knobs';
 
-import { AvatarPopup, Props } from './AvatarPopup';
-import { AvatarColors, AvatarColorType } from '../types/Colors';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import type { Props } from './AvatarPopup';
+import { AvatarPopup } from './AvatarPopup';
+import type { AvatarColorType } from '../types/Colors';
+import { AvatarColors } from '../types/Colors';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 
 const i18n = setupI18n('en', enMessages);
@@ -30,24 +32,25 @@ const conversationTypeMap: Record<string, Props['conversationType']> = {
 const createProps = (overrideProps: Partial<Props> = {}): Props => ({
   acceptedMessageRequest: true,
   avatarPath: text('avatarPath', overrideProps.avatarPath || ''),
-  color: select('color', colorMap, overrideProps.color || 'blue'),
+  color: select('color', colorMap, overrideProps.color || AvatarColors[0]),
   conversationType: select(
     'conversationType',
     conversationTypeMap,
     overrideProps.conversationType || 'direct'
   ),
+  hasPendingUpdate: Boolean(overrideProps.hasPendingUpdate),
   i18n,
   isMe: true,
   name: text('name', overrideProps.name || ''),
   noteToSelf: boolean('noteToSelf', overrideProps.noteToSelf || false),
-  onClick: action('onClick'),
-  onSetChatColor: action('onSetChatColor'),
+  onEditProfile: action('onEditProfile'),
   onViewArchive: action('onViewArchive'),
   onViewPreferences: action('onViewPreferences'),
   phoneNumber: text('phoneNumber', overrideProps.phoneNumber || ''),
   profileName: text('profileName', overrideProps.profileName || ''),
   sharedGroupNames: [],
   size: 80,
+  startUpdate: action('startUpdate'),
   style: {},
   title: text('title', overrideProps.title || ''),
 });
@@ -80,6 +83,14 @@ stories.add('Phone Number', () => {
   const props = createProps({
     profileName: 'Sam Neill',
     phoneNumber: '(555) 867-5309',
+  });
+
+  return <AvatarPopup {...props} />;
+});
+
+stories.add('Update Available', () => {
+  const props = createProps({
+    hasPendingUpdate: true,
   });
 
   return <AvatarPopup {...props} />;

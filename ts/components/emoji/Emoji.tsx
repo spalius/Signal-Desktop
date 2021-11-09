@@ -3,7 +3,8 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import { emojiToImage, getImagePath, SkinToneKey } from './lib';
+import type { SkinToneKey } from './lib';
+import { emojiToImage, getImagePath } from './lib';
 
 export const EmojiSizes = [16, 18, 20, 24, 28, 32, 48, 64, 66] as const;
 
@@ -15,6 +16,7 @@ export type OwnProps = {
   skinTone?: SkinToneKey | number;
   size?: EmojiSizeType;
   children?: React.ReactNode;
+  title?: string;
 };
 
 export type Props = OwnProps &
@@ -27,7 +29,15 @@ export type Props = OwnProps &
 export const Emoji = React.memo(
   React.forwardRef<HTMLDivElement, Props>(
     (
-      { style = {}, size = 28, shortName, skinTone, emoji, className }: Props,
+      {
+        className,
+        emoji,
+        shortName,
+        size = 28,
+        skinTone,
+        style = {},
+        title,
+      }: Props,
       ref
     ) => {
       let image = '';
@@ -50,8 +60,8 @@ export const Emoji = React.memo(
           <img
             className={`module-emoji__image--${size}px`}
             src={image}
-            aria-label={emoji}
-            title={emoji}
+            aria-label={title ?? emoji}
+            title={title ?? emoji}
           />
         </span>
       );

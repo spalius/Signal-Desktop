@@ -4,19 +4,26 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
+import type {
   ConversationAttributesType,
   ConversationModelCollectionType,
   MessageAttributesType,
   MessageModelCollectionType,
 } from '../model-types.d';
-import { MessageModel } from '../models/messages';
-import { ConversationModel } from '../models/conversations';
-import { StoredJob } from '../jobs/types';
-import { ReactionType } from '../types/Reactions';
-import { ConversationColorType, CustomColorType } from '../types/Colors';
-import { StorageAccessType } from '../types/Storage.d';
-import { AttachmentType } from '../types/Attachment';
+import type { MessageModel } from '../models/messages';
+import type { ConversationModel } from '../models/conversations';
+import type { StoredJob } from '../jobs/types';
+import type { ReactionType } from '../types/Reactions';
+import type { ConversationColorType, CustomColorType } from '../types/Colors';
+import type { ProcessGroupCallRingRequestResult } from '../types/Calling';
+import type { StorageAccessType } from '../types/Storage.d';
+import type { AttachmentType } from '../types/Attachment';
+import type { BodyRangesType } from '../types/Util';
+import type { QualifiedAddressStringType } from '../types/QualifiedAddress';
+import type { UUIDStringType } from '../types/UUID';
+import type { BadgeType } from '../badges/types';
+import type { RemoveAllConfiguration } from '../types/RemoveAllConfiguration';
+import type { LoggerType } from '../types/Logging';
 
 export type AttachmentDownloadJobTypeType =
   | 'long-message'
@@ -54,14 +61,17 @@ export type EmojiType = {
   shortName: string;
   lastUsage: number;
 };
+
 export type IdentityKeyType = {
   firstUse: boolean;
-  id: string;
+  id: UUIDStringType | `conversation:${string}`;
   nonblockingApproval: boolean;
-  publicKey: ArrayBuffer;
+  publicKey: Uint8Array;
   timestamp: number;
   verified: number;
 };
+export type IdentityKeyIdType = IdentityKeyType['id'];
+
 export type ItemKeyType = keyof StorageAccessType;
 export type AllItemsType = Partial<StorageAccessType>;
 export type ItemType<K extends ItemKeyType> = {
@@ -73,79 +83,119 @@ export type MessageTypeUnhydrated = {
   json: string;
 };
 export type PreKeyType = {
-  id: number;
-  privateKey: ArrayBuffer;
-  publicKey: ArrayBuffer;
+  id: `${UUIDStringType}:${number}`;
+  keyId: number;
+  ourUuid: UUIDStringType;
+  privateKey: Uint8Array;
+  publicKey: Uint8Array;
 };
+export type PreKeyIdType = PreKeyType['id'];
 export type SearchResultMessageType = {
   json: string;
   snippet: string;
 };
 export type ClientSearchResultMessageType = MessageType & {
   json: string;
-  bodyRanges: [];
+  bodyRanges: BodyRangesType;
   snippet: string;
 };
+
+export type SentProtoType = {
+  contentHint: number;
+  proto: Uint8Array;
+  timestamp: number;
+};
+export type SentProtoWithMessageIdsType = SentProtoType & {
+  messageIds: Array<string>;
+};
+export type SentRecipientsType = Record<string, Array<number>>;
+export type SentMessagesType = Array<string>;
+
+// These two are for test only
+export type SentRecipientsDBType = {
+  payloadId: number;
+  recipientUuid: string;
+  deviceId: number;
+};
+export type SentMessageDBType = {
+  payloadId: number;
+  messageId: string;
+};
+
 export type SenderKeyType = {
   // Primary key
-  id: string;
+  id: `${QualifiedAddressStringType}--${string}`;
   // These two are combined into one string to give us the final id
   senderId: string;
   distributionId: string;
   // Raw data to serialize/deserialize into signal-client SenderKeyRecord
-  data: Buffer;
+  data: Uint8Array;
   lastUpdatedDate: number;
 };
+export type SenderKeyIdType = SenderKeyType['id'];
 export type SessionType = {
-  id: string;
+  id: QualifiedAddressStringType;
+  ourUuid: UUIDStringType;
+  uuid: UUIDStringType;
   conversationId: string;
   deviceId: number;
   record: string;
   version?: number;
 };
+export type SessionIdType = SessionType['id'];
 export type SignedPreKeyType = {
   confirmed: boolean;
   // eslint-disable-next-line camelcase
   created_at: number;
-  id: number;
-  privateKey: ArrayBuffer;
-  publicKey: ArrayBuffer;
+  ourUuid: UUIDStringType;
+  id: `${UUIDStringType}:${number}`;
+  keyId: number;
+  privateKey: Uint8Array;
+  publicKey: Uint8Array;
 };
-export type StickerPackStatusType =
-  | 'known'
-  | 'ephemeral'
-  | 'downloaded'
-  | 'installed'
-  | 'pending'
-  | 'error';
+export type SignedPreKeyIdType = SignedPreKeyType['id'];
 
-export type StickerType = {
+export type StickerType = Readonly<{
   id: number;
   packId: string;
 
-  emoji: string | null;
+  emoji?: string;
   isCoverOnly: boolean;
   lastUsed?: number;
   path: string;
+
   width: number;
   height: number;
-};
-export type StickerPackType = {
+}>;
+
+export const StickerPackStatuses = [
+  'known',
+  'ephemeral',
+  'downloaded',
+  'installed',
+  'pending',
+  'error',
+] as const;
+
+export type StickerPackStatusType = typeof StickerPackStatuses[number];
+
+export type StickerPackType = Readonly<{
   id: string;
   key: string;
 
-  attemptedStatus: 'downloaded' | 'installed' | 'ephemeral';
+  attemptedStatus?: 'downloaded' | 'installed' | 'ephemeral';
   author: string;
   coverStickerId: number;
   createdAt: number;
   downloadAttempts: number;
-  installedAt: number | null;
-  lastUsed: number;
+  installedAt?: number;
+  lastUsed?: number;
   status: StickerPackStatusType;
   stickerCount: number;
-  stickers: ReadonlyArray<string>;
+  stickers: Record<string, StickerType>;
   title: string;
-};
+}>;
+
 export type UnprocessedType = {
   id: string;
   timestamp: number;
@@ -164,11 +214,29 @@ export type UnprocessedType = {
 export type UnprocessedUpdateType = {
   source?: string;
   sourceUuid?: string;
-  sourceDevice?: string;
+  sourceDevice?: number;
   serverGuid?: string;
   serverTimestamp?: number;
   decrypted?: string;
 };
+
+export type LastConversationMessagesServerType = {
+  activity?: MessageType;
+  preview?: MessageType;
+  hasUserInitiatedMessages: boolean;
+};
+
+export type LastConversationMessagesType = {
+  activity?: MessageModel;
+  preview?: MessageModel;
+  hasUserInitiatedMessages: boolean;
+};
+
+export type DeleteSentProtoRecipientOptionsType = Readonly<{
+  timestamp: number;
+  recipientUuid: string;
+  deviceId: number;
+}>;
 
 export type DataInterface = {
   close: () => Promise<void>;
@@ -176,23 +244,27 @@ export type DataInterface = {
   removeIndexedDBFiles: () => Promise<void>;
 
   createOrUpdateIdentityKey: (data: IdentityKeyType) => Promise<void>;
-  getIdentityKeyById: (id: string) => Promise<IdentityKeyType | undefined>;
+  getIdentityKeyById: (
+    id: IdentityKeyIdType
+  ) => Promise<IdentityKeyType | undefined>;
   bulkAddIdentityKeys: (array: Array<IdentityKeyType>) => Promise<void>;
-  removeIdentityKeyById: (id: string) => Promise<void>;
+  removeIdentityKeyById: (id: IdentityKeyIdType) => Promise<void>;
   removeAllIdentityKeys: () => Promise<void>;
   getAllIdentityKeys: () => Promise<Array<IdentityKeyType>>;
 
   createOrUpdatePreKey: (data: PreKeyType) => Promise<void>;
-  getPreKeyById: (id: number) => Promise<PreKeyType | undefined>;
+  getPreKeyById: (id: PreKeyIdType) => Promise<PreKeyType | undefined>;
   bulkAddPreKeys: (array: Array<PreKeyType>) => Promise<void>;
-  removePreKeyById: (id: number) => Promise<void>;
+  removePreKeyById: (id: PreKeyIdType) => Promise<void>;
   removeAllPreKeys: () => Promise<void>;
   getAllPreKeys: () => Promise<Array<PreKeyType>>;
 
   createOrUpdateSignedPreKey: (data: SignedPreKeyType) => Promise<void>;
-  getSignedPreKeyById: (id: number) => Promise<SignedPreKeyType | undefined>;
+  getSignedPreKeyById: (
+    id: SignedPreKeyIdType
+  ) => Promise<SignedPreKeyType | undefined>;
   bulkAddSignedPreKeys: (array: Array<SignedPreKeyType>) => Promise<void>;
-  removeSignedPreKeyById: (id: number) => Promise<void>;
+  removeSignedPreKeyById: (id: SignedPreKeyIdType) => Promise<void>;
   removeAllSignedPreKeys: () => Promise<void>;
   getAllSignedPreKeys: () => Promise<Array<SignedPreKeyType>>;
 
@@ -203,10 +275,40 @@ export type DataInterface = {
   getAllItems: () => Promise<AllItemsType>;
 
   createOrUpdateSenderKey: (key: SenderKeyType) => Promise<void>;
-  getSenderKeyById: (id: string) => Promise<SenderKeyType | undefined>;
+  getSenderKeyById: (id: SenderKeyIdType) => Promise<SenderKeyType | undefined>;
   removeAllSenderKeys: () => Promise<void>;
   getAllSenderKeys: () => Promise<Array<SenderKeyType>>;
-  removeSenderKeyById: (id: string) => Promise<void>;
+  removeSenderKeyById: (id: SenderKeyIdType) => Promise<void>;
+
+  insertSentProto: (
+    proto: SentProtoType,
+    options: {
+      recipients: SentRecipientsType;
+      messageIds: SentMessagesType;
+    }
+  ) => Promise<number>;
+  deleteSentProtosOlderThan: (timestamp: number) => Promise<void>;
+  deleteSentProtoByMessageId: (messageId: string) => Promise<void>;
+  insertProtoRecipients: (options: {
+    id: number;
+    recipientUuid: string;
+    deviceIds: Array<number>;
+  }) => Promise<void>;
+  deleteSentProtoRecipient: (
+    options:
+      | DeleteSentProtoRecipientOptionsType
+      | ReadonlyArray<DeleteSentProtoRecipientOptionsType>
+  ) => Promise<void>;
+  getSentProtoByRecipient: (options: {
+    now: number;
+    recipientUuid: string;
+    timestamp: number;
+  }) => Promise<SentProtoWithMessageIdsType | undefined>;
+  removeAllSentProtos: () => Promise<void>;
+  getAllSentProtos: () => Promise<Array<SentProtoType>>;
+  // Test-only
+  _getAllSentProtoRecipients: () => Promise<Array<SentRecipientsDBType>>;
+  _getAllSentProtoMessageIds: () => Promise<Array<SentMessageDBType>>;
 
   createOrUpdateSession: (data: SessionType) => Promise<void>;
   createOrUpdateSessions: (array: Array<SessionType>) => Promise<void>;
@@ -215,7 +317,7 @@ export type DataInterface = {
     unprocessed: Array<UnprocessedType>;
   }): Promise<void>;
   bulkAddSessions: (array: Array<SessionType>) => Promise<void>;
-  removeSessionById: (id: string) => Promise<void>;
+  removeSessionById: (id: SessionIdType) => Promise<void>;
   removeSessionsByConversation: (conversationId: string) => Promise<void>;
   removeAllSessions: () => Promise<void>;
   getAllSessions: () => Promise<Array<SessionType>>;
@@ -232,8 +334,19 @@ export type DataInterface = {
     options?: { limit?: number }
   ) => Promise<Array<ConversationType>>;
 
+  getMessagesById: (messageIds: Array<string>) => Promise<Array<MessageType>>;
+  saveMessage: (
+    data: MessageType,
+    options?: {
+      jobToInsert?: StoredJob;
+      forceSave?: boolean;
+    }
+  ) => Promise<string>;
+  saveMessages: (
+    arrayOfMessages: Array<MessageType>,
+    options?: { forceSave?: boolean }
+  ) => Promise<void>;
   getMessageCount: (conversationId?: string) => Promise<number>;
-  hasUserInitiatedMessages: (conversationId: string) => Promise<boolean>;
   getAllMessageIds: () => Promise<Array<string>>;
   getMessageMetricsForConversation: (
     conversationId: string
@@ -248,9 +361,39 @@ export type DataInterface = {
   ) => Promise<void>;
   getNextTapToViewMessageTimestampToAgeOut: () => Promise<undefined | number>;
 
+  getUnreadCountForConversation: (conversationId: string) => Promise<number>;
+  getUnreadByConversationAndMarkRead: (
+    conversationId: string,
+    newestUnreadId: number,
+    readAt?: number
+  ) => Promise<
+    Array<
+      Pick<MessageType, 'id' | 'source' | 'sourceUuid' | 'sent_at' | 'type'>
+    >
+  >;
+  getUnreadReactionsAndMarkRead: (
+    conversationId: string,
+    newestUnreadId: number
+  ) => Promise<
+    Array<
+      Pick<ReactionType, 'targetAuthorUuid' | 'targetTimestamp' | 'messageId'>
+    >
+  >;
+  markReactionAsRead: (
+    targetAuthorUuid: string,
+    targetTimestamp: number
+  ) => Promise<ReactionType | undefined>;
+  removeReactionFromConversation: (reaction: {
+    emoji: string;
+    fromId: string;
+    targetAuthorUuid: string;
+    targetTimestamp: number;
+  }) => Promise<void>;
+  addReaction: (reactionObj: ReactionType) => Promise<void>;
+  _getAllReactions: () => Promise<Array<ReactionType>>;
+
   getUnprocessedCount: () => Promise<number>;
   getAllUnprocessed: () => Promise<Array<UnprocessedType>>;
-  updateUnprocessedAttempts: (id: string, attempts: number) => Promise<void>;
   updateUnprocessedWithData: (
     id: string,
     data: UnprocessedUpdateType
@@ -291,7 +434,7 @@ export type DataInterface = {
   deleteStickerPackReference: (
     messageId: string,
     packId: string
-  ) => Promise<Array<string>>;
+  ) => Promise<ReadonlyArray<string> | undefined>;
   getStickerCount: () => Promise<number>;
   deleteStickerPack: (packId: string) => Promise<Array<string>>;
   getAllStickerPacks: () => Promise<Array<StickerPackType>>;
@@ -304,8 +447,12 @@ export type DataInterface = {
   updateEmojiUsage: (shortName: string, timeUsed?: number) => Promise<void>;
   getRecentEmojis: (limit?: number) => Promise<Array<EmojiType>>;
 
+  getAllBadges(): Promise<Array<BadgeType>>;
+  updateOrCreateBadges(badges: ReadonlyArray<BadgeType>): Promise<void>;
+  badgeImageFileDownloaded(url: string, localPath: string): Promise<void>;
+
   removeAll: () => Promise<void>;
-  removeAllConfiguration: () => Promise<void>;
+  removeAllConfiguration: (type?: RemoveAllConfiguration) => Promise<void>;
 
   getMessagesNeedingUpgrade: (
     limit: number,
@@ -331,6 +478,12 @@ export type DataInterface = {
   insertJob(job: Readonly<StoredJob>): Promise<void>;
   deleteJob(id: string): Promise<void>;
 
+  processGroupCallRingRequest(
+    ringId: bigint
+  ): Promise<ProcessGroupCallRingRequestResult>;
+  processGroupCallRingCancelation(ringId: bigint): Promise<void>;
+  cleanExpiredGroupCallRings(): Promise<void>;
+
   updateAllConversationColors: (
     conversationColor?: ConversationColorType,
     customColorData?: {
@@ -338,6 +491,9 @@ export type DataInterface = {
       value: CustomColorType;
     }
   ) => Promise<void>;
+
+  getMaxMessageCounter(): Promise<number | undefined>;
+  getStatisticsForLogging(): Promise<Record<string, string>>;
 };
 
 // The reason for client/server divergence is the need to inject Backbone models and
@@ -350,7 +506,9 @@ export type DataInterface = {
 
 export type ServerInterface = DataInterface & {
   getAllConversations: () => Promise<Array<ConversationType>>;
-  getAllGroupsInvolvingId: (id: string) => Promise<Array<ConversationType>>;
+  getAllGroupsInvolvingUuid: (
+    id: UUIDStringType
+  ) => Promise<Array<ConversationType>>;
   getAllPrivateConversations: () => Promise<Array<ConversationType>>;
   getConversationById: (id: string) => Promise<ConversationType | undefined>;
   getExpiredMessages: () => Promise<Array<MessageType>>;
@@ -358,7 +516,7 @@ export type ServerInterface = DataInterface & {
   getMessageBySender: (options: {
     source: string;
     sourceUuid: string;
-    sourceDevice: string;
+    sourceDevice: number;
     sent_at: number;
   }) => Promise<Array<MessageType>>;
   getMessagesBySentAt: (sentAt: number) => Promise<Array<MessageType>>;
@@ -375,42 +533,11 @@ export type ServerInterface = DataInterface & {
     conversationId: string,
     options?: { limit?: number; receivedAt?: number; sentAt?: number }
   ) => Promise<Array<MessageTypeUnhydrated>>;
-  getLastConversationActivity: (options: {
+  getLastConversationMessages: (options: {
     conversationId: string;
-    ourConversationId: string;
-  }) => Promise<MessageType | undefined>;
-  getLastConversationPreview: (options: {
-    conversationId: string;
-    ourConversationId: string;
-  }) => Promise<MessageType | undefined>;
+    ourUuid: UUIDStringType;
+  }) => Promise<LastConversationMessagesServerType>;
   getTapToViewMessagesNeedingErase: () => Promise<Array<MessageType>>;
-  getUnreadCountForConversation: (conversationId: string) => Promise<number>;
-  getUnreadByConversationAndMarkRead: (
-    conversationId: string,
-    newestUnreadId: number,
-    readAt?: number
-  ) => Promise<
-    Array<
-      Pick<MessageType, 'id' | 'source' | 'sourceUuid' | 'sent_at' | 'type'>
-    >
-  >;
-  getUnreadReactionsAndMarkRead: (
-    conversationId: string,
-    newestUnreadId: number
-  ) => Promise<
-    Array<Pick<ReactionType, 'targetAuthorUuid' | 'targetTimestamp'>>
-  >;
-  markReactionAsRead: (
-    targetAuthorUuid: string,
-    targetTimestamp: number
-  ) => Promise<ReactionType | undefined>;
-  removeReactionFromConversation: (reaction: {
-    emoji: string;
-    fromId: string;
-    targetAuthorUuid: string;
-    targetTimestamp: number;
-  }) => Promise<void>;
-  addReaction: (reactionObj: ReactionType) => Promise<void>;
   removeConversation: (id: Array<string> | string) => Promise<void>;
   removeMessage: (id: string) => Promise<void>;
   removeMessages: (ids: Array<string>) => Promise<void>;
@@ -423,14 +550,6 @@ export type ServerInterface = DataInterface & {
     conversationId: string,
     options?: { limit?: number }
   ) => Promise<Array<SearchResultMessageType>>;
-  saveMessage: (
-    data: MessageType,
-    options: { forceSave?: boolean }
-  ) => Promise<string>;
-  saveMessages: (
-    arrayOfMessages: Array<MessageType>,
-    options: { forceSave?: boolean }
-  ) => Promise<void>;
   updateConversation: (data: ConversationType) => Promise<void>;
 
   // For testing only
@@ -438,7 +557,13 @@ export type ServerInterface = DataInterface & {
 
   // Server-only
 
-  initialize: (options: { configDir: string; key: string }) => Promise<void>;
+  getCorruptionLog: () => string;
+
+  initialize: (options: {
+    configDir: string;
+    key: string;
+    logger: LoggerType;
+  }) => Promise<void>;
 
   initializeRenderer: (options: {
     configDir: string;
@@ -452,14 +577,15 @@ export type ServerInterface = DataInterface & {
   removeKnownDraftAttachments: (
     allStickers: Array<string>
   ) => Promise<Array<string>>;
+  getAllBadgeImageFileLocalPaths: () => Promise<Set<string>>;
 };
 
 export type ClientInterface = DataInterface & {
   getAllConversations: (options: {
     ConversationCollection: typeof ConversationModelCollectionType;
   }) => Promise<ConversationModelCollectionType>;
-  getAllGroupsInvolvingId: (
-    id: string,
+  getAllGroupsInvolvingUuid: (
+    id: UUIDStringType,
     options: {
       ConversationCollection: typeof ConversationModelCollectionType;
     }
@@ -482,7 +608,7 @@ export type ClientInterface = DataInterface & {
     data: {
       source: string;
       sourceUuid: string;
-      sourceDevice: string;
+      sourceDevice: number;
       sent_at: number;
     },
     options: { Message: typeof MessageModel }
@@ -510,46 +636,14 @@ export type ClientInterface = DataInterface & {
       MessageCollection: typeof MessageModelCollectionType;
     }
   ) => Promise<MessageModelCollectionType>;
-  getLastConversationActivity: (options: {
+  getLastConversationMessages: (options: {
     conversationId: string;
-    ourConversationId: string;
+    ourUuid: UUIDStringType;
     Message: typeof MessageModel;
-  }) => Promise<MessageModel | undefined>;
-  getLastConversationPreview: (options: {
-    conversationId: string;
-    ourConversationId: string;
-    Message: typeof MessageModel;
-  }) => Promise<MessageModel | undefined>;
+  }) => Promise<LastConversationMessagesType>;
   getTapToViewMessagesNeedingErase: (options: {
     MessageCollection: typeof MessageModelCollectionType;
   }) => Promise<MessageModelCollectionType>;
-  getUnreadCountForConversation: (conversationId: string) => Promise<number>;
-  getUnreadByConversationAndMarkRead: (
-    conversationId: string,
-    newestUnreadId: number,
-    readAt?: number
-  ) => Promise<
-    Array<
-      Pick<MessageType, 'id' | 'source' | 'sourceUuid' | 'sent_at' | 'type'>
-    >
-  >;
-  getUnreadReactionsAndMarkRead: (
-    conversationId: string,
-    newestUnreadId: number
-  ) => Promise<
-    Array<Pick<ReactionType, 'targetAuthorUuid' | 'targetTimestamp'>>
-  >;
-  markReactionAsRead: (
-    targetAuthorUuid: string,
-    targetTimestamp: number
-  ) => Promise<ReactionType | undefined>;
-  removeReactionFromConversation: (reaction: {
-    emoji: string;
-    fromId: string;
-    targetAuthorUuid: string;
-    targetTimestamp: number;
-  }) => Promise<void>;
-  addReaction: (reactionObj: ReactionType) => Promise<void>;
   removeConversation: (
     id: string,
     options: { Conversation: typeof ConversationModel }
@@ -561,14 +655,6 @@ export type ClientInterface = DataInterface & {
   removeMessages: (
     ids: Array<string>,
     options: { Message: typeof MessageModel }
-  ) => Promise<void>;
-  saveMessage: (
-    data: MessageType,
-    options: { forceSave?: boolean; Message: typeof MessageModel }
-  ) => Promise<string>;
-  saveMessages: (
-    arrayOfMessages: Array<MessageType>,
-    options: { forceSave?: boolean; Message: typeof MessageModel }
   ) => Promise<void>;
   searchMessages: (
     query: string,
@@ -610,6 +696,7 @@ export type ClientInterface = DataInterface & {
   // whether we should use IPC to use the database in the main process or
   // use the db already running in the renderer.
   goBackToMainProcess: () => Promise<void>;
+  startInRendererProcess: (isTesting?: boolean) => Promise<void>;
 };
 
 export type ClientJobType = {

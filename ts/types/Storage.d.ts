@@ -1,11 +1,12 @@
 // Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import type { AudioDevice } from 'ringrtc';
 import type {
   CustomColorsItemType,
   DefaultConversationColorType,
 } from './Colors';
-import type { AudioDevice } from './Calling';
+import type { AudioDeviceModule } from '../calling/audioDeviceModule';
 import type { PhoneNumberDiscoverability } from '../util/phoneNumberDiscoverability';
 import type { PhoneNumberSharingMode } from '../util/phoneNumberSharingMode';
 import type { RetryItemType } from '../util/retryPlaceholders';
@@ -21,12 +22,28 @@ import type {
 
 export type SerializedCertificateType = {
   expires: number;
-  serialized: ArrayBuffer;
+  serialized: Uint8Array;
 };
 
+export type ZoomFactorType = 0.75 | 1 | 1.25 | 1.5 | 2 | number;
+
+export type ThemeSettingType = 'system' | 'light' | 'dark';
+
+export type NotificationSettingType = 'message' | 'name' | 'count' | 'off';
+
+export type IdentityKeyMap = Record<
+  string,
+  {
+    privKey: string;
+    pubKey: string;
+  }
+>;
+
+// This should be in sync with `STORAGE_UI_KEYS` in `ts/types/StorageUIKeys.ts`.
 export type StorageAccessType = {
   'always-relay-calls': boolean;
   'audio-notification': boolean;
+  'auto-download-update': boolean;
   'badge-count-muted-conversations': boolean;
   'blocked-groups': Array<string>;
   'blocked-uuids': Array<string>;
@@ -36,10 +53,10 @@ export type StorageAccessType = {
   'system-tray-setting': SystemTraySetting;
   'incoming-call-notification': boolean;
   'notification-draw-attention': boolean;
-  'notification-setting': 'message' | 'name' | 'count' | 'off';
+  'notification-setting': NotificationSettingType;
   'read-receipt-setting': boolean;
   'spell-check': boolean;
-  'theme-setting': 'light' | 'dark' | 'system';
+  'theme-setting': ThemeSettingType;
   attachmentMigration_isComplete: boolean;
   attachmentMigration_lastProcessedIndex: number;
   blocked: Array<string>;
@@ -47,16 +64,16 @@ export type StorageAccessType = {
   customColors: CustomColorsItemType;
   device_name: string;
   hasRegisterSupportForUnauthenticatedDelivery: boolean;
-  identityKey: KeyPairType;
+  identityKeyMap: IdentityKeyMap;
   lastHeartbeat: number;
   lastStartup: number;
   lastAttemptedToRefreshProfilesAt: number;
   maxPreKeyId: number;
   number_id: string;
   password: string;
-  profileKey: ArrayBuffer;
+  profileKey: Uint8Array;
   regionCode: string;
-  registrationId: number;
+  registrationIdMap: Record<string, number>;
   remoteBuildExpiration: number;
   sessionResets: SessionResetsType;
   showStickerPickerHint: boolean;
@@ -77,6 +94,9 @@ export type StorageAccessType = {
   phoneNumberDiscoverability: PhoneNumberDiscoverability;
   pinnedConversationIds: Array<string>;
   primarySendsSms: boolean;
+  // Unlike `number_id` (which also includes device id) this field is only
+  // updated whenever we receive a new storage manifest
+  accountE164: string;
   typingIndicators: boolean;
   sealedSenderIndicators: boolean;
   storageFetchComplete: boolean;
@@ -94,11 +114,12 @@ export type StorageAccessType = {
   'preferred-video-input-device': string;
   'preferred-audio-input-device': AudioDevice;
   'preferred-audio-output-device': AudioDevice;
+  previousAudioDeviceModule: AudioDeviceModule;
   remoteConfig: RemoteConfigType;
   unidentifiedDeliveryIndicators: boolean;
   groupCredentials: Array<GroupCredentialType>;
   lastReceivedAtCounter: number;
-  signaling_key: ArrayBuffer;
+  preferredReactionEmoji: Array<string>;
   skinTone: number;
   unreadCount: number;
   'challenge:retry-message-ids': ReadonlyArray<{
@@ -109,9 +130,13 @@ export type StorageAccessType = {
   'indexeddb-delete-needed': boolean;
   senderCertificate: SerializedCertificateType;
   senderCertificateNoE164: SerializedCertificateType;
+  paymentAddress: string;
+  zoomFactor: ZoomFactorType;
+  preferredLeftPaneWidth: number;
 
   // Deprecated
   senderCertificateWithUuid: never;
+  signaling_key: never;
 };
 
 export interface StorageInterface {

@@ -7,12 +7,15 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { EmojiPicker } from '../emoji/EmojiPicker';
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
-import { PropsType as TimelineItemProps, TimelineItem } from './TimelineItem';
+import type { PropsType as TimelineItemProps } from './TimelineItem';
+import { TimelineItem } from './TimelineItem';
 import { UniversalTimerNotification } from './UniversalTimerNotification';
 import { CallMode } from '../../types/Calling';
+import { AvatarColors } from '../../types/Colors';
 import { getDefaultConversation } from '../../test-both/helpers/getDefaultConversation';
+import { WidthBreakpoint } from '../_util';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -31,6 +34,10 @@ const renderEmojiPicker: TimelineItemProps['renderEmojiPicker'] = ({
   />
 );
 
+const renderReactionPicker: TimelineItemProps['renderReactionPicker'] = () => (
+  <div />
+);
+
 const renderContact = (conversationId: string) => (
   <React.Fragment key={conversationId}>{conversationId}</React.Fragment>
 );
@@ -40,8 +47,9 @@ const renderUniversalTimerNotification = () => (
 );
 
 const getDefaultProps = () => ({
+  containerElementRef: React.createRef<HTMLElement>(),
+  containerWidthBreakpoint: WidthBreakpoint.Wide,
   conversationId: 'conversation-id',
-  conversationAccepted: true,
   id: 'asdf',
   isSelected: false,
   interactionMode: 'keyboard' as const,
@@ -55,7 +63,9 @@ const getDefaultProps = () => ({
   deleteMessage: action('deleteMessage'),
   deleteMessageForEveryone: action('deleteMessageForEveryone'),
   kickOffAttachmentDownload: action('kickOffAttachmentDownload'),
+  learnMoreAboutDeliveryIssue: action('learnMoreAboutDeliveryIssue'),
   markAttachmentAsCorrupted: action('markAttachmentAsCorrupted'),
+  markViewed: action('markViewed'),
   showMessageDetail: action('showMessageDetail'),
   openConversation: action('openConversation'),
   showContactDetail: action('showContactDetail'),
@@ -79,10 +89,13 @@ const getDefaultProps = () => ({
   messageSizeChanged: action('messageSizeChanged'),
   startCallingLobby: action('startCallingLobby'),
   returnToActiveCall: action('returnToActiveCall'),
+  previousItem: undefined,
+  nextItem: undefined,
 
   renderContact,
   renderUniversalTimerNotification,
   renderEmojiPicker,
+  renderReactionPicker,
   renderAudioAttachment: () => <div>*AudioAttachment*</div>,
 });
 
@@ -96,7 +109,7 @@ storiesOf('Components/Conversation/TimelineItem', module)
         timestamp: Date.now(),
         author: {
           phoneNumber: '(202) 555-2001',
-          color: 'forest',
+          color: AvatarColors[0],
         },
         text: '🔥',
       },
@@ -116,7 +129,18 @@ storiesOf('Components/Conversation/TimelineItem', module)
         },
       },
       {
+        type: 'universalTimerNotification',
+        data: null,
+      },
+      {
         type: 'chatSessionRefreshed',
+      },
+      {
+        type: 'safetyNumberNotification',
+        data: {
+          isGroup: false,
+          contact: getDefaultConversation(),
+        },
       },
       {
         type: 'deliveryIssue',
@@ -125,8 +149,11 @@ storiesOf('Components/Conversation/TimelineItem', module)
         },
       },
       {
-        type: 'universalTimerNotification',
-        data: null,
+        type: 'changeNumberNotification',
+        data: {
+          sender: getDefaultConversation(),
+          timestamp: Date.now(),
+        },
       },
       {
         type: 'callHistory',
@@ -245,7 +272,7 @@ storiesOf('Components/Conversation/TimelineItem', module)
       {
         type: 'callHistory',
         data: {
-          // missed (neither accepted nor declined) outgoing audio
+          // unanswered (neither accepted nor declined) outgoing audio
           callMode: CallMode.Direct,
           wasDeclined: false,
           wasIncoming: false,
@@ -256,7 +283,7 @@ storiesOf('Components/Conversation/TimelineItem', module)
       {
         type: 'callHistory',
         data: {
-          // missed (neither accepted nor declined) outgoing video
+          // unanswered (neither accepted nor declined) outgoing video
           callMode: CallMode.Direct,
           wasDeclined: false,
           wasIncoming: false,
@@ -378,6 +405,71 @@ storiesOf('Components/Conversation/TimelineItem', module)
           deviceCount: 0,
           maxDevices: 16,
           startedTime: Date.now(),
+        },
+      },
+      {
+        type: 'linkNotification',
+        data: null,
+      },
+      {
+        type: 'profileChange',
+        data: {
+          change: {
+            type: 'name',
+            oldName: 'Fred',
+            newName: 'John',
+          },
+          changedContact: getDefaultConversation(),
+        },
+      },
+      {
+        type: 'resetSessionNotification',
+        data: null,
+      },
+      {
+        type: 'unsupportedMessage',
+        data: {
+          canProcessNow: true,
+          contact: getDefaultConversation(),
+        },
+      },
+      {
+        type: 'unsupportedMessage',
+        data: {
+          canProcessNow: false,
+          contact: getDefaultConversation(),
+        },
+      },
+      {
+        type: 'verificationNotification',
+        data: {
+          type: 'markVerified',
+          isLocal: false,
+          contact: getDefaultConversation(),
+        },
+      },
+      {
+        type: 'verificationNotification',
+        data: {
+          type: 'markVerified',
+          isLocal: true,
+          contact: getDefaultConversation(),
+        },
+      },
+      {
+        type: 'verificationNotification',
+        data: {
+          type: 'markNotVerified',
+          isLocal: false,
+          contact: getDefaultConversation(),
+        },
+      },
+      {
+        type: 'verificationNotification',
+        data: {
+          type: 'markNotVerified',
+          isLocal: true,
+          contact: getDefaultConversation(),
         },
       },
     ];

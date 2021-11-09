@@ -4,9 +4,9 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import { ContactType } from '../../types/Contact';
+import type { EmbeddedContactType } from '../../types/EmbeddedContact';
 
-import { LocalizerType } from '../../types/Util';
+import type { LocalizerType } from '../../types/Util';
 import {
   renderAvatar,
   renderContactShorthand,
@@ -14,7 +14,7 @@ import {
 } from './_contactUtil';
 
 export type Props = {
-  contact: ContactType;
+  contact: EmbeddedContactType;
   i18n: LocalizerType;
   isIncoming: boolean;
   withContentAbove: boolean;

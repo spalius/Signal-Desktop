@@ -1,22 +1,30 @@
-// Copyright 2019-2021 Signal Messenger, LLC
+// Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /* eslint-disable max-classes-per-file */
 
 import { Collection, Model } from 'backbone';
-import { MessageModel } from '../models/messages';
+
+import type { MessageModel } from '../models/messages';
+import { ReadStatus } from '../messages/MessageReadStatus';
+import { markViewed } from '../services/MessageUpdater';
+import { isIncoming } from '../state/selectors/message';
+import { notificationService } from '../services/notifications';
+import * as log from '../logging/log';
 
 type ViewSyncAttributesType = {
-  source?: string;
-  sourceUuid: string;
+  senderId: string;
+  senderE164: string;
+  senderUuid: string;
   timestamp: number;
+  viewedAt: number;
 };
 
 class ViewSyncModel extends Model<ViewSyncAttributesType> {}
 
 let singleton: ViewSyncs | undefined;
 
-export class ViewSyncs extends Collection<ViewSyncModel> {
+export class ViewSyncs extends Collection {
   static getSingleton(): ViewSyncs {
     if (!singleton) {
       singleton = new ViewSyncs();
@@ -25,32 +33,26 @@ export class ViewSyncs extends Collection<ViewSyncModel> {
     return singleton;
   }
 
-  forMessage(message: MessageModel): ViewSyncModel | null {
-    const syncBySourceUuid = this.find(item => {
+  forMessage(message: MessageModel): Array<ViewSyncModel> {
+    const senderId = window.ConversationController.ensureContactIds({
+      e164: message.get('source'),
+      uuid: message.get('sourceUuid'),
+    });
+    const syncs = this.filter(item => {
       return (
-        item.get('sourceUuid') === message.get('sourceUuid') &&
+        item.get('senderId') === senderId &&
         item.get('timestamp') === message.get('sent_at')
       );
     });
-    if (syncBySourceUuid) {
-      window.log.info('Found early view sync for message');
-      this.remove(syncBySourceUuid);
-      return syncBySourceUuid;
-    }
-
-    const syncBySource = this.find(item => {
-      return (
-        item.get('source') === message.get('source') &&
-        item.get('timestamp') === message.get('sent_at')
+    if (syncs.length) {
+      log.info(
+        `Found ${syncs.length} early view sync(s) for message ${message.get(
+          'sent_at'
+        )}`
       );
-    });
-    if (syncBySource) {
-      window.log.info('Found early view sync for message');
-      this.remove(syncBySource);
-      return syncBySource;
+      this.remove(syncs);
     }
-
-    return null;
+    return syncs;
   }
 
   async onSync(sync: ViewSyncModel): Promise<void> {
@@ -63,40 +65,36 @@ export class ViewSyncs extends Collection<ViewSyncModel> {
       );
 
       const found = messages.find(item => {
-        const itemSourceUuid = item.get('sourceUuid');
-        const syncSourceUuid = sync.get('sourceUuid');
-        const itemSource = item.get('source');
-        const syncSource = sync.get('source');
+        const senderId = window.ConversationController.ensureContactIds({
+          e164: item.get('source'),
+          uuid: item.get('sourceUuid'),
+        });
 
-        return Boolean(
-          (itemSourceUuid &&
-            syncSourceUuid &&
-            itemSourceUuid === syncSourceUuid) ||
-            (itemSource && syncSource && itemSource === syncSource)
-        );
-      });
-
-      const syncSource = sync.get('source');
-      const syncSourceUuid = sync.get('sourceUuid');
-      const syncTimestamp = sync.get('timestamp');
-      const wasMessageFound = Boolean(found);
-      window.log.info('Receive view sync:', {
-        syncSource,
-        syncSourceUuid,
-        syncTimestamp,
-        wasMessageFound,
+        return isIncoming(item.attributes) && senderId === sync.get('senderId');
       });
 
       if (!found) {
+        log.info(
+          'Nothing found for view sync',
+          sync.get('senderId'),
+          sync.get('senderE164'),
+          sync.get('senderUuid'),
+          sync.get('timestamp')
+        );
         return;
       }
 
+      notificationService.removeBy({ messageId: found.id });
+
       const message = window.MessageController.register(found.id, found);
-      await message.markViewed({ fromSync: true });
+
+      if (message.get('readStatus') !== ReadStatus.Viewed) {
+        message.set(markViewed(message.attributes, sync.get('viewedAt')));
+      }
 
       this.remove(sync);
     } catch (error) {
-      window.log.error(
+      log.error(
         'ViewSyncs.onSync error:',
         error && error.stack ? error.stack : error
       );

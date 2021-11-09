@@ -1,10 +1,13 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { useCallback, useState, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { useCallback, useState } from 'react';
 
-import { LocalizerType } from '../../types/Util';
+import type { LocalizerType } from '../../types/Util';
 
+import { Button, ButtonSize, ButtonVariant } from '../Button';
+import { SystemMessage } from './SystemMessage';
 import { ChatSessionRefreshedDialog } from './ChatSessionRefreshedDialog';
 
 type PropsHousekeepingType = {
@@ -36,18 +39,20 @@ export function ChatSessionRefreshedNotification(
   }, [contactSupport, setIsDialogOpen]);
 
   return (
-    <div className="module-chat-session-refreshed-notification">
-      <div className="module-chat-session-refreshed-notification__first-line">
-        <span className="module-chat-session-refreshed-notification__icon" />
-        {i18n('ChatRefresh--notification')}
-      </div>
-      <button
-        type="button"
-        onClick={openDialog}
-        className="module-chat-session-refreshed-notification__button"
-      >
-        {i18n('ChatRefresh--learnMore')}
-      </button>
+    <>
+      <SystemMessage
+        contents={i18n('ChatRefresh--notification')}
+        button={
+          <Button
+            onClick={openDialog}
+            size={ButtonSize.Small}
+            variant={ButtonVariant.SystemMessage}
+          >
+            {i18n('ChatRefresh--learnMore')}
+          </Button>
+        }
+        icon="session-refresh"
+      />
       {isDialogOpen ? (
         <ChatSessionRefreshedDialog
           onClose={closeDialog}
@@ -55,6 +60,6 @@ export function ChatSessionRefreshedNotification(
           i18n={i18n}
         />
       ) : null}
-    </div>
+    </>
   );
 }

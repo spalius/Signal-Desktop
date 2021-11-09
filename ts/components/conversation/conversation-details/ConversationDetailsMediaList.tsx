@@ -3,10 +3,10 @@
 
 import React from 'react';
 
-import { LocalizerType } from '../../../types/Util';
+import type { LocalizerType } from '../../../types/Util';
 
-import { MediaItemType } from '../../LightboxGallery';
-import { ConversationType } from '../../../state/ducks/conversations';
+import type { MediaItemType } from '../../../types/MediaItem';
+import type { ConversationType } from '../../../state/ducks/conversations';
 
 import { PanelSection } from './PanelSection';
 import { bemGenerator } from './util';
@@ -25,7 +25,7 @@ export type Props = {
 
 const MEDIA_ITEM_LIMIT = 6;
 
-const bem = bemGenerator('module-conversation-details-media-list');
+const bem = bemGenerator('ConversationDetails-media-list');
 
 export const ConversationDetailsMediaList: React.ComponentType<Props> = ({
   conversation,
@@ -36,11 +36,13 @@ export const ConversationDetailsMediaList: React.ComponentType<Props> = ({
 }) => {
   const mediaItems = conversation.recentMediaItems || [];
 
+  const mediaItemsLength = mediaItems.length;
+
   React.useEffect(() => {
     loadRecentMediaItems(MEDIA_ITEM_LIMIT);
-  }, [loadRecentMediaItems]);
+  }, [loadRecentMediaItems, mediaItemsLength]);
 
-  if (mediaItems.length === 0) {
+  if (mediaItemsLength === 0) {
     return null;
   }
 
@@ -55,7 +57,6 @@ export const ConversationDetailsMediaList: React.ComponentType<Props> = ({
           {i18n('ConversationDetailsMediaList--show-all')}
         </button>
       }
-      borderless
       title={i18n('ConversationDetailsMediaList--shared-media')}
     >
       <div className={bem('root')}>

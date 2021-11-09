@@ -4,9 +4,9 @@
 // The list of permissions is here:
 //   https://electronjs.org/docs/api/session#sessetpermissionrequesthandlerhandler
 
-import { session as ElectronSession } from 'electron';
+import type { session as ElectronSession } from 'electron';
 
-import { ConfigType } from './config';
+import type { ConfigType } from './base_config';
 
 const PERMISSIONS: Record<string, boolean> = {
   // Allowed
@@ -24,7 +24,7 @@ const PERMISSIONS: Record<string, boolean> = {
 };
 
 function _createPermissionHandler(
-  userConfig: ConfigType
+  userConfig: Pick<ConfigType, 'get'>
 ): Parameters<typeof ElectronSession.prototype.setPermissionRequestHandler>[0] {
   return (_webContents, permission, callback, details): void => {
     // We default 'media' permission to false, but the user can override that for
@@ -75,7 +75,7 @@ export function installPermissionsHandler({
   userConfig,
 }: {
   session: typeof ElectronSession;
-  userConfig: ConfigType;
+  userConfig: Pick<ConfigType, 'get'>;
 }): void {
   // Setting the permission request handler to null first forces any permissions to be
   //   requested again. Without this, revoked permissions might still be available if

@@ -3,13 +3,12 @@
 
 import { assert } from 'chai';
 
-import { ConversationType } from '../../state/ducks/conversations';
+import type { ConversationType } from '../../state/ducks/conversations';
 import { MemberRepository } from '../../quill/memberRepository';
-import { getDefaultConversation } from '../../test-both/helpers/getDefaultConversation';
+import { getDefaultConversationWithUuid } from '../../test-both/helpers/getDefaultConversation';
 
-const memberMahershala: ConversationType = getDefaultConversation({
+const memberMahershala: ConversationType = getDefaultConversationWithUuid({
   id: '555444',
-  uuid: 'abcdefg',
   title: 'Pal',
   firstName: 'Mahershala',
   profileName: 'Mr Ali',
@@ -20,9 +19,8 @@ const memberMahershala: ConversationType = getDefaultConversation({
   areWeAdmin: false,
 });
 
-const memberShia: ConversationType = getDefaultConversation({
+const memberShia: ConversationType = getDefaultConversationWithUuid({
   id: '333222',
-  uuid: 'hijklmno',
   title: 'Buddy',
   firstName: 'Shia',
   profileName: 'Sr LaBeouf',
@@ -35,9 +33,8 @@ const memberShia: ConversationType = getDefaultConversation({
 
 const members: Array<ConversationType> = [memberMahershala, memberShia];
 
-const singleMember: ConversationType = getDefaultConversation({
+const singleMember: ConversationType = getDefaultConversationWithUuid({
   id: '666777',
-  uuid: 'pqrstuv',
   title: 'The Guy',
   firstName: 'Jeff',
   profileName: 'Jr Klaus',
@@ -85,7 +82,7 @@ describe('MemberRepository', () => {
 
     it('returns a matched member', () => {
       const memberRepository = new MemberRepository(members);
-      assert.isDefined(memberRepository.getMemberByUuid('abcdefg'));
+      assert.isDefined(memberRepository.getMemberByUuid(memberMahershala.uuid));
     });
 
     it('returns undefined when it does not have the member', () => {
@@ -119,11 +116,32 @@ describe('MemberRepository', () => {
       });
     });
 
+    describe('given a prefix-matching string on name', () => {
+      it('returns the match', () => {
+        const memberRepository = new MemberRepository(members);
+        const results = memberRepository.search('dude');
+        assert.deepEqual(results, [memberShia]);
+      });
+    });
+
     describe('given a prefix-matching string on title', () => {
       it('returns the match', () => {
         const memberRepository = new MemberRepository(members);
-        const results = memberRepository.search('d');
+        const results = memberRepository.search('bud');
         assert.deepEqual(results, [memberShia]);
+      });
+
+      it('handles titles with Unicode bidi characters, which some contacts have', () => {
+        const memberShiaBidi: ConversationType = {
+          ...memberShia,
+          title: '\u2086Buddyo\u2069',
+        };
+        const memberRepository = new MemberRepository([
+          memberMahershala,
+          memberShiaBidi,
+        ]);
+        const results = memberRepository.search('bud');
+        assert.deepEqual(results, [memberShiaBidi]);
       });
     });
 

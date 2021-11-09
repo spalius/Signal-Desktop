@@ -3,15 +3,28 @@
 
 import is from '@sindresorhus/is';
 import moment from 'moment';
-import { isNumber, padStart } from 'lodash';
+import {
+  isNumber,
+  padStart,
+  isTypedArray,
+  isFunction,
+  isUndefined,
+  omit,
+} from 'lodash';
+import { blobToArrayBuffer } from 'blob-util';
 
+import type { LoggerType } from './Logging';
 import * as MIME from './MIME';
+import { toLogFormat } from './errors';
 import { SignalService } from '../protobuf';
 import {
   isImageTypeSupported,
   isVideoTypeSupported,
 } from '../util/GoogleChrome';
-import { LocalizerType, ThemeType } from './Util';
+import type { LocalizerType } from './Util';
+import { ThemeType } from './Util';
+import * as GoogleChrome from '../util/GoogleChrome';
+import { scaleImageToLevel } from '../util/scaleImageToLevel';
 
 const MAX_WIDTH = 300;
 const MAX_HEIGHT = MAX_WIDTH * 1.5;
@@ -30,7 +43,7 @@ export type AttachmentType = {
   isVoiceMessage?: boolean;
   /** For messages not already on disk, this will be a data url */
   url?: string;
-  size?: number;
+  size: number;
   fileSize?: string;
   pending?: boolean;
   width?: number;
@@ -39,10 +52,11 @@ export type AttachmentType = {
   screenshot?: {
     height: number;
     width: number;
-    url: string;
+    url?: string;
     contentType: MIME.MIMEType;
     path: string;
   };
+  screenshotData?: Uint8Array;
   screenshotPath?: string;
   flags?: number;
   thumbnail?: ThumbnailType;
@@ -51,40 +65,482 @@ export type AttachmentType = {
   cdnNumber?: number;
   cdnId?: string;
   cdnKey?: string;
+  data?: Uint8Array;
+
+  /** Legacy field. Used only for downloading old attachments */
+  id?: number;
 };
 
-type BaseAttachmentDraftType = {
+export type DownloadedAttachmentType = AttachmentType & {
+  data: Uint8Array;
+};
+
+export type BaseAttachmentDraftType = {
   blurHash?: string;
   contentType: MIME.MIMEType;
   fileName: string;
+  path: string;
   screenshotContentType?: string;
   screenshotSize?: number;
   size: number;
 };
 
-export type InMemoryAttachmentDraftType = {
-  data?: ArrayBuffer;
-  screenshotData?: ArrayBuffer;
-} & BaseAttachmentDraftType;
+export type InMemoryAttachmentDraftType =
+  | ({
+      data?: Uint8Array;
+      pending: false;
+      screenshotData?: Uint8Array;
+    } & BaseAttachmentDraftType)
+  | {
+      contentType: MIME.MIMEType;
+      fileName: string;
+      path: string;
+      pending: true;
+      size: number;
+    };
 
-export type OnDiskAttachmentDraftType = {
-  path?: string;
-  screenshotPath?: string;
-} & BaseAttachmentDraftType;
-
-export type AttachmentDraftType = {
-  url: string;
-} & BaseAttachmentDraftType;
+export type AttachmentDraftType =
+  | ({
+      url: string;
+      screenshotPath?: string;
+      caption?: string;
+      pending: false;
+    } & BaseAttachmentDraftType)
+  | {
+      contentType: MIME.MIMEType;
+      fileName: string;
+      path: string;
+      pending: true;
+      size: number;
+    };
 
 export type ThumbnailType = {
   height: number;
   width: number;
-  url: string;
+  url?: string;
   contentType: MIME.MIMEType;
   path: string;
   // Only used when quote needed to make an in-memory thumbnail
   objectUrl?: string;
 };
+
+export async function migrateDataToFileSystem(
+  attachment: AttachmentType,
+  {
+    writeNewAttachmentData,
+  }: {
+    writeNewAttachmentData: (data: Uint8Array) => Promise<string>;
+  }
+): Promise<AttachmentType> {
+  if (!isFunction(writeNewAttachmentData)) {
+    throw new TypeError("'writeNewAttachmentData' must be a function");
+  }
+
+  const { data } = attachment;
+  const attachmentHasData = !isUndefined(data);
+  const shouldSkipSchemaUpgrade = !attachmentHasData;
+  if (shouldSkipSchemaUpgrade) {
+    return attachment;
+  }
+
+  if (!isTypedArray(data)) {
+    throw new TypeError(
+      'Expected `attachment.data` to be a typed array;' +
+        ` got: ${typeof attachment.data}`
+    );
+  }
+
+  const path = await writeNewAttachmentData(data);
+
+  const attachmentWithoutData = omit({ ...attachment, path }, ['data']);
+  return attachmentWithoutData;
+}
+
+// // Incoming message attachment fields
+// {
+//   id: string
+//   contentType: MIMEType
+//   data: Uint8Array
+//   digest: Uint8Array
+//   fileName?: string
+//   flags: null
+//   key: Uint8Array
+//   size: integer
+//   thumbnail: Uint8Array
+// }
+
+// // Outgoing message attachment fields
+// {
+//   contentType: MIMEType
+//   data: Uint8Array
+//   fileName: string
+//   size: integer
+// }
+
+// Returns true if `rawAttachment` is a valid attachment based on our current schema.
+// Over time, we can expand this definition to become more narrow, e.g. require certain
+// fields, etc.
+export function isValid(
+  rawAttachment?: AttachmentType
+): rawAttachment is AttachmentType {
+  // NOTE: We cannot use `_.isPlainObject` because `rawAttachment` is
+  // deserialized by protobuf:
+  if (!rawAttachment) {
+    return false;
+  }
+
+  return true;
+}
+
+// Upgrade steps
+// NOTE: This step strips all EXIF metadata from JPEG images as
+// part of re-encoding the image:
+export async function autoOrientJPEG(
+  attachment: AttachmentType,
+  _: unknown,
+  {
+    sendHQImages = false,
+    isIncoming = false,
+  }: {
+    sendHQImages?: boolean;
+    isIncoming?: boolean;
+  } = {}
+): Promise<AttachmentType> {
+  if (isIncoming && !MIME.isJPEG(attachment.contentType)) {
+    return attachment;
+  }
+
+  if (!canBeTranscoded(attachment)) {
+    return attachment;
+  }
+
+  // If we haven't downloaded the attachment yet, we won't have the data.
+  // All images go through handleImageAttachment before being sent and thus have
+  // already been scaled to level, oriented, stripped of exif data, and saved
+  // in high quality format. If we want to send the image in HQ we can return
+  // the attachement as-is. Otherwise we'll have to further scale it down.
+  if (!attachment.data || sendHQImages) {
+    return attachment;
+  }
+
+  const dataBlob = new Blob([attachment.data], {
+    type: attachment.contentType,
+  });
+  const { blob: xcodedDataBlob } = await scaleImageToLevel(
+    dataBlob,
+    attachment.contentType,
+    isIncoming
+  );
+  const xcodedDataArrayBuffer = await blobToArrayBuffer(xcodedDataBlob);
+
+  // IMPORTANT: We overwrite the existing `data` `Uint8Array` losing the original
+  // image data. Ideally, we’d preserve the original image data for users who want to
+  // retain it but due to reports of data loss, we don’t want to overburden IndexedDB
+  // by potentially doubling stored image data.
+  // See: https://github.com/signalapp/Signal-Desktop/issues/1589
+  const xcodedAttachment = {
+    // `digest` is no longer valid for auto-oriented image data, so we discard it:
+    ...omit(attachment, 'digest'),
+    data: new Uint8Array(xcodedDataArrayBuffer),
+    size: xcodedDataArrayBuffer.byteLength,
+  };
+
+  return xcodedAttachment;
+}
+
+const UNICODE_LEFT_TO_RIGHT_OVERRIDE = '\u202D';
+const UNICODE_RIGHT_TO_LEFT_OVERRIDE = '\u202E';
+const UNICODE_REPLACEMENT_CHARACTER = '\uFFFD';
+const INVALID_CHARACTERS_PATTERN = new RegExp(
+  `[${UNICODE_LEFT_TO_RIGHT_OVERRIDE}${UNICODE_RIGHT_TO_LEFT_OVERRIDE}]`,
+  'g'
+);
+
+// NOTE: Expose synchronous version to do property-based testing using `testcheck`,
+// which currently doesn’t support async testing:
+// https://github.com/leebyron/testcheck-js/issues/45
+export function _replaceUnicodeOrderOverridesSync(
+  attachment: AttachmentType
+): AttachmentType {
+  if (!is.string(attachment.fileName)) {
+    return attachment;
+  }
+
+  const normalizedFilename = attachment.fileName.replace(
+    INVALID_CHARACTERS_PATTERN,
+    UNICODE_REPLACEMENT_CHARACTER
+  );
+  const newAttachment = { ...attachment, fileName: normalizedFilename };
+
+  return newAttachment;
+}
+
+export const replaceUnicodeOrderOverrides = async (
+  attachment: AttachmentType
+): Promise<AttachmentType> => {
+  return _replaceUnicodeOrderOverridesSync(attachment);
+};
+
+// \u202A-\u202E is LRE, RLE, PDF, LRO, RLO
+// \u2066-\u2069 is LRI, RLI, FSI, PDI
+// \u200E is LRM
+// \u200F is RLM
+// \u061C is ALM
+const V2_UNWANTED_UNICODE = /[\u202A-\u202E\u2066-\u2069\u200E\u200F\u061C]/g;
+
+export async function replaceUnicodeV2(
+  attachment: AttachmentType
+): Promise<AttachmentType> {
+  if (!is.string(attachment.fileName)) {
+    return attachment;
+  }
+
+  const fileName = attachment.fileName.replace(
+    V2_UNWANTED_UNICODE,
+    UNICODE_REPLACEMENT_CHARACTER
+  );
+
+  return {
+    ...attachment,
+    fileName,
+  };
+}
+
+export function removeSchemaVersion({
+  attachment,
+  logger,
+}: {
+  attachment: AttachmentType;
+  logger: LoggerType;
+}): AttachmentType {
+  if (!exports.isValid(attachment)) {
+    logger.error(
+      'Attachment.removeSchemaVersion: Invalid input attachment:',
+      attachment
+    );
+    return attachment;
+  }
+
+  return omit(attachment, 'schemaVersion');
+}
+
+export function hasData(attachment: AttachmentType): boolean {
+  return attachment.data instanceof Uint8Array;
+}
+
+export function loadData(
+  readAttachmentData: (path: string) => Promise<Uint8Array>
+): (attachment?: AttachmentType) => Promise<AttachmentType> {
+  if (!is.function_(readAttachmentData)) {
+    throw new TypeError("'readAttachmentData' must be a function");
+  }
+
+  return async (attachment?: AttachmentType): Promise<AttachmentType> => {
+    if (!isValid(attachment)) {
+      throw new TypeError("'attachment' is not valid");
+    }
+
+    const isAlreadyLoaded = Boolean(attachment.data);
+    if (isAlreadyLoaded) {
+      return attachment;
+    }
+
+    if (!is.string(attachment.path)) {
+      throw new TypeError("'attachment.path' is required");
+    }
+
+    const data = await readAttachmentData(attachment.path);
+    return { ...attachment, data, size: data.byteLength };
+  };
+}
+
+export function deleteData(
+  deleteOnDisk: (path: string) => Promise<void>
+): (attachment?: AttachmentType) => Promise<void> {
+  if (!is.function_(deleteOnDisk)) {
+    throw new TypeError('deleteData: deleteOnDisk must be a function');
+  }
+
+  return async (attachment?: AttachmentType): Promise<void> => {
+    if (!isValid(attachment)) {
+      throw new TypeError('deleteData: attachment is not valid');
+    }
+
+    const { path, thumbnail, screenshot } = attachment;
+    if (is.string(path)) {
+      await deleteOnDisk(path);
+    }
+
+    if (thumbnail && is.string(thumbnail.path)) {
+      await deleteOnDisk(thumbnail.path);
+    }
+
+    if (screenshot && is.string(screenshot.path)) {
+      await deleteOnDisk(screenshot.path);
+    }
+  };
+}
+
+const THUMBNAIL_SIZE = 150;
+const THUMBNAIL_CONTENT_TYPE = MIME.IMAGE_PNG;
+
+export async function captureDimensionsAndScreenshot(
+  attachment: AttachmentType,
+  params: {
+    writeNewAttachmentData: (data: Uint8Array) => Promise<string>;
+    getAbsoluteAttachmentPath: (path: string) => Promise<string>;
+    makeObjectUrl: (
+      data: Uint8Array | ArrayBuffer,
+      contentType: MIME.MIMEType
+    ) => string;
+    revokeObjectUrl: (path: string) => void;
+    getImageDimensions: (params: {
+      objectUrl: string;
+      logger: LoggerType;
+    }) => { width: number; height: number };
+    makeImageThumbnail: (params: {
+      size: number;
+      objectUrl: string;
+      contentType: MIME.MIMEType;
+      logger: LoggerType;
+    }) => Promise<Blob>;
+    makeVideoScreenshot: (params: {
+      objectUrl: string;
+      contentType: MIME.MIMEType;
+      logger: LoggerType;
+    }) => Promise<Blob>;
+    logger: LoggerType;
+  }
+): Promise<AttachmentType> {
+  const { contentType } = attachment;
+
+  const {
+    writeNewAttachmentData,
+    getAbsoluteAttachmentPath,
+    makeObjectUrl,
+    revokeObjectUrl,
+    getImageDimensions: getImageDimensionsFromURL,
+    makeImageThumbnail,
+    makeVideoScreenshot,
+    logger,
+  } = params;
+
+  if (
+    !GoogleChrome.isImageTypeSupported(contentType) &&
+    !GoogleChrome.isVideoTypeSupported(contentType)
+  ) {
+    return attachment;
+  }
+
+  // If the attachment hasn't been downloaded yet, we won't have a path
+  if (!attachment.path) {
+    return attachment;
+  }
+
+  const absolutePath = await getAbsoluteAttachmentPath(attachment.path);
+
+  if (GoogleChrome.isImageTypeSupported(contentType)) {
+    try {
+      const { width, height } = await getImageDimensionsFromURL({
+        objectUrl: absolutePath,
+        logger,
+      });
+      const thumbnailBuffer = await blobToArrayBuffer(
+        await makeImageThumbnail({
+          size: THUMBNAIL_SIZE,
+          objectUrl: absolutePath,
+          contentType: THUMBNAIL_CONTENT_TYPE,
+          logger,
+        })
+      );
+
+      const thumbnailPath = await writeNewAttachmentData(
+        new Uint8Array(thumbnailBuffer)
+      );
+      return {
+        ...attachment,
+        width,
+        height,
+        thumbnail: {
+          path: thumbnailPath,
+          contentType: THUMBNAIL_CONTENT_TYPE,
+          width: THUMBNAIL_SIZE,
+          height: THUMBNAIL_SIZE,
+        },
+      };
+    } catch (error) {
+      logger.error(
+        'captureDimensionsAndScreenshot:',
+        'error processing image; skipping screenshot generation',
+        toLogFormat(error)
+      );
+      return attachment;
+    }
+  }
+
+  let screenshotObjectUrl: string | undefined;
+  try {
+    const screenshotBuffer = await blobToArrayBuffer(
+      await makeVideoScreenshot({
+        objectUrl: absolutePath,
+        contentType: THUMBNAIL_CONTENT_TYPE,
+        logger,
+      })
+    );
+    screenshotObjectUrl = makeObjectUrl(
+      screenshotBuffer,
+      THUMBNAIL_CONTENT_TYPE
+    );
+    const { width, height } = await getImageDimensionsFromURL({
+      objectUrl: screenshotObjectUrl,
+      logger,
+    });
+    const screenshotPath = await writeNewAttachmentData(
+      new Uint8Array(screenshotBuffer)
+    );
+
+    const thumbnailBuffer = await blobToArrayBuffer(
+      await makeImageThumbnail({
+        size: THUMBNAIL_SIZE,
+        objectUrl: screenshotObjectUrl,
+        contentType: THUMBNAIL_CONTENT_TYPE,
+        logger,
+      })
+    );
+
+    const thumbnailPath = await writeNewAttachmentData(
+      new Uint8Array(thumbnailBuffer)
+    );
+
+    return {
+      ...attachment,
+      screenshot: {
+        contentType: THUMBNAIL_CONTENT_TYPE,
+        path: screenshotPath,
+        width,
+        height,
+      },
+      thumbnail: {
+        path: thumbnailPath,
+        contentType: THUMBNAIL_CONTENT_TYPE,
+        width: THUMBNAIL_SIZE,
+        height: THUMBNAIL_SIZE,
+      },
+      width,
+      height,
+    };
+  } catch (error) {
+    logger.error(
+      'captureDimensionsAndScreenshot: error processing video; skipping screenshot generation',
+      toLogFormat(error)
+    );
+    return attachment;
+  } finally {
+    if (screenshotObjectUrl !== undefined) {
+      revokeObjectUrl(screenshotObjectUrl);
+    }
+  }
+}
 
 // UI-focused functions
 
@@ -115,31 +571,29 @@ export function getExtensionForDisplay({
   return undefined;
 }
 
-export function isAudio(
-  attachments?: Array<AttachmentType>
-): boolean | undefined {
-  return (
+export function isAudio(attachments?: ReadonlyArray<AttachmentType>): boolean {
+  return Boolean(
     attachments &&
-    attachments[0] &&
-    attachments[0].contentType &&
-    !attachments[0].isCorrupted &&
-    MIME.isAudio(attachments[0].contentType)
+      attachments[0] &&
+      attachments[0].contentType &&
+      !attachments[0].isCorrupted &&
+      MIME.isAudio(attachments[0].contentType)
   );
 }
 
 export function canDisplayImage(
-  attachments?: Array<AttachmentType>
-): boolean | 0 | undefined {
+  attachments?: ReadonlyArray<AttachmentType>
+): boolean {
   const { height, width } =
     attachments && attachments[0] ? attachments[0] : { height: 0, width: 0 };
 
-  return (
+  return Boolean(
     height &&
-    height > 0 &&
-    height <= 4096 &&
-    width &&
-    width > 0 &&
-    width <= 4096
+      height > 0 &&
+      height <= 4096 &&
+      width &&
+      width > 0 &&
+      width <= 4096
   );
 }
 
@@ -161,37 +615,44 @@ export function getUrl(attachment: AttachmentType): string | undefined {
   return attachment.url;
 }
 
-export function isImage(
-  attachments?: Array<AttachmentType>
-): boolean | undefined {
-  return (
+export function isImage(attachments?: ReadonlyArray<AttachmentType>): boolean {
+  return Boolean(
     attachments &&
-    attachments[0] &&
-    attachments[0].contentType &&
-    isImageTypeSupported(attachments[0].contentType)
+      attachments[0] &&
+      attachments[0].contentType &&
+      isImageTypeSupported(attachments[0].contentType)
   );
 }
 
 export function isImageAttachment(
-  attachment?: AttachmentType
-): attachment is AttachmentType {
+  attachment?: Pick<AttachmentType, 'contentType'>
+): boolean {
   return Boolean(
     attachment &&
       attachment.contentType &&
       isImageTypeSupported(attachment.contentType)
   );
 }
-export function hasImage(
-  attachments?: Array<AttachmentType>
-): string | boolean | undefined {
-  return (
-    attachments &&
-    attachments[0] &&
-    (attachments[0].url || attachments[0].pending || attachments[0].blurHash)
+
+export function canBeTranscoded(
+  attachment?: Pick<AttachmentType, 'contentType'>
+): boolean {
+  return Boolean(
+    attachment &&
+      isImageAttachment(attachment) &&
+      !MIME.isGif(attachment.contentType)
   );
 }
 
-export function isVideo(attachments?: Array<AttachmentType>): boolean {
+export function hasImage(attachments?: ReadonlyArray<AttachmentType>): boolean {
+  return Boolean(
+    attachments &&
+      attachments[0] &&
+      (attachments[0].url || attachments[0].pending || attachments[0].blurHash)
+  );
+}
+
+export function isVideo(attachments?: ReadonlyArray<AttachmentType>): boolean {
   if (!attachments || attachments.length === 0) {
     return false;
   }
@@ -248,7 +709,7 @@ type DimensionsType = {
 };
 
 export function getImageDimensions(
-  attachment: AttachmentType,
+  attachment: Pick<AttachmentType, 'width' | 'height'>,
   forcedWidth?: number
 ): DimensionsType {
   const { height, width } = attachment;
@@ -271,7 +732,7 @@ export function getImageDimensions(
 }
 
 export function areAllAttachmentsVisual(
-  attachments?: Array<AttachmentType>
+  attachments?: ReadonlyArray<AttachmentType>
 ): boolean {
   if (!attachments) {
     return false;
@@ -289,7 +750,7 @@ export function areAllAttachmentsVisual(
 }
 
 export function getGridDimensions(
-  attachments?: Array<AttachmentType>
+  attachments?: ReadonlyArray<AttachmentType>
 ): null | DimensionsType {
   if (!attachments || !attachments.length) {
     return null;
@@ -352,28 +813,7 @@ export function getAlt(
 
 // Migration-related attachment stuff
 
-export type Attachment = {
-  fileName?: string;
-  flags?: SignalService.AttachmentPointer.Flags;
-  contentType?: MIME.MIMEType;
-  size?: number;
-  data: ArrayBuffer;
-
-  // // Omit unused / deprecated keys:
-  // schemaVersion?: number;
-  // id?: string;
-  // width?: number;
-  // height?: number;
-  // thumbnail?: ArrayBuffer;
-  // key?: ArrayBuffer;
-  // digest?: ArrayBuffer;
-} & Partial<AttachmentSchemaVersion3>;
-
-type AttachmentSchemaVersion3 = {
-  path: string;
-};
-
-export const isVisualMedia = (attachment: Attachment): boolean => {
+export const isVisualMedia = (attachment: AttachmentType): boolean => {
   const { contentType } = attachment;
 
   if (is.undefined(contentType)) {
@@ -387,7 +827,7 @@ export const isVisualMedia = (attachment: Attachment): boolean => {
   return MIME.isImage(contentType) || MIME.isVideo(contentType);
 };
 
-export const isFile = (attachment: Attachment): boolean => {
+export const isFile = (attachment: AttachmentType): boolean => {
   const { contentType } = attachment;
 
   if (is.undefined(contentType)) {
@@ -405,9 +845,7 @@ export const isFile = (attachment: Attachment): boolean => {
   return true;
 };
 
-export const isVoiceMessage = (
-  attachment: Attachment | AttachmentType
-): boolean => {
+export const isVoiceMessage = (attachment: AttachmentType): boolean => {
   const flag = SignalService.AttachmentPointer.Flags.VOICE_MESSAGE;
   const hasFlag =
     // eslint-disable-next-line no-bitwise
@@ -434,22 +872,24 @@ export const save = async ({
   saveAttachmentToDisk,
   timestamp,
 }: {
-  attachment: Attachment;
-  index: number;
-  readAttachmentData: (relativePath: string) => Promise<ArrayBuffer>;
+  attachment: AttachmentType;
+  index?: number;
+  readAttachmentData: (relativePath: string) => Promise<Uint8Array>;
   saveAttachmentToDisk: (options: {
-    data: ArrayBuffer;
+    data: Uint8Array;
     name: string;
-  }) => Promise<{ name: string; fullPath: string }>;
+  }) => Promise<{ name: string; fullPath: string } | null>;
   timestamp?: number;
 }): Promise<string | null> => {
-  if (!attachment.path && !attachment.data) {
+  let data: Uint8Array;
+  if (attachment.path) {
+    data = await readAttachmentData(attachment.path);
+  } else if (attachment.data) {
+    data = attachment.data;
+  } else {
     throw new Error('Attachment had neither path nor data');
   }
 
-  const data = attachment.path
-    ? await readAttachmentData(attachment.path)
-    : attachment.data;
   const name = getSuggestedFilename({ attachment, timestamp, index });
 
   const result = await saveAttachmentToDisk({
@@ -469,7 +909,7 @@ export const getSuggestedFilename = ({
   timestamp,
   index,
 }: {
-  attachment: Attachment;
+  attachment: AttachmentType;
   timestamp?: number | Date;
   index?: number;
 }): string => {
@@ -489,7 +929,7 @@ export const getSuggestedFilename = ({
 };
 
 export const getFileExtension = (
-  attachment: Attachment
+  attachment: AttachmentType
 ): string | undefined => {
   if (!attachment.contentType) {
     return undefined;

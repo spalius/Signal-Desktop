@@ -1,19 +1,17 @@
-// Copyright 2020 Signal Messenger, LLC
+// Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import * as React from 'react';
 import { useSelector } from 'react-redux';
-import { StateType } from '../reducer';
+import type { StateType } from '../reducer';
 
 import { ContactName } from '../../components/conversation/ContactName';
 
 import { getIntl } from '../selectors/user';
-import {
-  GetConversationByIdType,
-  getConversationSelector,
-} from '../selectors/conversations';
+import type { GetConversationByIdType } from '../selectors/conversations';
+import { getConversationSelector } from '../selectors/conversations';
 
-import { LocalizerType } from '../../types/Util';
+import type { LocalizerType } from '../../types/Util';
 
 type ExternalProps = {
   conversationId: string;
@@ -33,10 +31,6 @@ export const SmartContactName: React.ComponentType<ExternalProps> = props => {
   return (
     <ContactName
       firstName={conversation.firstName}
-      i18n={i18n}
-      name={conversation.name}
-      phoneNumber={conversation.phoneNumber}
-      profileName={conversation.profileName}
       title={conversation.title}
     />
   );

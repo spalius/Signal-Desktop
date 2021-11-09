@@ -177,11 +177,15 @@
     },
     "avatarMenuViewArchive": {
         "message": "Zobacz archiwum",
-        "description": "One of the menu options available in the Avatar Popup menu"
+        "description": "One of the menu options available in the Avatar popup menu"
     },
     "avatarMenuChatColors": {
         "message": "Kolor czatu",
-        "description": "One of the menu options available in the Avatar Popup menu"
+        "description": "One of the menu options available in the Avatar popup menu"
+    },
+    "avatarMenuUpdateAvailable": {
+        "message": "Zaktualizuj Signal",
+        "description": "One of the menu options available in the Avatar popup menu"
     },
     "loading": {
         "message": "Wczytywanie…",
@@ -411,6 +415,20 @@
         "message": "Następujące osoby mogły ponownie zainstalować aplikację lub zmienić urządzenie. Zweryfikuj wasze numery bezpieczeństwa, aby zapewnić prywatność.",
         "description": "Shown on confirmation dialog when user attempts to send a message"
     },
+    "safetyNumberChangeDialog__pending-messages--1": {
+        "message": "Wyślij oczekującą wiadomość",
+        "description": "Shown on confirmation dialog when user attempts to send a message in the outbox"
+    },
+    "safetyNumberChangeDialog__pending-messages--many": {
+        "message": "Wyślij $count$ oczekujących wiadomości",
+        "description": "Shown on confirmation dialog when user attempts to send a message in the outbox",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": 123
+            }
+        }
+    },
     "identityKeyErrorOnSend": {
         "message": "Numer bezpieczeństwa dla $name1$ uległ zmianie. Może to oznaczać, że ktoś próbuje przechwycić Twoją komunikację albo że $name2$ po prostu przeinstalował(a) Signal. Możesz chcieć zweryfikować numer bezpieczeństwa z tym kontaktem.",
         "description": "Shown when user clicks on a failed recipient in the message detail view after an identity key change",
@@ -452,27 +470,35 @@
         "description": "Shown in conversation banner when more than one group member's safety number has changed, but they were previously verified."
     },
     "debugLogExplanation": {
-        "message": "Ten log zostanie upubliczniony online, aby umożliwić twórcom aplikacji jego sprawdzenie. Możesz go przejrzeć i edytować przed przesłaniem.",
+        "message": "Ten log zostanie upubliczniony online, aby umożliwić twórcom aplikacji jego sprawdzenie. Możesz pobrać pełen log przed przesłaniem.",
         "description": ""
     },
     "debugLogError": {
-        "message": "Coś poszło nie tak podczas przesyłania! Rozważ ręczne dodanie swojego logu do zgłoszonego błędu.",
+        "message": "Coś poszło nie tak podczas przesyłania!! Wyślij e-mail na adres support@signal.org i załącz swój log, jako plik tekstowy.",
         "description": ""
     },
+    "debugLogSuccess": {
+        "message": "Wysłano logi debugowania",
+        "description": "Title of the success page for submitting a debug log"
+    },
+    "debugLogSuccessNextSteps": {
+        "message": "Log debugowania został wysłany. Skontaktuj się z pomocą techniczną, skopiuj poniższy link i dołącz go do wiadomości, wraz z opisem błędu i krokami, pozwalającymi go wywołać.",
+        "description": "Explanation of next steps to take when submitting debug log"
+    },
     "debugLogCopy": {
-        "message": "Kopiuj",
+        "message": "Kopiuj link",
         "description": "Shown as the text for the copy button on the debug log screen"
     },
-    "debugLogCopyAlt": {
-        "message": "Kopiuj link do schowka",
-        "description": "Shown as the alt text for the copy button on the debug log screen"
+    "debugLogSave": {
+        "message": "Zapisz",
+        "description": "Shown as the text for the download button on the debug log screen"
     },
     "debugLogLinkCopied": {
         "message": "Link skopiowany do schowka",
         "description": "Shown in a toast to let the user know that the link to the debug log has been copied to their clipboard"
     },
     "reportIssue": {
-        "message": "Zgłoś problem",
+        "message": "Kontakt z pomocą techniczną",
         "description": "Link to open the issue tracker"
     },
     "gotIt": {
@@ -621,6 +647,14 @@
             }
         }
     },
+    "decryptionErrorToast": {
+        "message": "Aplikacja Desktop napotkała błąd, w trakcie odszyfrowywania.",
+        "description": "An error popup when we haven't added an error for decryption error."
+    },
+    "decryptionErrorToastAction": {
+        "message": "Wyślij logi debugowania",
+        "description": "Label for the decryption error toast button"
+    },
     "oneNonImageAtATimeToast": {
         "message": "Gdy załącznik nie jest obrazem, możesz wysłać tylko jeden na raz.",
         "description": "An error popup when the user has attempted to add an attachment"
@@ -646,15 +680,15 @@
         "description": "Displayed when the desktop client cannot connect to the server."
     },
     "connecting": {
-        "message": "Łączenie",
+        "message": "Łączenie...",
         "description": "Displayed when the desktop client is currently connecting to the server."
     },
     "connect": {
-        "message": "Połącz",
+        "message": "Kliknij, aby połączyć.",
         "description": "Shown to allow the user to manually attempt a reconnect."
     },
     "connectingHangOn": {
-        "message": "To potrwa tylko chwilę...",
+        "message": "To potrwa tylko chwilę",
         "description": "Subtext description for when the client is connecting to the server."
     },
     "offline": {
@@ -672,6 +706,10 @@
     "debugLog": {
         "message": "Dziennik debugowania",
         "description": "View menu item to open the debug log (title case)"
+    },
+    "forceUpdate": {
+        "message": "Wymuś aktualizację",
+        "description": "View menu item to force the app to update download and install"
     },
     "helpMenuShowKeyboardShortcuts": {
         "message": "Pokaż skróty klawiszowe",
@@ -799,6 +837,20 @@
         "message": "Witamy w Signal",
         "description": ""
     },
+    "whatsNew": {
+        "message": "Zobacz $whatsNew$ w tej aktualizacji",
+        "description": "Shown in the main window",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "what's new"
+            }
+        }
+    },
+    "viewReleaseNotes": {
+        "message": "co nowego",
+        "description": "Clickable link that displays the latest release notes"
+    },
     "selectAContact": {
         "message": "Wybierz kontakt lub grupę, aby zacząć rozmowę.",
         "description": ""
@@ -835,7 +887,7 @@
     },
     "mobile": {
         "message": "Komórka",
-        "description": "Shown on contact detail screen as a label for aa phone or email"
+        "description": "Shown on contact detail screen as a label for a phone or email"
     },
     "email": {
         "message": "e-mail",
@@ -881,6 +933,18 @@
         "message": "Znaleziono oryginalną wiadomość, ale nie została załadowana. Przewiń w górę, aby załadować.",
         "description": "Shown in toast if user clicks on quote references messages not loaded in view, but in database"
     },
+    "voiceRecording--start": {
+        "message": "Zacznij nagrywać wiadomość głosową",
+        "description": "Tooltip for microphone button to start voice message"
+    },
+    "voiceRecording--complete": {
+        "message": "Zakończ i wyślij wiadomość głosową",
+        "description": "Tooltip for green complete voice message and send"
+    },
+    "voiceRecording--cancel": {
+        "message": "Anuluj wiadomość głosową",
+        "description": "Tooltip for red button to cancel voice message"
+    },
     "voiceRecordingInterruptedMax": {
         "message": "Nagrywanie wiadomości głosowej zostało zatrzymane, ponieważ osiągnięto limit czasu.",
         "description": "Confirmation dialog message for when the voice recording is interrupted due to max time limit"
@@ -897,15 +961,17 @@
         "message": "Wiadomość głosowa musi mieć tylko jeden załącznik.",
         "description": "Shown in toast if tries to record a voice note with any staged attachments"
     },
+    "voiceNoteError": {
+        "message": "Błąd nagrywania dźwięku.",
+        "description": "Shown in a dialog to inform user that we experienced an unrecoverable error"
+    },
     "attachmentSaved": {
-        "message": "Załącznik zapisany. Kliknij, aby pokazać w folderze.",
-        "description": "Shown after user selects to save to downloads",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "proof.jpg"
-            }
-        }
+        "message": "Zapisano załącznik.",
+        "description": "Shown after user selects to save to downloads"
+    },
+    "attachmentSavedShow": {
+        "message": "Pokaż w folderze",
+        "description": "Button label for showing the attachment in your file system"
     },
     "you": {
         "message": "Ty",
@@ -953,9 +1019,21 @@
         "message": "Zdjęcie",
         "description": "Shown in a quotation of a message containing a photo if no text was originally provided with that image"
     },
+    "text": {
+        "message": "Tekst",
+        "description": "Label for the word 'text'"
+    },
     "cannotUpdate": {
         "message": "Nie można zaktualizować",
         "description": "Shown as the title of our update error dialogs on windows"
+    },
+    "muted": {
+        "message": "Wyciszono",
+        "description": "Shown in a button when a conversation is muted"
+    },
+    "mute": {
+        "message": "Wycisz",
+        "description": "Shown in a button when a conversation is unmuted and can be muted"
     },
     "cannotUpdateDetail": {
         "message": "Dostępna jest nowa wersja Signal Desktop, ale automatyczna aktualizacja nie powiodła się. Przejdź do  $url$ i zainstaluj nową wersję ręcznie, a następnie skontaktuj się z pomocą techniczną lub zgłoś błąd dotyczący tego problemu.",
@@ -1013,6 +1091,10 @@
         "message": "Akceptuj",
         "description": ""
     },
+    "done": {
+        "message": "Gotowe",
+        "description": "Label for done"
+    },
     "on": {
         "message": "Włączone",
         "description": "Label for when something is turned on"
@@ -1028,10 +1110,6 @@
     "deleteForEveryoneWarning": {
         "message": "Ta wiadomość zostanie usunięta u wszystkich uczestników tej konwersacji, jeśli używają najnowszej wersji Signal. Będą oni mogli zobaczyć, że skasowałeś(aś) wiadomość.",
         "description": "Text shown in the confirmation dialog for deleting a message for everyone"
-    },
-    "deleteThisMessage": {
-        "message": "Usuń wiadomość",
-        "description": ""
     },
     "from": {
         "message": "Od",
@@ -1065,10 +1143,6 @@
         "message": "Pokaż członków",
         "description": ""
     },
-    "resetSession": {
-        "message": "Zresetuj sesję",
-        "description": "This is a menu item for resetting the session, using the imperative case, as in a command."
-    },
     "showSafetyNumber": {
         "message": "Zobacz numer bezpieczeństwa",
         "description": ""
@@ -1078,7 +1152,7 @@
         "description": "This is a menu item for viewing all media (images + video) in a conversation, using the imperative case, as in a command."
     },
     "verifyHelp": {
-        "message": "Jeżeli chcesz sprawdzić bezpieczeństwo Twojego szyfrowanego połączenia z $name$, porównaj powyższe cyfry z cyframi na  urządzeniu Twojego kontaktu.",
+        "message": "Aby sprawdzić bezpieczeństwo Twojego szyfrowanego połączenia z $name$, porównaj powyższe cyfry z cyframi na  urządzeniu Twojego kontaktu.",
         "description": "",
         "placeholders": {
             "name": {
@@ -1171,11 +1245,31 @@
     },
     "DeliveryIssue--summary": {
         "message": "Nie udało się dostarczyć Ci wiadomości, naklejki, reakcji, potwierdzenia przeczytania lub multimediów od $sender$. Ten kontakt mógł próbować przesłać Ci tę wiadomość bezpośrednio lub w rozmowie grupowej.",
-        "description": "Shown on explainer dialog available from delivery issue timeline events",
+        "description": "Shown on explainer dialog available from delivery issue timeline events in 1:1 conversations",
         "placeholders": {
             "name": {
                 "content": "$1",
                 "example": "Alice"
+            }
+        }
+    },
+    "DeliveryIssue--summary--group": {
+        "message": "Nie udało się dostarczyć Ci wiadomości, naklejki, reakcji, potwierdzenia przeczytania lub multimediów od $sender$, w tej rozmowie.",
+        "description": "Shown on explainer dialog available from delivery issue timeline events in groups",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "ChangeNumber--notification": {
+        "message": "$sender$ zmienił(a) swój numer telefonu",
+        "description": "Shown in timeline when a member of a conversation changes their phone number",
+        "placeholders": {
+            "sender": {
+                "content": "$1",
+                "example": "Sam"
             }
         }
     },
@@ -1205,7 +1299,11 @@
     },
     "save": {
         "message": "Zapisz",
-        "description": "Used as a 'commit changes' button in the Caption Editor for outgoing image attachments"
+        "description": "Used as a 'commit changes' button in the caption editor for outgoing image attachments"
+    },
+    "reset": {
+        "message": "Zresetuj",
+        "description": "Used on reset buttons"
     },
     "fileIconAlt": {
         "message": "Ikona pliku",
@@ -1239,7 +1337,11 @@
         "message": "Połącz nowe urządzenie",
         "description": "The menu option shown in Signal iOS to add a new linked device"
     },
-    "deviceName": {
+    "LinkScreen__scan-this-code": {
+        "message": "Zeskanuj ten kod, używając aplikacji Signal na swoim telefonie",
+        "description": "Alt text for the QR code on the device link screen"
+    },
+    "Preferences--device-name": {
         "message": "Nazwa urządzenia",
         "description": "The label in settings panel shown for the user-provided name for this desktop instance"
     },
@@ -1275,13 +1377,21 @@
         "message": "Spróbuj ponownie",
         "description": ""
     },
-    "theme": {
+    "Preferences--theme": {
         "message": "Motyw",
         "description": "Header for theme settings"
     },
     "calling": {
         "message": "Połączenia",
         "description": "Header for calling options on the settings screen"
+    },
+    "calling__call-back": {
+        "message": "Oddzwoń",
+        "description": "Button to call someone back"
+    },
+    "calling__call-again": {
+        "message": "Zadzwoń ponownie",
+        "description": "Button to call someone again"
     },
     "calling__start": {
         "message": "Połącz",
@@ -1297,7 +1407,11 @@
     },
     "calling__call-is-full": {
         "message": "Połączenie jest pełne",
-        "description": "Button label in the call lobby when you can't join because the call is full"
+        "description": "Text in the call lobby when you can't join because the call is full"
+    },
+    "calling__button--video__label": {
+        "message": "Kamera",
+        "description": "Label under the video button"
     },
     "calling__button--video-disabled": {
         "message": "Kamera wyłączona",
@@ -1311,6 +1425,10 @@
         "message": "Włącz kamerę",
         "description": "Button tooltip label for turning on the camera"
     },
+    "calling__button--audio__label": {
+        "message": "Wycisz",
+        "description": "Label under the audio button"
+    },
     "calling__button--audio-disabled": {
         "message": "Mikrofon wyłączony",
         "description": "Button tooltip label when the microphone is disabled"
@@ -1322,6 +1440,10 @@
     "calling__button--audio-on": {
         "message": "Cofnij wyciszenie",
         "description": "Button tooltip label for turning on the microphone"
+    },
+    "calling__button--presenting__label": {
+        "message": "Udostępnij",
+        "description": "Label under the share screen button"
     },
     "calling__button--presenting-disabled": {
         "message": "Udostępnianie wyłączone",
@@ -1335,15 +1457,31 @@
         "message": "Przestań udostępniać",
         "description": "Button tooltip label for stopping screen sharing"
     },
+    "calling__button--ring__label": {
+        "message": "Zadzwoń",
+        "description": "Label under the ring button"
+    },
+    "calling__button--ring__disabled-because-group-is-too-large": {
+        "message": "Grupa jest zbyt duża, aby powiadomić uczestników dzwonkiem.",
+        "description": "Button tooltip label when you can't ring because the group is too large"
+    },
+    "calling__button--ring__off": {
+        "message": "Nie dzwoń, powiadamiaj",
+        "description": "Button tooltip label for turning ringing off"
+    },
+    "calling__button--ring__on": {
+        "message": "Włącz dzwonek",
+        "description": "Button tooltip label for turning ringing on"
+    },
     "calling__your-video-is-off": {
         "message": "Twoja kamera jest wyłączona",
         "description": "Label in the calling lobby indicating that your camera is off"
     },
-    "calling__lobby-summary--zero": {
+    "calling__pre-call-info--empty-group": {
         "message": "Brak innych uczestników rozmowy",
         "description": "Shown in the calling lobby to describe who is in the call"
     },
-    "calling__lobby-summary--single": {
+    "calling__pre-call-info--1-person-in-call": {
         "message": "$first$ uczestniczy w rozmowie",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1353,11 +1491,11 @@
             }
         }
     },
-    "calling__lobby-summary--self": {
+    "calling__pre-call-info--another-device-in-call": {
         "message": "Jedno z Twoich urządzeń uczestniczy w rozmowie",
         "description": "Shown in the calling lobby to describe when it is just you"
     },
-    "calling__lobby-summary--double": {
+    "calling__pre-call-info--2-people-in-call": {
         "message": "$first$ i $second$ uczestniczą w rozmowie",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1371,7 +1509,7 @@
             }
         }
     },
-    "calling__lobby-summary--triple": {
+    "calling__pre-call-info--3-people-in-call": {
         "message": "$first$,  $second$ i $third$ uczestniczą w rozmowie",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1389,11 +1527,131 @@
             }
         }
     },
-    "calling__lobby-summary--many": {
+    "calling__pre-call-info--many-people-in-call": {
         "message": "$first$, $second$ i $others$ innych uczestniczy w rozmowie",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
             "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "others": {
+                "content": "$3",
+                "example": "5"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-1": {
+        "message": "Signal zadzwoni do $person$",
+        "description": "Shown in the calling lobby to describe who will be rung",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-2": {
+        "message": "Signal zadzwoni do $first$ i $second$",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-3": {
+        "message": "Signal zadzwoni do $first$, $second$ i $third$",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "third": {
+                "content": "$3",
+                "example": "April"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-many": {
+        "message": "Signal zadzwoni do $first$, $second$ i $others$ innych",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "others": {
+                "content": "$3",
+                "example": "5"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-1": {
+        "message": "$person$ otrzyma powiadomienie",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-2": {
+        "message": "$first$ i $second$ otrzymają powiadomienie",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-3": {
+        "message": "$first$, $second$ i $third$ otrzymają powiadomienie",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "third": {
+                "content": "$3",
+                "example": "April"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-many": {
+        "message": "$first$, $second$ i $others$ otrzyma powiadomienie",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "person": {
                 "content": "$1",
                 "example": "Sam"
             },
@@ -1437,7 +1695,7 @@
     },
     "calling__block-info": {
         "message": "Nie odbierzesz audio i wideo od tej osoby, a ona nie odbierze Twojego.",
-        "description": "Shown in the modal dialog to describe how blocking works in a gorup call"
+        "description": "Shown in the modal dialog to describe how blocking works in a group call"
     },
     "calling__overflow__scroll-up": {
         "message": "Przewiń w górę",
@@ -1546,7 +1804,7 @@
         "description": "Header for general options on the settings screen"
     },
     "spellCheckDescription": {
-        "message": "Włącz sprawdzanie pisowni",
+        "message": "Sprawdzaj pisownię w polu wiadomości",
         "description": "Description of the spell check setting"
     },
     "spellCheckWillBeEnabled": {
@@ -1557,12 +1815,20 @@
         "message": "Sprawdzanie pisowni zostanie wyłączone przy kolejnym uruchomieniu Signal.",
         "description": "Shown when the user disables spellcheck to indicate that they must restart Signal."
     },
+    "SystemTraySetting__minimize-to-system-tray": {
+        "message": "Minimalizuj do obszaru powiadomień",
+        "description": "In the settings, shown next to the checkbox option for minimizing to the system tray"
+    },
+    "SystemTraySetting__minimize-to-and-start-in-system-tray": {
+        "message": "Uruchom zminimalizowany",
+        "description": "In the settings, shown next to the checkbox option for starting in the system tray"
+    },
     "autoLaunchDescription": {
         "message": "Uruchom przy starcie systemu",
         "description": "Description for the automatic launch setting"
     },
     "clearDataHeader": {
-        "message": "Wyczyść dane",
+        "message": "Usuń dane aplikacji",
         "description": "Header in the settings dialog for the section dealing with data deletion"
     },
     "clearDataExplanation": {
@@ -1700,7 +1966,7 @@
         "description": "Warning notification that this version of the app has expired"
     },
     "upgrade": {
-        "message": "Aktualizuj",
+        "message": "Kliknij, aby przejśc do signal.org/download",
         "description": "Label text for button to upgrade the app to the latest version"
     },
     "mediaMessage": {
@@ -1712,7 +1978,7 @@
         "description": "Error message displayed when sending to an unregistered user."
     },
     "sync": {
-        "message": "Kontakty",
+        "message": "Importuj kontakty",
         "description": "Label for contact and group sync settings"
     },
     "syncExplanation": {
@@ -1837,7 +2103,7 @@
     },
     "disappearingMessages": {
         "message": "Znikające wiadomości",
-        "description": "Conversation menu option to enable disappearing messages. Title of the settings section for Disappearing Messages"
+        "description": "Conversation menu option to enable disappearing messages. Title of the settings section for Disappearing Messages. Label of the disappearing timer select in group creation flow"
     },
     "disappearingMessagesDisabled": {
         "message": "Znikające wiadomości wyłączone",
@@ -1872,7 +2138,7 @@
         }
     },
     "audioNotificationDescription": {
-        "message": "Odtwórz powiadomienie dźwiękowe",
+        "message": "Odtwarzaj dźwięk powiadomień",
         "description": "Description for audio notification setting"
     },
     "callRingtoneNotificationDescription": {
@@ -1918,6 +2184,10 @@
                 "example": "Bob Smith"
             }
         }
+    },
+    "SafetyNumberModal__title": {
+        "message": "Zweryfikuj numer bezpieczeństwa",
+        "description": "Title for the modal for safety number verification"
     },
     "safetyNumberChanged": {
         "message": "Numer bezpieczeństwa uległ zmianie",
@@ -2110,7 +2380,7 @@
         "description": "When a person inputs a number that is invalid"
     },
     "unlinkedWarning": {
-        "message": "Połącz ponownie Signal Desktop z urządzeniem mobilnym, aby móc dalej wysyłać wiadomości.",
+        "message": "Kliknij, aby ponownie połączyć Signal Desktop z Twoim urządzeniem mobilnym i móc dalej wysyłać wiadomości.",
         "description": ""
     },
     "unlinked": {
@@ -2122,11 +2392,15 @@
         "description": ""
     },
     "autoUpdateNewVersionTitle": {
-        "message": "Dostępna aktualizacja aplikacji Signal",
+        "message": "Dostępna aktualizacja",
         "description": ""
     },
     "autoUpdateNewVersionMessage": {
-        "message": "Dostępna nowa wersja Signal.",
+        "message": "Kliknij, aby ponownie uruchomić Signal",
+        "description": ""
+    },
+    "downloadNewVersionMessage": {
+        "message": "Kliknij, aby pobrać aktualizację",
         "description": ""
     },
     "autoUpdateNewVersionInstructions": {
@@ -2139,6 +2413,10 @@
     },
     "autoUpdateLaterButtonLabel": {
         "message": "Później",
+        "description": ""
+    },
+    "autoUpdateIgnoreButtonLabel": {
+        "message": "Zignoruj aktualizację",
         "description": ""
     },
     "leftTheGroup": {
@@ -2210,6 +2488,38 @@
             "names": {
                 "content": "$1",
                 "example": "Alice, Bob"
+            }
+        }
+    },
+    "ConversationList__aria-label": {
+        "message": "Rozmowa z: $title$, nowe wiadomości: $unreadCount$, ostatnia wiadomość: $lastMessage$.",
+        "description": "Aria label for the conversation list item",
+        "placeholders": {
+            "title": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "unreadCount": {
+                "content": "$2",
+                "example": "23"
+            },
+            "lastMessage": {
+                "content": "$3",
+                "example": "How about Friday?"
+            }
+        }
+    },
+    "ConversationList__last-message-undefined": {
+        "message": "Ostatnia wiadomość mogła zostać usunięta.",
+        "description": "For aria-label within conversation list. Describes if last message is not defined."
+    },
+    "BaseConversationListItem__aria-label": {
+        "message": "Przejdź do konwersacji z $title$",
+        "description": "Aria label for the conversation list item button",
+        "placeholders": {
+            "title": {
+                "content": "$1",
+                "example": "Alice"
             }
         }
     },
@@ -2444,6 +2754,10 @@
     "confirmation-dialog--Cancel": {
         "message": "Anuluj",
         "description": "Appears on the cancel button in confirmation dialogs."
+    },
+    "MessageBody--read-more": {
+        "message": "Czytaj dalej",
+        "description": "When a message is too long this is the affordance to expand the message"
     },
     "Message--unsupported-message": {
         "message": "$contact$ wysłał(a) wiadomość, która nie może zostać przetworzona lub wyświetlona, ponieważ wykorzystuje nową funkcję Signal.",
@@ -2721,6 +3035,10 @@
         "message": "Zarchiwizowano konwersację",
         "description": "A toast that shows up when user archives a conversation"
     },
+    "conversationArchivedUndo": {
+        "message": "Cofnij",
+        "description": "Undo button for archiving a conversation"
+    },
     "conversationReturnedToInbox": {
         "message": "Przywrócono z archiwum",
         "description": "A toast that shows up when the user unarchives a conversation"
@@ -2780,6 +3098,14 @@
     "StickerCreator--DropStage--title": {
         "message": "Dodaj swoje naklejki",
         "description": "Title for the drop stage of the sticker creator"
+    },
+    "StickerCreator--DropStage--removeSticker": {
+        "message": "Usuń naklejkę",
+        "description": "Label for the X button used to remove a staged sticker"
+    },
+    "StickerCreator--DropStage--dragDrop": {
+        "message": "kliknij, lub przeciągnij i upuść, aby dodać naklejkę",
+        "description": "Shown on the + section of the file addition stage of sticker pack creation"
     },
     "StickerCreator--DropStage--help": {
         "message": "Naklejki muszą być w formacie PNG, APNG lub WebP, z przezroczystym tłem i mieć rozmiar 512x512 pikseli. Zalecany margines to 16 pikseli.",
@@ -2955,11 +3281,15 @@
         "message": "Połącz Signal na swoim telefonie i komputerze, aby móc używać Kreatora pakietów naklejek",
         "description": "The error message which appears when the user has not linked their account and attempts to use the Sticker Creator"
     },
+    "Reactions--remove": {
+        "message": "Usuń reakcję",
+        "description": ""
+    },
     "Reactions--error": {
         "message": "Nie udało się zareagować. Spróbuj ponownie.",
         "description": "Shown when a reaction fails to send"
     },
-    "ReactionsViewer--more": {
+    "Reactions--more": {
         "message": "Więcej",
         "description": "Use in the reaction picker as the alt text for the 'more' button"
     },
@@ -2989,13 +3319,7 @@
     },
     "MessageRequests--message-group": {
         "message": "Czy chcesz dołączyć do tej grupy i udostępnić swoje imię i zdjęcie jej członkom? Członkowie grupy nie będą wiedzieć, że przeczytałeś(aś) ich wiadomość, dopóki nie zaakceptujesz.",
-        "description": "Shown as the message for a message request in a group",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the message for a message request in a group"
     },
     "MessageRequests--message-group-blocked": {
         "message": "Czy chcesz odblokować tę grupę i udostępnić swoje imię i zdjęcie jej członkom? Nie otrzymasz żadnych wiadomości, dopóki nie odblokujesz.",
@@ -3021,23 +3345,11 @@
     },
     "MessageRequests--unblock-direct-confirm-body": {
         "message": "Będziecie w stanie wysyłać wiadomości i wykonywać połączenia do siebie nawzajem.",
-        "description": "Shown as the body in the confirmation modal for unblocking a private message request",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the body in the confirmation modal for unblocking a private message request"
     },
     "MessageRequests--unblock-group-confirm-body": {
         "message": "Członkowie grupy będą mogli ponownie dodać Cię do grupy.",
-        "description": "Shown as the body in the confirmation modal for unblocking a group message request",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the body in the confirmation modal for unblocking a group message request"
     },
     "MessageRequests--block-and-report-spam": {
         "message": "Zgłoś spam i zablokuj",
@@ -3177,7 +3489,7 @@
     },
     "member-of-2-groups": {
         "message": "Członek $group1$ i $group2$",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least two mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of two mutual groups",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3191,7 +3503,7 @@
     },
     "member-of-3-groups": {
         "message": "Członek $group1$, $group2$ i $group3$",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least three mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of three mutual groups",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3207,9 +3519,27 @@
             }
         }
     },
-    "member-of-more-than-3-groups": {
+    "member-of-more-than-3-groups--one-more": {
+        "message": "Członek $group1$, $group2$, $group3$ i jednej innej",
+        "description": "Shown in the conversation hero to indicate this user is a member of four mutual groups",
+        "placeholders": {
+            "group1": {
+                "content": "$1",
+                "example": "NYC Rock Climbers"
+            },
+            "group2": {
+                "content": "$2",
+                "example": "Dinner Party"
+            },
+            "group3": {
+                "content": "$3",
+                "example": "Friends 🌿"
+            }
+        }
+    },
+    "member-of-more-than-3-groups--multiple-more": {
         "message": "Członek $group1$, $group2$, $group3$ i $remainingCount$ innych",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least three mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of 5+ mutual groups.",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3307,9 +3637,87 @@
         "message": "Przychodzące połączenie wideo...",
         "description": "Shown in both the incoming call bar and notification for an incoming video call"
     },
-    "outgoingCallPrering": {
-        "message": "Łączenie…",
-        "description": "Shown in the call screen when placing an outgoing call that isn't ringing yet"
+    "incomingGroupCall__ringing-you": {
+        "message": "$ringer$ dzwoni do Ciebie",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-1-other": {
+        "message": "$ringer$ dzwoni do Ciebie i $otherMember$",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "otherMember": {
+                "content": "$2",
+                "example": "Bob"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-2-others": {
+        "message": "$ringer$ dzwoni do Ciebie, $first$ i $second$",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-3-others": {
+        "message": "$ringer$ dzwoni do Ciebie, $first$, $second$ i 1 innego",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-many": {
+        "message": "$ringer$ dzwoni do Ciebie, $first$, $second$ i $remaining$ innych",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            },
+            "remaining": {
+                "content": "$4",
+                "example": "5"
+            }
+        }
     },
     "outgoingCallRinging": {
         "message": "Dzwonienie...",
@@ -3426,7 +3834,7 @@
         "description": "Title for the select your screen sharing sources modal"
     },
     "calling__SelectPresentingSourcesModal--confirm": {
-        "message": "Udostępnij ekran",
+        "message": "Rozpocznij udostępnianie",
         "description": "Confirm button for sharing screen modal"
     },
     "calling__SelectPresentingSourcesModal--entireScreen": {
@@ -3470,6 +3878,10 @@
     "muteNotificationsTitle": {
         "message": "Wycisz powiadomienia",
         "description": "Label for the mute notifications drop-down selector"
+    },
+    "notMuted": {
+        "message": "Niewyciszony",
+        "description": "Label when the conversation is not muted"
     },
     "muteHour": {
         "message": "Wycisz na godzinę",
@@ -3515,19 +3927,31 @@
     },
     "ErrorModal--title": {
         "message": "Coś poszło nie tak!",
-        "description": "Title of pop-up dialog when user-initiated task has gone wrong"
+        "description": "Title of popup dialog when user-initiated task has gone wrong"
     },
     "ErrorModal--description": {
         "message": "Spróbuj ponownie lub skontaktuj się z pomocą techniczną.",
-        "description": "Description text in pop-up dialog when user-initiated task has gone wrong"
+        "description": "Description text in popup dialog when user-initiated task has gone wrong"
     },
     "Confirmation--confirm": {
         "message": "OK",
-        "description": "Button to dismiss pop-up dialog when user-initiated task has gone wrong"
+        "description": "Button to dismiss popup dialog when user-initiated task has gone wrong"
     },
     "unknown-sgnl-link": {
         "message": "Przykro nam, ten link sgnl:// nie ma sensu!",
         "description": "Shown if you click on a sgnl:// link not currently supported by Desktop"
+    },
+    "GroupV2--cannot-send": {
+        "message": "Nie możesz wysyłać wiadomości w tej grupie.",
+        "description": "Shown in toast when you attempt to forward a message to an announcement only group"
+    },
+    "GroupV2--add--missing-capability": {
+        "message": "Nie można dodać tych użytkowników do grupy, dopóki nie zaktualizują aplikacji Signal.",
+        "description": "Shown in a confirmation dialog when members who cannot view announcement only group cannot be added"
+    },
+    "GroupV2--cannot-start-group-call": {
+        "message": "Tylko administratorzy mogą rozpoczynać połączenia w tej grupie.",
+        "description": "Shown in toast when a non-admin starts a group call in an announcements only group"
     },
     "GroupV2--join--invalid-link--title": {
         "message": "Nieprawidłowy link",
@@ -3626,7 +4050,7 @@
         "description": "Shown if something went wrong when you try to join via a group link"
     },
     "GroupV2--join--general-join-failure": {
-        "message": "Dołączanie przez link nie powiodło się. Spróbuj później.",
+        "message": "Nie udało się dołączyć do grupy. Spróbuj później.",
         "description": "Shown if something went wrong when you try to join via a group link"
     },
     "GroupV2--admin": {
@@ -4191,7 +4615,13 @@
     },
     "GroupV2--member-privilege--demote--other--unknown": {
         "message": "Administrator anulował uprawnienia administratora $memberName$.",
-        "description": "Shown in timeline or conversation preview when v2 group changes"
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "memberName": {
+                "content": "$1",
+                "example": "Bob"
+            }
+        }
     },
     "GroupV2--member-privilege--demote--you--other": {
         "message": "$adminName$ anulował(a) Twoje uprawnienia administratora.",
@@ -4701,6 +5131,42 @@
         "message": "Opis grupy został zmieniony.",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
+    "GroupV2--announcements--admin--you": {
+        "message": "Zmieniłeś(aś) ustawienia grupy, aby tylko administratorzy mogli wysyłać wiadomości.",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--admin--other": {
+        "message": "$memberName$ zmienił(a) ustawienia grupy, aby tylko administratorzy mogli wysyłać wiadomości.",
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "adminName": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "GroupV2--announcements--admin--unknown": {
+        "message": "Ustawienia tej grupy zostały zmienione, aby tylko administratorzy mogli wysyłać wiadomości.",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--member--you": {
+        "message": "Zmieniłeś(aś) ustawienia grupy, aby wszyscy członkowie mogli wysyłać wiadomości.",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--member--other": {
+        "message": "$memberName$ zmienił(a) ustawienia grupy, aby wszyscy członkowie mogli wysyłać wiadomości.",
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "adminName": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "GroupV2--announcements--member--unknown": {
+        "message": "Ustawienia tej grupy zostały zmienione, aby wszyscy członkowie mogli wysyłać wiadomości.",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
     "GroupV1--Migration--disabled": {
         "message": "Zaktualizuj tę grupę, aby aktywować takie nowe funkcje jak @wzmianki i administratorzy. Członkowie grupy, którzy nie udostępnili tej grupie swojego imienia lub zdjęcia, zostaną do niej zaproszeni. $learnMore$",
         "description": "Shown instead of composition area when user is forced to migrate a legacy group (GV1).",
@@ -4840,7 +5306,7 @@
         "description": "Title for the composition area for the SMS-only contact"
     },
     "CompositionArea--sms-only__body": {
-        "message": "Signal Desktop nie obsługuje wysyłania wiadomości do kontaktów niekorzystających z Signal. Poproś tę osobę, aby zainstalowała Signal , by móc komunikować się bezpieczniej.",
+        "message": "Signal Desktop nie obsługuje wysyłania wiadomości do kontaktów niekorzystających z Signal. Poproś tę osobę, aby zainstalowała Signal, by móc komunikować się bezpieczniej.",
         "description": "Body for the composition area for the SMS-only contact"
     },
     "CompositionArea--sms-only__spinner-label": {
@@ -4874,7 +5340,7 @@
         }
     },
     "ContactModal--rm-admin-info": {
-        "message": "Usuń $contact$, jako administratora grupy",
+        "message": "Usunąć $contact$, jako administratora grupy?",
         "description": "Shown in a confirmation dialog when you are about to remove admin privileges from someone",
         "placeholders": {
             "contact": {
@@ -4895,6 +5361,14 @@
         "message": "Ustawienia grupy",
         "description": "This is a button in the conversation context menu to show group settings"
     },
+    "showConversationDetails--direct": {
+        "message": "Ustawienia rozmów",
+        "description": "This is a button in the conversation context menu to show chat settings"
+    },
+    "ConversationDetails__unmute--title": {
+        "message": "Cofnąć wyciszenie tej rozmowy?",
+        "description": "Title for the modal to unmute a chat"
+    },
     "ConversationDetails--group-link": {
         "message": "Link do grupy",
         "description": "This is the label for the group link management panel"
@@ -4906,6 +5380,10 @@
     "ConversationDetails--disappearing-messages-info": {
         "message": "Włączenie funkcji spowoduje, że wysyłane i otrzymywane wiadomości w tej rozmowie znikną, gdy zostaną odczytane.",
         "description": "This is the info about the disappearing messages setting"
+    },
+    "ConversationDetails--notifications": {
+        "message": "Powiadomienia",
+        "description": "This is the label for notifications in the conversation details screen"
     },
     "ConversationDetails--group-info-label": {
         "message": "Kto może edytować informacje o grupie",
@@ -4922,6 +5400,14 @@
     "ConversationDetails--add-members-info": {
         "message": "Wybierz, kto może dodawać członków do tej grupy.",
         "description": "This is the additional info for the 'who can add members' panel"
+    },
+    "ConversationDetails--announcement-label": {
+        "message": "Kto może wysyłać wiadomości",
+        "description": "This is the additional info for the 'who can send messages' panel"
+    },
+    "ConversationDetails--announcement-info": {
+        "message": "Wybierz, kto może wysyłać wiadomości w tej grupie.",
+        "description": "This is the additional info for the 'who can send messages' panel"
     },
     "ConversationDetails--requests-and-invites": {
         "message": "Prośby o przyjęcie i zaproszenia",
@@ -5004,6 +5490,22 @@
     "ConversationDetailsMembershipList--show-all": {
         "message": "Zobacz wszystkie",
         "description": "This is a button on the conversation details to show all members"
+    },
+    "ConversationNotificationsSettings__mentions__label": {
+        "message": "Wzmianki",
+        "description": "In the conversation notifications settings, this is the label for the mentions option"
+    },
+    "ConversationNotificationsSettings__mentions__info": {
+        "message": "Otrzymuj powiadomienia, gdy zostaniesz wspomniany(a) w wyciszonych rozmowach",
+        "description": "In the conversation notifications settings, this is the sub-label for the mentions option"
+    },
+    "ConversationNotificationsSettings__mentions__select__always-notify": {
+        "message": "Zawsze powiadamiaj",
+        "description": "In the conversation notifications settings, this is the option that always notifies you for @mentions"
+    },
+    "ConversationNotificationsSettings__mentions__select__dont-notify-for-mentions-if-muted": {
+        "message": "Nie powiadamiaj, gdy wyciszono",
+        "description": "In the conversation notifications settings, this is the option that doesn't notify you for @mentions if the conversation is muted"
     },
     "GroupLinkManagement--clipboard": {
         "message": "Skopiowano link do grupy.",
@@ -5147,7 +5649,7 @@
     },
     "PendingRequests--info": {
         "message": "Osoby na tej liście próbują dołączyć do \"$name$\" przez link do grupy.",
-        "description": "Inforamtion shown below the pending admin approval list",
+        "description": "Information shown below the pending admin approval list",
         "placeholders": {
             "name": {
                 "content": "$1",
@@ -5162,6 +5664,10 @@
     "AvatarInput--no-photo-label--group": {
         "message": "Dodaj zdjęcie grupy",
         "description": "The label for the avatar uploader when no group photo is selected"
+    },
+    "AvatarInput--no-photo-label--profile": {
+        "message": "Dodaj zdjęcie",
+        "description": "The label for the avatar uploader when no profile photo is selected"
     },
     "AvatarInput--change-photo-label": {
         "message": "Zmień zdjęcie",
@@ -5268,16 +5774,34 @@
         "description": "The text of the button to create new groups"
     },
     "selectContact": {
-        "message": "Wybierz kontakt",
-        "description": "The label for contact checkboxes that are non-selected (clicking them should select the contact)"
+        "message": "Zaznacz kontakt $name$",
+        "description": "The label for contact checkboxes that are non-selected (clicking them should select the contact)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "deselectContact": {
-        "message": "Odznacz kontakt",
-        "description": "The label for contact checkboxes that are selected (clicking them should de-select the contact)"
+        "message": "Odznacz kontakt $name$",
+        "description": "The label for contact checkboxes that are selected (clicking them should de-select the contact)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "cannotSelectContact": {
-        "message": "Nie można wybrać kontaktu",
-        "description": "The label for contact checkboxes that are disabled"
+        "message": "Nie można wybrać kontaktu $name$",
+        "description": "The label for contact checkboxes that are disabled",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "alreadyAMember": {
         "message": "Należy już do grupy",
@@ -5455,7 +5979,7 @@
     },
     "deleteForEveryoneFailed": {
         "message": "Nie udało się usunąć wiadomości u wszystkich. Spróbuj później.",
-        "description": "Displayed when delete-for-everyone has failed to send to all recepients"
+        "description": "Displayed when delete-for-everyone has failed to send to all recipients"
     },
     "ChatColorPicker__delete--title": {
         "message": "Usuń kolor",
@@ -5597,7 +6121,7 @@
     },
     "settings__DisappearingMessages__timer__label": {
         "message": "Domyślny czas dla nowych rozmów",
-        "description": "Label for the Disapearring Messages default timer setting"
+        "description": "Label for the Disappearing Messages default timer setting"
     },
     "UniversalTimerNotification__text": {
         "message": "Czas znikania wiadomości będzie ustawiony na $timeValue$, gdy wyślesz wiadomość.",
@@ -5608,6 +6132,10 @@
                 "example": "1 week"
             }
         }
+    },
+    "ErrorBoundaryNotification__text": {
+        "message": "Nie udało się wyświetlić tej wiadomości. Kliknij, aby przesłać logi debugowania.",
+        "description": "An error notification displayed when message fails to render due to an internal error"
     },
     "GroupDescription__read-more": {
         "message": "czytaj dalej",
@@ -5620,5 +6148,365 @@
     "ConversationDetailsHeader--add-group-description": {
         "message": "Dodaj opis grupy…",
         "description": "Placeholder text in the details header for those that can edit the group description"
+    },
+    "MediaQualitySelector--button": {
+        "message": "Wybierz jakość multimediów",
+        "description": "aria-label for the media quality selector button"
+    },
+    "MediaQualitySelector--title": {
+        "message": "Jakość multimediów",
+        "description": "Popup selector title"
+    },
+    "MediaQualitySelector--standard-quality-title": {
+        "message": "Standardowa",
+        "description": "Title for option for standard quality"
+    },
+    "MediaQualitySelector--standard-quality-description": {
+        "message": "Szybciej, mniejszy plik",
+        "description": "Description of standard quality selector"
+    },
+    "MediaQualitySelector--high-quality-title": {
+        "message": "Wysoka",
+        "description": "Title for option for high quality"
+    },
+    "MediaQualitySelector--high-quality-description": {
+        "message": "Wolniej, większy plik",
+        "description": "Description of high quality selector"
+    },
+    "MessageDetailsHeader--Failed": {
+        "message": "Nie wysłano",
+        "description": "In the message details screen, shown above contacts where the message failed to deliver"
+    },
+    "MessageDetailsHeader--Pending": {
+        "message": "Oczekuje",
+        "description": "In the message details screen, shown above contacts where the message is still sending"
+    },
+    "MessageDetailsHeader--Sent": {
+        "message": "Wysłano do",
+        "description": "In the message details screen, shown above contacts where the message has been sent (but not delivered, read, or viewed)"
+    },
+    "MessageDetailsHeader--Delivered": {
+        "message": "Dostarczono do",
+        "description": "In the message details screen, shown above contacts who have received your message"
+    },
+    "MessageDetailsHeader--Read": {
+        "message": "Odczytano przez",
+        "description": "In the message details screen, shown above contacts who have read this message"
+    },
+    "MessageDetailsHeader--Viewed": {
+        "message": "Obejrzano przez",
+        "description": "In the message details screen, shown above contacts who have viewed this message"
+    },
+    "ProfileEditor--about": {
+        "message": "O mnie",
+        "description": "Default text for about field"
+    },
+    "ProfileEditor--about-placeholder": {
+        "message": "Napisz kilka słów o sobie...",
+        "description": "Placeholder text for about input field"
+    },
+    "ProfileEditor--first-name": {
+        "message": "Imię (wymagane)",
+        "description": "Placeholder text for first name field"
+    },
+    "ProfileEditor--last-name": {
+        "message": "Nazwisko (opcjonalne)",
+        "description": "Placeholder text for last name field"
+    },
+    "ConfirmDiscardDialog--discard": {
+        "message": "Odrzucić zmiany?",
+        "description": "ConfirmationDialog text for discarding changes"
+    },
+    "ProfileEditor--info": {
+        "message": "Twój profil jest szyfrowany metodą end-to-end. Twój profil i jego zmiany będą widoczne dla Twoich kontaktów, i gdy rozpoczniesz lub zaakceptujesz nowe rozmowy. $learnMore$",
+        "description": "Information shown at the bottom of the profile editor section",
+        "placeholders": {
+            "learnMore": {
+                "content": "$1",
+                "example": "Learn More."
+            }
+        }
+    },
+    "ProfileEditor--learnMore": {
+        "message": "Dowiedz się więcej",
+        "description": "Text that links to a support article"
+    },
+    "Bio--speak-freely": {
+        "message": "Mówcie śmiało",
+        "description": "A default bio option"
+    },
+    "Bio--encrypted": {
+        "message": "Zaszyfrowany",
+        "description": "A default bio option"
+    },
+    "Bio--free-to-chat": {
+        "message": "Chętny do rozmowy",
+        "description": "A default bio option"
+    },
+    "Bio--coffee-lover": {
+        "message": "Miłośnik kawy",
+        "description": "A default bio option"
+    },
+    "Bio--taking-break": {
+        "message": "Robię przerwę",
+        "description": "A default bio option"
+    },
+    "ProfileEditorModal--profile": {
+        "message": "Profil",
+        "description": "Title for profile editing"
+    },
+    "ProfileEditorModal--name": {
+        "message": "Twoje imię",
+        "description": "Title for editing your name"
+    },
+    "ProfileEditorModal--about": {
+        "message": "O mnie",
+        "description": "Title for about editing"
+    },
+    "ProfileEditorModal--error": {
+        "message": "Nie udało się zaktualizować Twojego profilu. Spróbuj później.",
+        "description": "Error message when something goes wrong updating your profile."
+    },
+    "AnnouncementsOnlyGroupBanner--modal": {
+        "message": "Wyślij do administratora",
+        "description": "Modal title for the list of admins in a group"
+    },
+    "AnnouncementsOnlyGroupBanner--announcements-only": {
+        "message": "Tylko $admins$ mogą wysyłać wiadomości",
+        "description": "Displayed if sending of messages is disabled to non-admins",
+        "placeholders": {
+            "admins": {
+                "content": "$1",
+                "example": "admins"
+            }
+        }
+    },
+    "AnnouncementsOnlyGroupBanner--admins": {
+        "message": "administratorzy",
+        "description": "Clickable text describing administrators of a group, used in the message an admin label"
+    },
+    "AvatarEditor--choose": {
+        "message": "Wybierz awatar",
+        "description": "Label for the avatar selector"
+    },
+    "AvatarColorPicker--choose": {
+        "message": "Wybierz kolor",
+        "description": "Label for when you need to choose your fighter, err color"
+    },
+    "LeftPaneSetGroupMetadataHelper__avatar-modal-title": {
+        "message": "Awatar grupy",
+        "description": "Title for the avatar picker in the group creation flow"
+    },
+    "Preferences__button--general": {
+        "message": "Ogólne",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--appearance": {
+        "message": "Wygląd",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--chats": {
+        "message": "Rozmowy",
+        "description": "Button to switch the settings view (and a title of pane)"
+    },
+    "Preferences__button--calls": {
+        "message": "Połączenia",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--notifications": {
+        "message": "Powiadomienia",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--privacy": {
+        "message": "Prywatność",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences--lastSynced": {
+        "message": "Ostatnio importowano $date$ $time$",
+        "description": "Label for date and time of last sync operation",
+        "placeholders": {
+            "date": {
+                "content": "$1",
+                "example": "6/9/2020"
+            },
+            "time": {
+                "content": "$2",
+                "example": "7:37:25 PM"
+            }
+        }
+    },
+    "Preferences--system": {
+        "message": "Systemowy",
+        "description": "Title for system type settings"
+    },
+    "Preferences--zoom": {
+        "message": "Powiększenie",
+        "description": "Label for changing the zoom level"
+    },
+    "Preferences__link-previews--title": {
+        "message": "Twórz podglądy linków",
+        "description": "Title for the generate link previews setting"
+    },
+    "Preferences__link-previews--description": {
+        "message": "Aby zmienić tę opcję, otwórz aplikację Signal na swoim urządzeniu mobilnym i przejdź do Ustawienia > Rozmowy",
+        "description": "Description for the generate link previews setting"
+    },
+    "Preferences--advanced": {
+        "message": "Zaawansowane",
+        "description": "Title for advanced settings"
+    },
+    "Preferences--notification-content": {
+        "message": "Treść powiadomień",
+        "description": "Label for the notification content setting select box"
+    },
+    "Preferences--blocked": {
+        "message": "Zablokowani",
+        "description": "Label for blocked contacts setting"
+    },
+    "Preferences--blocked-count-singular": {
+        "message": "$num$ Kontakt",
+        "description": "Number of contacts blocked singular",
+        "placeholders": {
+            "num": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "Preferences--blocked-count-plural": {
+        "message": "$num$ kontakty(ów)",
+        "description": "Number of contacts blocked plural",
+        "placeholders": {
+            "num": {
+                "content": "$1",
+                "example": "20"
+            }
+        }
+    },
+    "Preferences__who-can--title": {
+        "message": "Kto może...",
+        "description": "Title for the 'who can do X' setting"
+    },
+    "Preferences__privacy--description": {
+        "message": "Aby zmienić te opcje, otwórz aplikację Signal na swoim urządzeniu mobilnym i przejdź do Ustawienia > Prywatność",
+        "description": "Description for the 'who can do X' setting"
+    },
+    "Preferences__who-can--everybody": {
+        "message": "Wszyscy",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences__who-can--contacts": {
+        "message": "Moje kontakty",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences__who-can--nobody": {
+        "message": "Nikt",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences--messaging": {
+        "message": "Wiadomości",
+        "description": "Title for the messaging settings"
+    },
+    "Preferences--see-me": {
+        "message": "Zobaczyć mój numer telefonu",
+        "description": "Label for the see my phone number setting"
+    },
+    "Preferences--find-me": {
+        "message": "Znajdź mnie po numerze telefonu",
+        "description": "Label for the find me by my phone number setting"
+    },
+    "Preferences--read-receipts": {
+        "message": "Potwierdzenia przeczytania",
+        "description": "Label for the read receipts setting"
+    },
+    "Preferences--typing-indicators": {
+        "message": "Wskaźniki pisania",
+        "description": "Label for the typing indicators setting"
+    },
+    "Preferences--updates": {
+        "message": "Aktualizacje",
+        "description": "Header for settings having to do with updates"
+    },
+    "Preferences__download-update": {
+        "message": "Automatycznie pobieraj aktualizacje",
+        "description": "Label for checkbox for the auto download updates setting"
+    },
+    "Preferences__enable-notifications": {
+        "message": "Włącz powiadomienia",
+        "description": "Label for checkbox for the notifications setting"
+    },
+    "Preferences__devices": {
+        "message": "Urządzenia",
+        "description": "Label for Device list in call settings pane"
+    },
+    "DialogUpdate--version-available": {
+        "message": "Dostępna jest aktualizacja do wersji $version$",
+        "description": "Tooltip for new update available",
+        "placeholders": {
+            "status": {
+                "content": "$1",
+                "example": "v7.7.7"
+            }
+        }
+    },
+    "NSIS__retry-dialog--first-line": {
+        "message": "Nie można zamknąć Signal.",
+        "description": "First line of the dialog displayed when Windows installer can't close application automatically and needs user intervention to complete the installation."
+    },
+    "NSIS__retry-dialog--second-line": {
+        "message": "Zamknij aplikację i kliknij Ponów, aby kontynuować.",
+        "description": "Second line of the dialog displayed when Windows installer can't close application automatically and needs user intervention to complete the installation."
+    },
+    "CustomizingPreferredReactions__title": {
+        "message": "Dostosuj reakcje",
+        "description": "Shown in the header of the modal for customizing the preferred reactions. Also shown in the tooltip for the button that opens this modal."
+    },
+    "CustomizingPreferredReactions__subtitle": {
+        "message": "Kliknij, aby zastąpić emotikonę",
+        "description": "Instructions in the modal for customizing the preferred reactions."
+    },
+    "CustomizingPreferredReactions__had-save-error": {
+        "message": "Podczas zapisywania Twoich ustawień wystąpił błąd. Spróbuj ponownie.",
+        "description": "Shown if there is an error when saving your preferred reaction settings. Should be very rare to see this message."
+    },
+    "WhatsNew__modal-title": {
+        "message": "Co nowego",
+        "description": "Title for the whats new modal"
+    },
+    "WhatsNew__v5.19--1": {
+        "message": "Weź głęboki oddech i relaksuj się dzięki nowym animacjom dla okien dialogowych i pop-upów.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--2": {
+        "message": "Przełączanie układu klawiatury zawsze jest trochę uciążliwe, ale skróty klawiszowe nadążają teraz za Tobą, dbając o ducha, zamiast litery naciśniętego klawisza, aby uszanować Twoje intencje.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--3": {
+        "message": "Gdy rozpocznie się połączenie grupowe, otrzymasz powiadomienie. Teraz już nigdy się nie spóźnisz (chyba, że masz na to ochotę).",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--4": {
+        "message": "Oto funkcja dla wszystkich, którzy wolą reagować, używając 💅 zamiast 👍: możesz teraz dostosować emotikony wyświetlane domyślnie, gdy chcesz zareagować na wiadomość.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.20": {
+        "message": "Ta wersja zawiera wiele drobnych ulepszeń i poprawek błędów, zapewniających płynne działanie aplikacji Signal.",
+        "description": "Release notes for v5.20"
+    },
+    "WhatsNew__v5.21--1": {
+        "message": "Poznaj więcej informacji, jednym rzutem oka 👀. Lewy panel ma teraz nowy wygląd i styl 😎.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__v5.21--2": {
+        "message": "Wiedz, co i kiedy. Jeśli ze statusem dostarczenia, odczytania i wysłania wiadomości są powiązane stemple czasowe, będą teraz widoczne na ekranie szczegółów wiadomości.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__v5.21--3": {
+        "message": "Użytkownicy czytników ekranu powinni móc teraz łatwiej nawigować po liście konwersacji na lewym panelu.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__bugfixes": {
+        "message": "Ta wersja zawiera wiele drobnych ulepszeń i poprawek błędów, zapewniających płynne działanie aplikacji Signal.",
+        "description": "Release notes for releases that only include bug fixes"
     }
 }

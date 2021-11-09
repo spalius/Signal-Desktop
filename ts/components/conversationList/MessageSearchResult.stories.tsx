@@ -6,9 +6,10 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { boolean, text, withKnobs } from '@storybook/addon-knobs';
 
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
-import { MessageSearchResult, PropsType } from './MessageSearchResult';
+import type { PropsType } from './MessageSearchResult';
+import { MessageSearchResult } from './MessageSearchResult';
 import { getDefaultConversation } from '../../test-both/helpers/getDefaultConversation';
 
 const i18n = setupI18n('en', enMessages);
@@ -55,7 +56,6 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
     'isSearchingInConversation',
     overrideProps.isSearchingInConversation || false
   ),
-  style: {},
 });
 
 story.add('Default', () => {

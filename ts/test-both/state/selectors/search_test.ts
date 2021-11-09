@@ -4,25 +4,30 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 
-import {
+import type {
   ConversationType,
-  getEmptyState as getEmptyConversationState,
   MessageType,
 } from '../../../state/ducks/conversations';
+import { getEmptyState as getEmptyConversationState } from '../../../state/ducks/conversations';
 import { noopAction } from '../../../state/ducks/noop';
-import {
-  getEmptyState as getEmptySearchState,
-  MessageSearchResultType,
-} from '../../../state/ducks/search';
+import type { MessageSearchResultType } from '../../../state/ducks/search';
+import { getEmptyState as getEmptySearchState } from '../../../state/ducks/search';
 import { getEmptyState as getEmptyUserState } from '../../../state/ducks/user';
 import {
+  getIsSearchingInAConversation,
   getMessageSearchResultSelector,
   getSearchResults,
 } from '../../../state/selectors/search';
 import { makeLookup } from '../../../util/makeLookup';
-import { getDefaultConversation } from '../../helpers/getDefaultConversation';
+import { UUID } from '../../../types/UUID';
+import {
+  getDefaultConversation,
+  getDefaultConversationWithUuid,
+} from '../../helpers/getDefaultConversation';
+import { ReadStatus } from '../../../messages/MessageReadStatus';
 
-import { StateType, reducer as rootReducer } from '../../../state/reducer';
+import type { StateType } from '../../../state/reducer';
+import { reducer as rootReducer } from '../../../state/reducer';
 
 describe('both/state/selectors/search', () => {
   const NOW = 1_000_000;
@@ -51,10 +56,10 @@ describe('both/state/selectors/search', () => {
       received_at: NOW,
       sent_at: NOW,
       source: 'source',
-      sourceUuid: 'sourceUuid',
+      sourceUuid: UUID.generate().toString(),
       timestamp: NOW,
       type: 'incoming' as const,
-      unread: false,
+      readStatus: ReadStatus.Read,
     };
   }
 
@@ -66,6 +71,27 @@ describe('both/state/selectors/search', () => {
       snippet: 'foo bar',
     };
   }
+
+  describe('#getIsSearchingInAConversation', () => {
+    it('returns false if not searching in a conversation', () => {
+      const state = getEmptyRootState();
+
+      assert.isFalse(getIsSearchingInAConversation(state));
+    });
+
+    it('returns true if searching in a conversation', () => {
+      const state = {
+        ...getEmptyRootState(),
+        search: {
+          ...getEmptySearchState(),
+          searchConversationId: 'abc123',
+          searchConversationName: 'Test Conversation',
+        },
+      };
+
+      assert.isTrue(getIsSearchingInAConversation(state));
+    });
+  });
 
   describe('#getMessageSearchResultSelector', () => {
     it('returns undefined if message not found in lookup', () => {
@@ -103,10 +129,9 @@ describe('both/state/selectors/search', () => {
 
     it('returns incoming message', () => {
       const searchId = 'search-id';
-      const fromId = 'from-id';
       const toId = 'to-id';
 
-      const from = getDefaultConversation({ id: fromId });
+      const from = getDefaultConversationWithUuid();
       const to = getDefaultConversation({ id: toId });
 
       const state = {
@@ -114,8 +139,11 @@ describe('both/state/selectors/search', () => {
         conversations: {
           ...getEmptyConversationState(),
           conversationLookup: {
-            [fromId]: from,
+            [from.id]: from,
             [toId]: to,
+          },
+          conversationsByUuid: {
+            [from.uuid]: from,
           },
         },
         search: {
@@ -124,7 +152,7 @@ describe('both/state/selectors/search', () => {
             [searchId]: {
               ...getDefaultMessage(searchId),
               type: 'incoming' as const,
-              sourceUuid: fromId,
+              sourceUuid: from.uuid,
               conversationId: toId,
               snippet: 'snippet',
               body: 'snippet',
@@ -156,11 +184,10 @@ describe('both/state/selectors/search', () => {
 
     it('returns the correct "from" and "to" when sent to me', () => {
       const searchId = 'search-id';
-      const fromId = 'from-id';
-      const toId = fromId;
       const myId = 'my-id';
 
-      const from = getDefaultConversation({ id: fromId });
+      const from = getDefaultConversationWithUuid();
+      const toId = from.uuid;
       const meAsRecipient = getDefaultConversation({ id: myId });
 
       const state = {
@@ -168,8 +195,11 @@ describe('both/state/selectors/search', () => {
         conversations: {
           ...getEmptyConversationState(),
           conversationLookup: {
-            [fromId]: from,
+            [from.id]: from,
             [myId]: meAsRecipient,
+          },
+          conversationsByUuid: {
+            [from.uuid]: from,
           },
         },
         ourConversationId: myId,
@@ -179,7 +209,7 @@ describe('both/state/selectors/search', () => {
             [searchId]: {
               ...getDefaultMessage(searchId),
               type: 'incoming' as const,
-              sourceUuid: fromId,
+              sourceUuid: from.uuid,
               conversationId: toId,
               snippet: 'snippet',
               body: 'snippet',
@@ -201,23 +231,25 @@ describe('both/state/selectors/search', () => {
 
     it('returns outgoing message and caches appropriately', () => {
       const searchId = 'search-id';
-      const fromId = 'from-id';
       const toId = 'to-id';
 
-      const from = getDefaultConversation({ id: fromId });
+      const from = getDefaultConversationWithUuid();
       const to = getDefaultConversation({ id: toId });
 
       const state = {
         ...getEmptyRootState(),
         user: {
           ...getEmptyUserState(),
-          ourConversationId: fromId,
+          ourConversationId: from.id,
         },
         conversations: {
           ...getEmptyConversationState(),
           conversationLookup: {
-            [fromId]: from,
+            [from.id]: from,
             [toId]: to,
+          },
+          conversationsByUuid: {
+            [from.uuid]: from,
           },
         },
         search: {
@@ -271,9 +303,9 @@ describe('both/state/selectors/search', () => {
         ...state,
         conversations: {
           ...state.conversations,
-          conversationLookup: {
-            ...state.conversations.conversationLookup,
-            [fromId]: {
+          conversationsByUuid: {
+            ...state.conversations.conversationsByUuid,
+            [from.uuid]: {
               ...from,
               name: 'new-name',
             },

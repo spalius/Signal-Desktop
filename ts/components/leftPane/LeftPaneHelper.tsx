@@ -1,10 +1,15 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ChangeEvent, ReactChild } from 'react';
+import type { ChangeEvent, ReactChild } from 'react';
 
-import { Row } from '../ConversationList';
-import { LocalizerType } from '../../types/Util';
+import type { Row } from '../ConversationList';
+import type { LocalizerType } from '../../types/Util';
+import type {
+  DeleteAvatarFromDiskActionType,
+  ReplaceAvatarActionType,
+  SaveAvatarToDiskActionType,
+} from '../../types/Avatar';
 
 export enum FindDirection {
   Up,
@@ -21,10 +26,12 @@ export type ToFindType = {
 export abstract class LeftPaneHelper<T> {
   getHeaderContents(
     _: Readonly<{
+      clearSearch: () => void;
       i18n: LocalizerType;
       showInbox: () => void;
       startComposing: () => void;
       showChooseGroupMembers: () => void;
+      updateSearchTerm: (query: string) => void;
     }>
   ): null | ReactChild {
     return null;
@@ -46,15 +53,19 @@ export abstract class LeftPaneHelper<T> {
       closeCantAddContactToGroupModal: () => unknown;
       closeMaximumGroupSizeModal: () => unknown;
       closeRecommendedGroupSizeModal: () => unknown;
+      composeDeleteAvatarFromDisk: DeleteAvatarFromDiskActionType;
+      composeReplaceAvatar: ReplaceAvatarActionType;
+      composeSaveAvatarToDisk: SaveAvatarToDiskActionType;
       createGroup: () => unknown;
       i18n: LocalizerType;
-      setComposeGroupAvatar: (_: undefined | ArrayBuffer) => unknown;
+      setComposeGroupAvatar: (_: undefined | Uint8Array) => unknown;
       setComposeGroupName: (_: string) => unknown;
       setComposeGroupExpireTimer: (_: number) => void;
       onChangeComposeSearchTerm: (
         event: ChangeEvent<HTMLInputElement>
       ) => unknown;
       removeSelectedContact: (_: string) => unknown;
+      toggleComposeEditingAvatar: () => unknown;
     }>
   ): null | ReactChild {
     return null;
@@ -82,6 +93,21 @@ export abstract class LeftPaneHelper<T> {
 
   isScrollable(): boolean {
     return true;
+  }
+
+  requiresFullWidth(): boolean {
+    return true;
+  }
+
+  onKeyDown(
+    _event: KeyboardEvent,
+    _options: Readonly<{
+      searchInConversation: (conversationId: string) => unknown;
+      selectedConversationId: undefined | string;
+      startSearch: () => unknown;
+    }>
+  ): void {
+    return undefined;
   }
 
   abstract getConversationAndMessageAtIndex(

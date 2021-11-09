@@ -5,11 +5,14 @@ import * as React from 'react';
 import { groupBy, mapValues, orderBy } from 'lodash';
 import classNames from 'classnames';
 import { ContactName } from './ContactName';
-import { Avatar, Props as AvatarProps } from '../Avatar';
+import type { Props as AvatarProps } from '../Avatar';
+import { Avatar } from '../Avatar';
 import { Emoji } from '../emoji/Emoji';
-import { useRestoreFocus } from '../../util/hooks';
-import { ConversationType } from '../../state/ducks/conversations';
-import { emojiToData, EmojiData } from '../emoji/lib';
+import { useRestoreFocus } from '../../hooks/useRestoreFocus';
+import type { ConversationType } from '../../state/ducks/conversations';
+import type { EmojiData } from '../emoji/lib';
+import { emojiToData } from '../emoji/lib';
+import { useEscapeHandling } from '../../hooks/useEscapeHandling';
 
 export type Reaction = {
   emoji: string;
@@ -124,25 +127,12 @@ export const ReactionViewer = React.forwardRef<HTMLDivElement, Props>(
       selectedReactionCategory,
       setSelectedReactionCategory,
     ] = React.useState(pickedReaction || 'all');
-    const focusRef = React.useRef<HTMLButtonElement>(null);
 
     // Handle escape key
-    React.useEffect(() => {
-      const handler = (e: KeyboardEvent) => {
-        if (onClose && e.key === 'Escape') {
-          onClose();
-        }
-      };
-
-      document.addEventListener('keydown', handler);
-
-      return () => {
-        document.removeEventListener('keydown', handler);
-      };
-    }, [onClose]);
+    useEscapeHandling(onClose);
 
     // Focus first button and restore focus on unmount
-    useRestoreFocus(focusRef);
+    const [focusRef] = useRestoreFocus();
 
     // If we have previously selected a reaction type that is no longer present
     // (removed on another device, for instance) we should select another
@@ -235,11 +225,7 @@ export const ReactionViewer = React.forwardRef<HTMLDivElement, Props>(
                 ) : (
                   <ContactName
                     module="module-reaction-viewer__body__row__name__contact-name"
-                    name={from.name}
-                    profileName={from.profileName}
-                    phoneNumber={from.phoneNumber}
                     title={from.title}
-                    i18n={i18n}
                   />
                 )}
               </div>

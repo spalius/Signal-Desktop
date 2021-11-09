@@ -2,21 +2,22 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import * as React from 'react';
-import { ContactName, PropsType as ContactNameProps } from './ContactName';
+import type { PropsType as ContactNameProps } from './ContactName';
+import { ContactName } from './ContactName';
 import { Button, ButtonVariant } from '../Button';
+import type { Props as MessageRequestActionsConfirmationProps } from './MessageRequestActionsConfirmation';
 import {
   MessageRequestActionsConfirmation,
   MessageRequestState,
-  Props as MessageRequestActionsConfirmationProps,
 } from './MessageRequestActionsConfirmation';
 import { Intl } from '../Intl';
-import { LocalizerType } from '../../types/Util';
+import type { LocalizerType } from '../../types/Util';
 
 export type Props = {
   i18n: LocalizerType;
   firstName?: string;
   onAccept(): unknown;
-} & Omit<ContactNameProps, 'module' | 'i18n'> &
+} & Omit<ContactNameProps, 'module'> &
   Pick<
     MessageRequestActionsConfirmationProps,
     'conversationType' | 'onBlock' | 'onBlockAndReportSpam' | 'onDelete'
@@ -26,13 +27,10 @@ export const MandatoryProfileSharingActions = ({
   conversationType,
   firstName,
   i18n,
-  name,
   onAccept,
   onBlock,
   onBlockAndReportSpam,
   onDelete,
-  phoneNumber,
-  profileName,
   title,
 }: Props): JSX.Element => {
   const [mrState, setMrState] = React.useState(MessageRequestState.default);
@@ -50,9 +48,6 @@ export const MandatoryProfileSharingActions = ({
             );
           }}
           onDelete={onDelete}
-          name={name}
-          profileName={profileName}
-          phoneNumber={phoneNumber}
           title={title}
           conversationType={conversationType}
           state={mrState}
@@ -71,11 +66,9 @@ export const MandatoryProfileSharingActions = ({
                   className="module-message-request-actions__message__name"
                 >
                   <ContactName
-                    name={name}
-                    profileName={profileName}
-                    phoneNumber={phoneNumber}
-                    title={firstName || title}
-                    i18n={i18n}
+                    firstName={firstName}
+                    title={title}
+                    preferFirstName
                   />
                 </strong>
               ),

@@ -3,19 +3,17 @@
 
 import React from 'react';
 import { minBy, debounce, noop } from 'lodash';
+import type { VideoFrameSource } from 'ringrtc';
 import { CallingPipRemoteVideo } from './CallingPipRemoteVideo';
-import { LocalizerType } from '../types/Util';
-import {
-  ActiveCallType,
-  GroupCallVideoRequest,
-  VideoFrameSource,
-} from '../types/Calling';
-import {
+import type { LocalizerType } from '../types/Util';
+import type { ActiveCallType, GroupCallVideoRequest } from '../types/Calling';
+import type {
   HangUpType,
   SetLocalPreviewType,
   SetRendererCanvasType,
 } from '../state/ducks/calling';
 import { missingCaseError } from '../util/missingCaseError';
+import { useActivateSpeakerViewOnPresenting } from '../hooks/useActivateSpeakerViewOnPresenting';
 
 enum PositionMode {
   BeingDragged,
@@ -61,6 +59,7 @@ export type PropsType = {
   setLocalPreview: (_: SetLocalPreviewType) => void;
   setRendererCanvas: (_: SetRendererCanvasType) => void;
   togglePip: () => void;
+  toggleSpeakerView: () => void;
 };
 
 const PIP_HEIGHT = 156;
@@ -78,6 +77,7 @@ export const CallingPip = ({
   setLocalPreview,
   setRendererCanvas,
   togglePip,
+  toggleSpeakerView,
 }: PropsType): JSX.Element | null => {
   const videoContainerRef = React.useRef<null | HTMLDivElement>(null);
   const localVideoRef = React.useRef(null);
@@ -88,6 +88,12 @@ export const CallingPip = ({
     mode: PositionMode.SnapToRight,
     offsetY: PIP_TOP_MARGIN,
   });
+
+  useActivateSpeakerViewOnPresenting(
+    activeCall.remoteParticipants,
+    activeCall.isInSpeakerView,
+    toggleSpeakerView
+  );
 
   React.useEffect(() => {
     setLocalPreview({ element: localVideoRef });

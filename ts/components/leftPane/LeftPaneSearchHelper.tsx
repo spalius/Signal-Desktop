@@ -1,12 +1,16 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { ReactChild } from 'react';
+import type { ReactChild } from 'react';
+import React from 'react';
 
-import { LeftPaneHelper, ToFindType } from './LeftPaneHelper';
-import { LocalizerType } from '../../types/Util';
-import { Row, RowType } from '../ConversationList';
-import { PropsData as ConversationListItemPropsType } from '../conversationList/ConversationListItem';
+import type { ToFindType } from './LeftPaneHelper';
+import { LeftPaneHelper } from './LeftPaneHelper';
+import type { LocalizerType } from '../../types/Util';
+import type { Row } from '../ConversationList';
+import { RowType } from '../ConversationList';
+import type { PropsData as ConversationListItemPropsType } from '../conversationList/ConversationListItem';
+import { handleKeydownForSearch } from './handleKeydownForSearch';
 
 import { Intl } from '../Intl';
 import { Emojify } from '../conversation/Emojify';
@@ -14,7 +18,7 @@ import { assert } from '../../util/assert';
 
 // The "correct" thing to do is to measure the size of the left pane and render enough
 //   search results for the container height. But (1) that's slow (2) the list is
-//   virtualized (3) 99 rows is over 6000px tall, taller than most monitors (4) it's fine
+//   virtualized (3) 99 rows is over 7500px tall, taller than most monitors (4) it's fine
 //   if, in some extremely tall window, we have some empty space. So we just hard-code a
 //   fairly big number.
 const SEARCH_RESULTS_FAKE_ROW_COUNT = 99;
@@ -38,6 +42,8 @@ export type LeftPaneSearchPropsType = {
 const searchResultKeys: Array<
   'conversationResults' | 'contactResults' | 'messageResults'
 > = ['conversationResults', 'contactResults', 'messageResults'];
+
+/* eslint-disable class-methods-use-this */
 
 export class LeftPaneSearchHelper extends LeftPaneHelper<LeftPaneSearchPropsType> {
   private readonly conversationResults: MaybeLoadedSearchResultsType<ConversationListItemPropsType>;
@@ -265,6 +271,17 @@ export class LeftPaneSearchHelper extends LeftPaneHelper<LeftPaneSearchPropsType
     _selectedMessageId: unknown
   ): undefined | { conversationId: string } {
     return undefined;
+  }
+
+  onKeyDown(
+    event: KeyboardEvent,
+    options: Readonly<{
+      searchInConversation: (conversationId: string) => unknown;
+      selectedConversationId: undefined | string;
+      startSearch: () => unknown;
+    }>
+  ): void {
+    handleKeydownForSearch(event, options);
   }
 
   private allResults() {

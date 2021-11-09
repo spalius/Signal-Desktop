@@ -5,7 +5,8 @@ import * as React from 'react';
 import PQueue from 'p-queue';
 import LRU from 'lru-cache';
 
-import { WaveformCache } from '../types/Audio';
+import type { WaveformCache } from '../types/Audio';
+import * as log from '../logging/log';
 
 const MAX_WAVEFORM_COUNT = 1000;
 const MAX_PARALLEL_COMPUTE = 8;
@@ -27,6 +28,8 @@ export type Contents = {
 //   `audioContext` global, however, as the browser limits the number that can be
 //   created.)
 const audioContext = new AudioContext();
+audioContext.suspend();
+
 const waveformCache: WaveformCache = new LRU({
   max: MAX_WAVEFORM_COUNT,
 });
@@ -82,11 +85,11 @@ async function doComputePeaks(
 ): Promise<ComputePeaksResult> {
   const existing = waveformCache.get(url);
   if (existing) {
-    window.log.info('GlobalAudioContext: waveform cache hit', url);
+    log.info('GlobalAudioContext: waveform cache hit', url);
     return Promise.resolve(existing);
   }
 
-  window.log.info('GlobalAudioContext: waveform cache miss', url);
+  log.info('GlobalAudioContext: waveform cache miss', url);
 
   // Load and decode `url` into a raw PCM
   const response = await fetch(url);
@@ -96,7 +99,7 @@ async function doComputePeaks(
 
   const peaks = new Array(barCount).fill(0);
   if (duration > MAX_AUDIO_DURATION) {
-    window.log.info(
+    log.info(
       `GlobalAudioContext: audio ${url} duration ${duration}s is too long`
     );
     const emptyResult = { peaks, duration };
@@ -149,14 +152,11 @@ export async function computePeaks(
 
   const pending = inProgressMap.get(computeKey);
   if (pending) {
-    window.log.info(
-      'GlobalAudioContext: already computing peaks for',
-      computeKey
-    );
+    log.info('GlobalAudioContext: already computing peaks for', computeKey);
     return pending;
   }
 
-  window.log.info('GlobalAudioContext: queue computing peaks for', computeKey);
+  log.info('GlobalAudioContext: queue computing peaks for', computeKey);
   const promise = computeQueue.add(() => doComputePeaks(url, barCount));
 
   inProgressMap.set(computeKey, promise);

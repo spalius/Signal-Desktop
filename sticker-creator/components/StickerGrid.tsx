@@ -3,16 +3,16 @@
 
 import * as React from 'react';
 import PQueue from 'p-queue';
-import {
-  SortableContainer,
-  SortableElement,
-  SortEndHandler,
-} from 'react-sortable-hoc';
+import type { SortEndHandler } from 'react-sortable-hoc';
+import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 import * as styles from './StickerGrid.scss';
-import { Props as StickerFrameProps, StickerFrame } from './StickerFrame';
+import type { Props as StickerFrameProps } from './StickerFrame';
+import { StickerFrame } from './StickerFrame';
 import { stickersDuck } from '../store';
-import { DropZone, Props as DropZoneProps } from '../elements/DropZone';
+import type { Props as DropZoneProps } from '../elements/DropZone';
+import { DropZone } from '../elements/DropZone';
 import { processStickerImage } from '../util/preload';
+import { useI18n } from '../util/i18n';
 
 const queue = new PQueue({ concurrency: 3, timeout: 1000 * 60 * 2 });
 
@@ -44,6 +44,7 @@ export type InnerGridProps = Props & {
 
 const InnerGrid = SortableContainer(
   ({ ids, mode, showGuide }: InnerGridProps) => {
+    const i18n = useI18n();
     const containerClassName = ids.length > 0 ? styles.grid : styles.drop;
     const frameMode = mode === 'add' ? 'removable' : 'pick-emoji';
 
@@ -58,7 +59,7 @@ const InnerGrid = SortableContainer(
               const stickerImage = await processStickerImage(path);
               actions.addImageData(stickerImage);
             } catch (e) {
-              window.log.error('Error processing image:', e);
+              window.SignalContext.log.error('Error processing image:', e);
               actions.removeSticker(path);
               actions.addToast({
                 key:
@@ -94,7 +95,10 @@ const InnerGrid = SortableContainer(
             ) : null}
           </>
         ) : (
-          <DropZone onDrop={handleDrop} />
+          <DropZone
+            label={i18n('StickerCreator--DropStage--dragDrop')}
+            onDrop={handleDrop}
+          />
         )}
       </div>
     );

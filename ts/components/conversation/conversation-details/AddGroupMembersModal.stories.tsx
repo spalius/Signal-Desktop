@@ -1,18 +1,20 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { ComponentProps, useState } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useState } from 'react';
 import { times } from 'lodash';
 
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { sleep } from '../../../util/sleep';
-import { setup as setupI18n } from '../../../../js/modules/i18n';
+import { setupI18n } from '../../../util/setupI18n';
 import enMessages from '../../../../_locales/en/messages.json';
 import { getDefaultConversation } from '../../../test-both/helpers/getDefaultConversation';
 import { AddGroupMembersModal } from './AddGroupMembersModal';
 import { RequestState } from './util';
+import { ThemeType } from '../../../types/Util';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -36,6 +38,7 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
     action('onMakeRequest')(conversationIds);
   },
   requestState: RequestState.Inactive,
+  theme: ThemeType.light,
   ...overrideProps,
 });
 

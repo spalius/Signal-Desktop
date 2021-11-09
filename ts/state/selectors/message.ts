@@ -1,50 +1,84 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { isNumber, isObject, map, reduce } from 'lodash';
+import {
+  identity,
+  isEqual,
+  isNumber,
+  isObject,
+  map,
+  omit,
+  pick,
+  reduce,
+} from 'lodash';
+import { createSelectorCreator } from 'reselect';
 import filesize from 'filesize';
 
-import {
+import type {
   LastMessageStatus,
   MessageAttributesType,
+  MessageReactionType,
   ShallowChallengeError,
 } from '../../model-types.d';
 
-import { TimelineItemType } from '../../components/conversation/TimelineItem';
-import { PropsData } from '../../components/conversation/Message';
-import { PropsData as TimerNotificationProps } from '../../components/conversation/TimerNotification';
-import { PropsData as SafetyNumberNotificationProps } from '../../components/conversation/SafetyNumberNotification';
-import { PropsData as VerificationNotificationProps } from '../../components/conversation/VerificationNotification';
-import { PropsDataType as GroupsV2Props } from '../../components/conversation/GroupV2Change';
-import { PropsDataType as GroupV1MigrationPropsType } from '../../components/conversation/GroupV1Migration';
-import { PropsDataType as DeliveryIssuePropsType } from '../../components/conversation/DeliveryIssueNotification';
-import {
+import type { TimelineItemType } from '../../components/conversation/TimelineItem';
+import type { PropsData } from '../../components/conversation/Message';
+import type { PropsData as TimerNotificationProps } from '../../components/conversation/TimerNotification';
+import type { PropsData as ChangeNumberNotificationProps } from '../../components/conversation/ChangeNumberNotification';
+import type { PropsData as SafetyNumberNotificationProps } from '../../components/conversation/SafetyNumberNotification';
+import type { PropsData as VerificationNotificationProps } from '../../components/conversation/VerificationNotification';
+import type { PropsDataType as GroupsV2Props } from '../../components/conversation/GroupV2Change';
+import type { PropsDataType as GroupV1MigrationPropsType } from '../../components/conversation/GroupV1Migration';
+import type { PropsDataType as DeliveryIssuePropsType } from '../../components/conversation/DeliveryIssueNotification';
+import type {
   PropsData as GroupNotificationProps,
   ChangeType,
 } from '../../components/conversation/GroupNotification';
-import { PropsType as ProfileChangeNotificationPropsType } from '../../components/conversation/ProfileChangeNotification';
-import { QuotedAttachmentType } from '../../components/conversation/Quote';
+import type { PropsType as ProfileChangeNotificationPropsType } from '../../components/conversation/ProfileChangeNotification';
+import type { QuotedAttachmentType } from '../../components/conversation/Quote';
 
 import { getDomain, isStickerPack } from '../../types/LinkPreview';
+import type { UUIDStringType } from '../../types/UUID';
 
-import { ContactType, contactSelector } from '../../types/Contact';
-import { BodyRangesType } from '../../types/Util';
-import { LinkPreviewType } from '../../types/message/LinkPreviews';
-import { ConversationColors } from '../../types/Colors';
+import type { EmbeddedContactType } from '../../types/EmbeddedContact';
+import { embeddedContactSelector } from '../../types/EmbeddedContact';
+import type { AssertProps, BodyRangesType } from '../../types/Util';
+import type { LinkPreviewType } from '../../types/message/LinkPreviews';
 import { CallMode } from '../../types/Calling';
-import { AttachmentType, isVoiceMessage } from '../../types/Attachment';
+import { SignalService as Proto } from '../../protobuf';
+import type { AttachmentType } from '../../types/Attachment';
+import { isVoiceMessage } from '../../types/Attachment';
+import { ReadStatus } from '../../messages/MessageReadStatus';
 
-import { CallingNotificationType } from '../../util/callingNotification';
+import type { CallingNotificationType } from '../../util/callingNotification';
+import { memoizeByRoot } from '../../util/memoizeByRoot';
 import { missingCaseError } from '../../util/missingCaseError';
 import { isNotNil } from '../../util/isNotNil';
+import { isMoreRecentThan } from '../../util/timestamp';
+import * as iterables from '../../util/iterables';
+import { strictAssert } from '../../util/assert';
 
-import { ConversationType } from '../ducks/conversations';
+import type { ConversationType } from '../ducks/conversations';
 
-import { CallSelectorType, CallStateType } from './calling';
-import {
+import type { AccountSelectorType } from './accounts';
+import type { CallSelectorType, CallStateType } from './calling';
+import type {
   GetConversationByIdType,
-  isMissingRequiredProfileSharing,
+  ContactNameColorSelectorType,
 } from './conversations';
+import { isMissingRequiredProfileSharing } from './conversations';
+import {
+  SendStatus,
+  isDelivered,
+  isFailed,
+  isMessageJustForMe,
+  isRead,
+  isSent,
+  isViewed,
+  maxStatus,
+  someSendStatus,
+} from '../../messages/MessageSendState';
+import * as log from '../../logging/log';
 
 const THREE_HOURS = 3 * 60 * 60 * 1000;
 
@@ -65,147 +99,19 @@ type PropsForUnsupportedMessage = {
   contact: FormattedContact;
 };
 
-// Top-level prop generation for the message bubble
-export function getPropsForBubble(
-  message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType,
-  ourConversationId: string,
-  ourNumber: string | undefined,
-  ourUuid: string | undefined,
-  regionCode: string,
-  readReceiptSetting: boolean,
-  selectedMessageId: string | undefined,
-  selectedMessageCounter: number | undefined,
-  callSelector: CallSelectorType,
-  activeCall: CallStateType | undefined,
-  accountSelector: (identifier?: string) => boolean
-): TimelineItemType {
-  if (isUnsupportedMessage(message)) {
-    return {
-      type: 'unsupportedMessage',
-      data: getPropsForUnsupportedMessage(
-        message,
-        conversationSelector,
-        ourConversationId,
-        ourNumber,
-        ourUuid
-      ),
-    };
-  }
-  if (isGroupV2Change(message)) {
-    return {
-      type: 'groupV2Change',
-      data: getPropsForGroupV2Change(
-        message,
-        conversationSelector,
-        ourConversationId
-      ),
-    };
-  }
-  if (isGroupV1Migration(message)) {
-    return {
-      type: 'groupV1Migration',
-      data: getPropsForGroupV1Migration(message, conversationSelector),
-    };
-  }
-  if (isMessageHistoryUnsynced(message)) {
-    return {
-      type: 'linkNotification',
-      data: null,
-    };
-  }
-  if (isExpirationTimerUpdate(message)) {
-    return {
-      type: 'timerNotification',
-      data: getPropsForTimerNotification(
-        message,
-        conversationSelector,
-        ourConversationId
-      ),
-    };
-  }
-  if (isKeyChange(message)) {
-    return {
-      type: 'safetyNumberNotification',
-      data: getPropsForSafetyNumberNotification(message, conversationSelector),
-    };
-  }
-  if (isVerifiedChange(message)) {
-    return {
-      type: 'verificationNotification',
-      data: getPropsForVerificationNotification(message, conversationSelector),
-    };
-  }
-  if (isGroupUpdate(message)) {
-    return {
-      type: 'groupNotification',
-      data: getPropsForGroupNotification(
-        message,
-        conversationSelector,
-        ourConversationId,
-        ourNumber,
-        ourUuid
-      ),
-    };
-  }
-  if (isEndSession(message)) {
-    return {
-      type: 'resetSessionNotification',
-      data: null,
-    };
-  }
-  if (isCallHistory(message)) {
-    return {
-      type: 'callHistory',
-      data: getPropsForCallHistory(
-        message,
-        conversationSelector,
-        callSelector,
-        activeCall
-      ),
-    };
-  }
-  if (isProfileChange(message)) {
-    return {
-      type: 'profileChange',
-      data: getPropsForProfileChange(message, conversationSelector),
-    };
-  }
-  if (isUniversalTimerNotification(message)) {
-    return {
-      type: 'universalTimerNotification',
-      data: null,
-    };
-  }
-  if (isChatSessionRefreshed(message)) {
-    return {
-      type: 'chatSessionRefreshed',
-      data: null,
-    };
-  }
-  if (isDeliveryIssue(message)) {
-    return {
-      type: 'deliveryIssue',
-      data: getPropsForDeliveryIssue(message, conversationSelector),
-    };
-  }
-
-  return {
-    type: 'message',
-    data: getPropsForMessage(
-      message,
-      conversationSelector,
-      ourConversationId,
-      ourNumber,
-      ourUuid,
-      selectedMessageId,
-      selectedMessageCounter,
-      readReceiptSetting,
-      regionCode,
-      accountSelector
-    ),
-  };
-}
+export type GetPropsForBubbleOptions = Readonly<{
+  conversationSelector: GetConversationByIdType;
+  ourConversationId: string;
+  ourNumber?: string;
+  ourUuid: UUIDStringType;
+  selectedMessageId?: string;
+  selectedMessageCounter?: number;
+  regionCode: string;
+  callSelector: CallSelectorType;
+  activeCall?: CallStateType;
+  accountSelector: AccountSelectorType;
+  contactNameColorSelector: ContactNameColorSelectorType;
+}>;
 
 export function isIncoming(
   message: Pick<MessageAttributesType, 'type'>
@@ -219,7 +125,9 @@ export function isOutgoing(
   return message.type === 'outgoing';
 }
 
-export function hasErrors(message: MessageAttributesType): boolean {
+export function hasErrors(
+  message: Pick<MessageAttributesType, 'errors'>
+): boolean {
   return message.errors ? message.errors.length > 0 : false;
 }
 
@@ -229,6 +137,9 @@ export function getSource(
 ): string | undefined {
   if (isIncoming(message)) {
     return message.source;
+  }
+  if (!isOutgoing(message)) {
+    log.warn('message.getSource: Called for non-incoming/non-outoing message');
   }
 
   return ourNumber;
@@ -243,6 +154,11 @@ export function getSourceDevice(
   if (isIncoming(message)) {
     return sourceDevice;
   }
+  if (!isOutgoing(message)) {
+    log.warn(
+      'message.getSourceDevice: Called for non-incoming/non-outoing message'
+    );
+  }
 
   return sourceDevice || ourDeviceId;
 }
@@ -254,17 +170,29 @@ export function getSourceUuid(
   if (isIncoming(message)) {
     return message.sourceUuid;
   }
+  if (!isOutgoing(message)) {
+    log.warn(
+      'message.getSourceUuid: Called for non-incoming/non-outoing message'
+    );
+  }
 
   return ourUuid;
 }
 
-export function getContactId(
+export type GetContactOptions = Pick<
+  GetPropsForBubbleOptions,
+  'conversationSelector' | 'ourConversationId' | 'ourNumber' | 'ourUuid'
+>;
+
+function getContactId(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType,
-  ourConversationId: string,
-  ourNumber: string | undefined,
-  ourUuid: string | undefined
-): string | undefined {
+  {
+    conversationSelector,
+    ourConversationId,
+    ourNumber,
+    ourUuid,
+  }: GetContactOptions
+): string {
   const source = getSource(message, ourNumber);
   const sourceUuid = getSourceUuid(message, ourUuid);
 
@@ -276,12 +204,15 @@ export function getContactId(
   return conversation.id;
 }
 
+// TODO: DESKTOP-2145
 export function getContact(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType,
-  ourConversationId: string,
-  ourNumber: string | undefined,
-  ourUuid: string | undefined
+  {
+    conversationSelector,
+    ourConversationId,
+    ourNumber,
+    ourUuid,
+  }: GetContactOptions
 ): ConversationType {
   const source = getSource(message, ourNumber);
   const sourceUuid = getSourceUuid(message, ourUuid);
@@ -302,112 +233,547 @@ export function getConversation(
 
 // Message
 
-export function getPropsForMessage(
-  message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType,
-  ourConversationId: string,
-  ourNumber: string | undefined,
-  ourUuid: string | undefined,
-  selectedMessageId: string | undefined,
-  selectedMessageCounter: number | undefined,
-  readReceiptSetting: boolean,
-  regionCode: string,
-  accountSelector: (identifier?: string) => boolean
-): Omit<PropsForMessage, 'renderingContext'> {
-  const contact = getContact(
-    message,
-    conversationSelector,
-    ourConversationId,
-    ourNumber,
-    ourUuid
-  );
+export const getAttachmentsForMessage = createSelectorCreator(memoizeByRoot)(
+  // `memoizeByRoot` requirement
+  identity,
 
-  const { expireTimer, expirationStartTimestamp } = message;
-  const expirationLength = expireTimer ? expireTimer * 1000 : undefined;
-  const expirationTimestamp =
-    expirationStartTimestamp && expirationLength
-      ? expirationStartTimestamp + expirationLength
-      : undefined;
+  ({ sticker }: MessageAttributesType) => sticker,
+  ({ attachments }: MessageAttributesType) => attachments,
+  (
+    _: MessageAttributesType,
+    sticker: MessageAttributesType['sticker'],
+    attachments: MessageAttributesType['attachments'] = []
+  ): Array<AttachmentType> => {
+    if (sticker && sticker.data) {
+      const { data } = sticker;
 
-  const conversation = getConversation(message, conversationSelector);
-  const isGroup = conversation.type === 'group';
-  const { sticker } = message;
+      // We don't show anything if we don't have the sticker or the blurhash...
+      if (!data.blurHash && (data.pending || !data.path)) {
+        return [];
+      }
 
-  const isMessageTapToView = isTapToView(message);
+      return [
+        {
+          ...data,
+          // We want to show the blurhash for stickers, not the spinner
+          pending: false,
+          url: data.path
+            ? window.Signal.Migrations.getAbsoluteAttachmentPath(data.path)
+            : undefined,
+        },
+      ];
+    }
 
-  const reactions = (message.reactions || []).map(re => {
-    const c = conversationSelector(re.fromId);
-
-    return {
-      emoji: re.emoji,
-      timestamp: re.timestamp,
-      from: c,
-    };
-  });
-
-  const selectedReaction = (
-    (message.reactions || []).find(re => re.fromId === ourConversationId) || {}
-  ).emoji;
-
-  const isSelected = message.id === selectedMessageId;
-
-  return {
-    attachments: getAttachmentsForMessage(message),
-    author: contact,
-    bodyRanges: processBodyRanges(message.bodyRanges, conversationSelector),
-    canDeleteForEveryone: canDeleteForEveryone(message),
-    canDownload: canDownload(message, conversationSelector),
-    canReply: canReply(message, conversationSelector),
-    contact: getPropsForEmbeddedContact(message, regionCode, accountSelector),
-    conversationColor: conversation?.conversationColor ?? ConversationColors[0],
-    conversationId: message.conversationId,
-    conversationType: isGroup ? 'group' : 'direct',
-    customColor: conversation?.customColor,
-    deletedForEveryone: message.deletedForEveryone || false,
-    direction: isIncoming(message) ? 'incoming' : 'outgoing',
-    expirationLength,
-    expirationTimestamp,
-    id: message.id,
-    isBlocked: conversation.isBlocked || false,
-    isMessageRequestAccepted: conversation?.acceptedMessageRequest ?? true,
-    isSelected,
-    isSelectedCounter: isSelected ? selectedMessageCounter : undefined,
-    isSticker: Boolean(sticker),
-    isTapToView: isMessageTapToView,
-    isTapToViewError:
-      isMessageTapToView && isIncoming(message) && message.isTapToViewInvalid,
-    isTapToViewExpired: isMessageTapToView && message.isErased,
-    previews: getPropsForPreview(message),
-    quote: getPropsForQuote(message, conversationSelector, ourConversationId),
-    reactions,
-    selectedReaction,
-    status: getMessagePropStatus(message, readReceiptSetting),
-    text: createNonBreakingLastSeparator(message.body),
-    textPending: message.bodyPending,
-    timestamp: message.sent_at,
-  };
-}
-
-export function processBodyRanges(
-  bodyRanges: BodyRangesType | undefined,
-  conversationSelector: GetConversationByIdType
-): BodyRangesType | undefined {
-  if (!bodyRanges) {
-    return undefined;
+    return attachments
+      .filter(attachment => !attachment.error)
+      .map(attachment => getPropsForAttachment(attachment))
+      .filter(isNotNil);
   }
+);
 
-  return bodyRanges
-    .filter(range => range.mentionUuid)
-    .map(range => {
-      const conversation = conversationSelector(range.mentionUuid);
+export const processBodyRanges = createSelectorCreator(memoizeByRoot, isEqual)(
+  // `memoizeByRoot` requirement
+  identity,
+
+  (
+    { bodyRanges }: Pick<MessageAttributesType, 'bodyRanges'>,
+    { conversationSelector }: { conversationSelector: GetConversationByIdType }
+  ): BodyRangesType | undefined => {
+    if (!bodyRanges) {
+      return undefined;
+    }
+
+    return bodyRanges
+      .filter(range => range.mentionUuid)
+      .map(range => {
+        const conversation = conversationSelector(range.mentionUuid);
+
+        return {
+          ...range,
+          conversationID: conversation.id,
+          replacementText: conversation.title,
+        };
+      })
+      .sort((a, b) => b.start - a.start);
+  },
+  (_: MessageAttributesType, ranges?: BodyRangesType) => ranges
+);
+
+const getAuthorForMessage = createSelectorCreator(memoizeByRoot)(
+  // `memoizeByRoot` requirement
+  identity,
+
+  getContact,
+
+  (_: MessageAttributesType, convo: ConversationType): PropsData['author'] => {
+    const {
+      acceptedMessageRequest,
+      avatarPath,
+      color,
+      id,
+      isMe,
+      name,
+      phoneNumber,
+      profileName,
+      sharedGroupNames,
+      title,
+      unblurredAvatarPath,
+    } = convo;
+
+    const unsafe = {
+      acceptedMessageRequest,
+      avatarPath,
+      color,
+      id,
+      isMe,
+      name,
+      phoneNumber,
+      profileName,
+      sharedGroupNames,
+      title,
+      unblurredAvatarPath,
+    };
+
+    const safe: AssertProps<PropsData['author'], typeof unsafe> = unsafe;
+
+    return safe;
+  }
+);
+
+const getCachedAuthorForMessage = createSelectorCreator(memoizeByRoot, isEqual)(
+  // `memoizeByRoot` requirement
+  identity,
+
+  getAuthorForMessage,
+
+  (
+    _: MessageAttributesType,
+    author: PropsData['author']
+  ): PropsData['author'] => author
+);
+
+export const getPreviewsForMessage = createSelectorCreator(memoizeByRoot)(
+  // `memoizeByRoot` requirement
+  identity,
+
+  ({ preview }: MessageAttributesType) => preview,
+
+  (
+    _: MessageAttributesType,
+    previews: MessageAttributesType['preview'] = []
+  ): Array<LinkPreviewType> => {
+    return previews.map(preview => ({
+      ...preview,
+      isStickerPack: isStickerPack(preview.url),
+      domain: getDomain(preview.url),
+      image: preview.image ? getPropsForAttachment(preview.image) : null,
+    }));
+  }
+);
+
+export const getReactionsForMessage = createSelectorCreator(
+  memoizeByRoot,
+  isEqual
+)(
+  // `memoizeByRoot` requirement
+  identity,
+
+  (
+    { reactions = [] }: MessageAttributesType,
+    { conversationSelector }: { conversationSelector: GetConversationByIdType }
+  ) => {
+    const reactionBySender = new Map<string, MessageReactionType>();
+    for (const reaction of reactions) {
+      const existingReaction = reactionBySender.get(reaction.fromId);
+      if (
+        !existingReaction ||
+        reaction.timestamp > existingReaction.timestamp
+      ) {
+        reactionBySender.set(reaction.fromId, reaction);
+      }
+    }
+
+    const reactionsWithEmpties = reactionBySender.values();
+    const reactionsWithEmoji = iterables.filter(
+      reactionsWithEmpties,
+      re => re.emoji
+    );
+    const formattedReactions = iterables.map(reactionsWithEmoji, re => {
+      const c = conversationSelector(re.fromId);
+
+      type From = NonNullable<PropsData['reactions']>[0]['from'];
+
+      const unsafe = pick(c, [
+        'acceptedMessageRequest',
+        'avatarPath',
+        'color',
+        'id',
+        'isMe',
+        'name',
+        'phoneNumber',
+        'profileName',
+        'sharedGroupNames',
+        'title',
+      ]);
+
+      const from: AssertProps<From, typeof unsafe> = unsafe;
+
+      strictAssert(re.emoji, 'Expected all reactions to have an emoji');
 
       return {
-        ...range,
-        conversationID: conversation.id,
-        replacementText: conversation.title,
+        emoji: re.emoji,
+        timestamp: re.timestamp,
+        from,
       };
-    })
-    .sort((a, b) => b.start - a.start);
+    });
+
+    return [...formattedReactions];
+  },
+
+  (_: MessageAttributesType, reactions: PropsData['reactions']) => reactions
+);
+
+export const getPropsForQuote = createSelectorCreator(memoizeByRoot, isEqual)(
+  // `memoizeByRoot` requirement
+  identity,
+
+  (
+    message: Pick<MessageAttributesType, 'conversationId' | 'quote'>,
+    {
+      conversationSelector,
+      ourConversationId,
+    }: {
+      conversationSelector: GetConversationByIdType;
+      ourConversationId?: string;
+    }
+  ): PropsData['quote'] => {
+    const { quote } = message;
+    if (!quote) {
+      return undefined;
+    }
+
+    const {
+      author,
+      authorUuid,
+      id: sentAt,
+      isViewOnce,
+      referencedMessageNotFound,
+      text,
+    } = quote;
+
+    const contact = conversationSelector(authorUuid || author);
+
+    const authorId = contact.id;
+    const authorName = contact.name;
+    const authorPhoneNumber = contact.phoneNumber;
+    const authorProfileName = contact.profileName;
+    const authorTitle = contact.title;
+    const isFromMe = authorId === ourConversationId;
+
+    const firstAttachment = quote.attachments && quote.attachments[0];
+    const conversation = getConversation(message, conversationSelector);
+
+    const defaultConversationColor = window.Events.getDefaultConversationColor();
+
+    return {
+      authorId,
+      authorName,
+      authorPhoneNumber,
+      authorProfileName,
+      authorTitle,
+      bodyRanges: processBodyRanges(quote, { conversationSelector }),
+      conversationColor:
+        conversation.conversationColor || defaultConversationColor.color,
+      customColor:
+        conversation.customColor ||
+        defaultConversationColor.customColorData?.value,
+      isFromMe,
+      rawAttachment: firstAttachment
+        ? processQuoteAttachment(firstAttachment)
+        : undefined,
+      isViewOnce,
+      referencedMessageNotFound,
+      sentAt: Number(sentAt),
+      text: createNonBreakingLastSeparator(text),
+    };
+  },
+
+  (_: unknown, quote: PropsData['quote']) => quote
+);
+
+export type GetPropsForMessageOptions = Pick<
+  GetPropsForBubbleOptions,
+  | 'conversationSelector'
+  | 'ourConversationId'
+  | 'ourUuid'
+  | 'ourNumber'
+  | 'selectedMessageId'
+  | 'selectedMessageCounter'
+  | 'regionCode'
+  | 'accountSelector'
+  | 'contactNameColorSelector'
+>;
+
+type ShallowPropsType = Pick<
+  PropsForMessage,
+  | 'canDeleteForEveryone'
+  | 'canDownload'
+  | 'canReply'
+  | 'contact'
+  | 'contactNameColor'
+  | 'conversationColor'
+  | 'conversationId'
+  | 'conversationType'
+  | 'customColor'
+  | 'deletedForEveryone'
+  | 'direction'
+  | 'expirationLength'
+  | 'expirationTimestamp'
+  | 'id'
+  | 'isBlocked'
+  | 'isMessageRequestAccepted'
+  | 'isSelected'
+  | 'isSelectedCounter'
+  | 'isSticker'
+  | 'isTapToView'
+  | 'isTapToViewError'
+  | 'isTapToViewExpired'
+  | 'readStatus'
+  | 'selectedReaction'
+  | 'status'
+  | 'text'
+  | 'textPending'
+  | 'timestamp'
+>;
+
+const getShallowPropsForMessage = createSelectorCreator(memoizeByRoot, isEqual)(
+  // `memoizeByRoot` requirement
+  identity,
+
+  (
+    message: MessageAttributesType,
+    {
+      accountSelector,
+      conversationSelector,
+      ourConversationId,
+      ourNumber,
+      ourUuid,
+      regionCode,
+      selectedMessageId,
+      selectedMessageCounter,
+      contactNameColorSelector,
+    }: GetPropsForMessageOptions
+  ): ShallowPropsType => {
+    const { expireTimer, expirationStartTimestamp, conversationId } = message;
+    const expirationLength = expireTimer ? expireTimer * 1000 : undefined;
+    const expirationTimestamp =
+      expirationStartTimestamp && expirationLength
+        ? expirationStartTimestamp + expirationLength
+        : undefined;
+
+    const conversation = getConversation(message, conversationSelector);
+    const isGroup = conversation.type === 'group';
+    const { sticker } = message;
+
+    const isMessageTapToView = isTapToView(message);
+
+    const isSelected = message.id === selectedMessageId;
+
+    const selectedReaction = (
+      (message.reactions || []).find(re => re.fromId === ourConversationId) ||
+      {}
+    ).emoji;
+
+    const authorId = getContactId(message, {
+      conversationSelector,
+      ourConversationId,
+      ourNumber,
+      ourUuid,
+    });
+    const contactNameColor = contactNameColorSelector(conversationId, authorId);
+
+    const defaultConversationColor = window.Events.getDefaultConversationColor();
+
+    return {
+      canDeleteForEveryone: canDeleteForEveryone(message),
+      canDownload: canDownload(message, conversationSelector),
+      canReply: canReply(message, ourConversationId, conversationSelector),
+      contact: getPropsForEmbeddedContact(message, regionCode, accountSelector),
+      contactNameColor,
+      conversationColor:
+        conversation.conversationColor || defaultConversationColor.color,
+      conversationId,
+      conversationType: isGroup ? 'group' : 'direct',
+      customColor:
+        conversation.customColor ||
+        defaultConversationColor.customColorData?.value,
+      deletedForEveryone: message.deletedForEveryone || false,
+      direction: isIncoming(message) ? 'incoming' : 'outgoing',
+      expirationLength,
+      expirationTimestamp,
+      id: message.id,
+      isBlocked: conversation.isBlocked || false,
+      isMessageRequestAccepted: conversation?.acceptedMessageRequest ?? true,
+      isSelected,
+      isSelectedCounter: isSelected ? selectedMessageCounter : undefined,
+      isSticker: Boolean(sticker),
+      isTapToView: isMessageTapToView,
+      isTapToViewError:
+        isMessageTapToView && isIncoming(message) && message.isTapToViewInvalid,
+      isTapToViewExpired: isMessageTapToView && message.isErased,
+      readStatus: message.readStatus ?? ReadStatus.Read,
+      selectedReaction,
+      status: getMessagePropStatus(message, ourConversationId),
+      text: createNonBreakingLastSeparator(message.body),
+      textPending: message.bodyPending,
+      timestamp: message.sent_at,
+    };
+  },
+
+  (_: unknown, props: ShallowPropsType) => props
+);
+
+export const getPropsForMessage = createSelectorCreator(memoizeByRoot)(
+  // `memoizeByRoot` requirement
+  identity,
+
+  getAttachmentsForMessage,
+  processBodyRanges,
+  getCachedAuthorForMessage,
+  getPreviewsForMessage,
+  getReactionsForMessage,
+  getPropsForQuote,
+  getShallowPropsForMessage,
+  (
+    _: unknown,
+    attachments: Array<AttachmentType>,
+    bodyRanges: BodyRangesType | undefined,
+    author: PropsData['author'],
+    previews: Array<LinkPreviewType>,
+    reactions: PropsData['reactions'],
+    quote: PropsData['quote'],
+    shallowProps: ShallowPropsType
+  ): Omit<PropsForMessage, 'renderingContext'> => {
+    return {
+      attachments,
+      author,
+      bodyRanges,
+      previews,
+      quote,
+      reactions,
+      ...shallowProps,
+    };
+  }
+);
+
+export const getBubblePropsForMessage = createSelectorCreator(memoizeByRoot)(
+  // `memoizeByRoot` requirement
+  identity,
+
+  getPropsForMessage,
+  (_: unknown, data: ReturnType<typeof getPropsForMessage>) => ({
+    type: 'message' as const,
+    data,
+  })
+);
+
+// Top-level prop generation for the message bubble
+export function getPropsForBubble(
+  message: MessageAttributesType,
+  options: GetPropsForBubbleOptions
+): TimelineItemType {
+  if (isUnsupportedMessage(message)) {
+    return {
+      type: 'unsupportedMessage',
+      data: getPropsForUnsupportedMessage(message, options),
+    };
+  }
+  if (isGroupV2Change(message)) {
+    return {
+      type: 'groupV2Change',
+      data: getPropsForGroupV2Change(message, options),
+    };
+  }
+  if (isGroupV1Migration(message)) {
+    return {
+      type: 'groupV1Migration',
+      data: getPropsForGroupV1Migration(message, options),
+    };
+  }
+  if (isMessageHistoryUnsynced(message)) {
+    return {
+      type: 'linkNotification',
+      data: null,
+    };
+  }
+  if (isExpirationTimerUpdate(message)) {
+    return {
+      type: 'timerNotification',
+      data: getPropsForTimerNotification(message, options),
+    };
+  }
+  if (isKeyChange(message)) {
+    return {
+      type: 'safetyNumberNotification',
+      data: getPropsForSafetyNumberNotification(message, options),
+    };
+  }
+  if (isVerifiedChange(message)) {
+    return {
+      type: 'verificationNotification',
+      data: getPropsForVerificationNotification(message, options),
+    };
+  }
+  if (isGroupUpdate(message)) {
+    return {
+      type: 'groupNotification',
+      data: getPropsForGroupNotification(message, options),
+    };
+  }
+  if (isEndSession(message)) {
+    return {
+      type: 'resetSessionNotification',
+      data: null,
+    };
+  }
+  if (isCallHistory(message)) {
+    return {
+      type: 'callHistory',
+      data: getPropsForCallHistory(message, options),
+    };
+  }
+  if (isProfileChange(message)) {
+    return {
+      type: 'profileChange',
+      data: getPropsForProfileChange(message, options),
+    };
+  }
+  if (isUniversalTimerNotification(message)) {
+    return {
+      type: 'universalTimerNotification',
+      data: null,
+    };
+  }
+  if (isChangeNumberNotification(message)) {
+    return {
+      type: 'changeNumberNotification',
+      data: getPropsForChangeNumberNotification(message, options),
+    };
+  }
+  if (isChatSessionRefreshed(message)) {
+    return {
+      type: 'chatSessionRefreshed',
+      data: null,
+    };
+  }
+  if (isDeliveryIssue(message)) {
+    return {
+      type: 'deliveryIssue',
+      data: getPropsForDeliveryIssue(message, options),
+    };
+  }
+
+  return getBubblePropsForMessage(message, options);
 }
 
 // Unsupported Message
@@ -425,13 +791,9 @@ export function isUnsupportedMessage(message: MessageAttributesType): boolean {
 
 function getPropsForUnsupportedMessage(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType,
-  ourConversationId: string,
-  ourNumber: string | undefined,
-  ourUuid: string | undefined
+  options: GetContactOptions
 ): PropsForUnsupportedMessage {
-  const CURRENT_PROTOCOL_VERSION =
-    window.textsecure.protobuf.DataMessage.ProtocolVersion.CURRENT;
+  const CURRENT_PROTOCOL_VERSION = Proto.DataMessage.ProtocolVersion.CURRENT;
 
   const requiredVersion = message.requiredProtocolVersion;
   const canProcessNow = Boolean(
@@ -442,13 +804,7 @@ function getPropsForUnsupportedMessage(
 
   return {
     canProcessNow,
-    contact: getContact(
-      message,
-      conversationSelector,
-      ourConversationId,
-      ourNumber,
-      ourUuid
-    ),
+    contact: getContact(message, options),
   };
 }
 
@@ -460,12 +816,8 @@ export function isGroupV2Change(message: MessageAttributesType): boolean {
 
 function getPropsForGroupV2Change(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType,
-  ourConversationId: string
+  { conversationSelector, ourUuid }: GetPropsForBubbleOptions
 ): GroupsV2Props {
-  const AccessControlEnum =
-    window.textsecure.protobuf.AccessControl.AccessRequired;
-  const RoleEnum = window.textsecure.protobuf.Member.Role;
   const change = message.groupV2Change;
 
   if (!change) {
@@ -476,9 +828,7 @@ function getPropsForGroupV2Change(
 
   return {
     groupName: conversation?.type === 'group' ? conversation?.name : undefined,
-    AccessControlEnum,
-    RoleEnum,
-    ourConversationId,
+    ourUuid,
     change,
   };
 }
@@ -491,7 +841,7 @@ export function isGroupV1Migration(message: MessageAttributesType): boolean {
 
 function getPropsForGroupV1Migration(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType
+  { conversationSelector }: GetPropsForBubbleOptions
 ): GroupV1MigrationPropsType {
   const migration = message.groupMigration;
   if (!migration) {
@@ -500,7 +850,7 @@ function getPropsForGroupV1Migration(
     const droppedGV2MemberIds = message.droppedGV2MemberIds || [];
 
     const invitedMembers = invitedGV2Members.map(item =>
-      conversationSelector(item.conversationId)
+      conversationSelector(item.uuid)
     );
     const droppedMembers = droppedGV2MemberIds.map(conversationId =>
       conversationSelector(conversationId)
@@ -519,7 +869,7 @@ function getPropsForGroupV1Migration(
     invitedMembers: rawInvitedMembers,
   } = migration;
   const invitedMembers = rawInvitedMembers.map(item =>
-    conversationSelector(item.conversationId)
+    conversationSelector(item.uuid)
   );
   const droppedMembers = droppedMemberIds.map(conversationId =>
     conversationSelector(conversationId)
@@ -545,18 +895,16 @@ export function isMessageHistoryUnsynced(
 // Expiration Timer Update
 
 export function isExpirationTimerUpdate(
-  message: MessageAttributesType
+  message: Pick<MessageAttributesType, 'flags'>
 ): boolean {
-  const flag =
-    window.textsecure.protobuf.DataMessage.Flags.EXPIRATION_TIMER_UPDATE;
+  const flag = Proto.DataMessage.Flags.EXPIRATION_TIMER_UPDATE;
   // eslint-disable-next-line no-bitwise
   return Boolean(message.flags && message.flags & flag);
 }
 
 function getPropsForTimerNotification(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType,
-  ourConversationId: string
+  { ourConversationId, conversationSelector }: GetPropsForBubbleOptions
 ): TimerNotificationProps {
   const timerUpdate = message.expirationTimerUpdate;
   if (!timerUpdate) {
@@ -607,7 +955,7 @@ export function isKeyChange(message: MessageAttributesType): boolean {
 
 function getPropsForSafetyNumberNotification(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType
+  { conversationSelector }: GetPropsForBubbleOptions
 ): SafetyNumberNotificationProps {
   const conversation = getConversation(message, conversationSelector);
   const isGroup = conversation?.type === 'group';
@@ -628,7 +976,7 @@ export function isVerifiedChange(message: MessageAttributesType): boolean {
 
 function getPropsForVerificationNotification(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType
+  { conversationSelector }: GetPropsForBubbleOptions
 ): VerificationNotificationProps {
   const type = message.verified ? 'markVerified' : 'markNotVerified';
   const isLocal = message.local || false;
@@ -651,10 +999,7 @@ export function isGroupUpdate(
 
 function getPropsForGroupNotification(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType,
-  ourConversationId: string,
-  ourNumber: string | undefined,
-  ourUuid: string | undefined
+  options: GetContactOptions
 ): GroupNotificationProps {
   const groupUpdate = message.group_update;
   if (!groupUpdate) {
@@ -662,6 +1007,8 @@ function getPropsForGroupNotification(
       'getPropsForGroupNotification: Message missing group_update'
     );
   }
+
+  const { conversationSelector } = options;
 
   const changes = [];
 
@@ -715,13 +1062,7 @@ function getPropsForGroupNotification(
     });
   }
 
-  const from = getContact(
-    message,
-    conversationSelector,
-    ourConversationId,
-    ourNumber,
-    ourUuid
-  );
+  const from = getContact(message, options);
 
   return {
     from,
@@ -734,7 +1075,7 @@ function getPropsForGroupNotification(
 export function isEndSession(
   message: Pick<MessageAttributesType, 'flags'>
 ): boolean {
-  const flag = window.textsecure.protobuf.DataMessage.Flags.END_SESSION;
+  const flag = Proto.DataMessage.Flags.END_SESSION;
   // eslint-disable-next-line no-bitwise
   return Boolean(message.flags && message.flags & flag);
 }
@@ -745,11 +1086,18 @@ export function isCallHistory(message: MessageAttributesType): boolean {
   return message.type === 'call-history';
 }
 
+export type GetPropsForCallHistoryOptions = Pick<
+  GetPropsForBubbleOptions,
+  'conversationSelector' | 'callSelector' | 'activeCall'
+>;
+
 export function getPropsForCallHistory(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType,
-  callSelector: CallSelectorType,
-  activeCall: CallStateType | undefined
+  {
+    conversationSelector,
+    callSelector,
+    activeCall,
+  }: GetPropsForCallHistoryOptions
 ): CallingNotificationType {
   const { callHistoryDetails } = message;
   if (!callHistoryDetails) {
@@ -773,7 +1121,7 @@ export function getPropsForCallHistory(
       const creator = conversationSelector(callHistoryDetails.creatorUuid);
       let call = callSelector(conversationId);
       if (call && call.callMode !== CallMode.Group) {
-        window.log.error(
+        log.error(
           'getPropsForCallHistory: there is an unexpected non-group call; pretending it does not exist'
         );
         call = undefined;
@@ -807,7 +1155,7 @@ export function isProfileChange(message: MessageAttributesType): boolean {
 
 function getPropsForProfileChange(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType
+  { conversationSelector }: GetPropsForBubbleOptions
 ): ProfileChangeNotificationPropsType {
   const change = message.profileChange;
   const { changedId } = message;
@@ -833,6 +1181,24 @@ export function isUniversalTimerNotification(
   return message.type === 'universal-timer-notification';
 }
 
+// Change Number Notification
+
+export function isChangeNumberNotification(
+  message: MessageAttributesType
+): boolean {
+  return message.type === 'change-number-notification';
+}
+
+function getPropsForChangeNumberNotification(
+  message: MessageAttributesType,
+  { conversationSelector }: GetPropsForBubbleOptions
+): ChangeNumberNotificationProps {
+  return {
+    sender: conversationSelector(message.sourceUuid),
+    timestamp: message.sent_at,
+  };
+}
+
 // Chat Session Refreshed
 
 export function isChatSessionRefreshed(
@@ -851,12 +1217,14 @@ export function isDeliveryIssue(message: MessageAttributesType): boolean {
 
 function getPropsForDeliveryIssue(
   message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType
+  { conversationSelector }: GetPropsForBubbleOptions
 ): DeliveryIssuePropsType {
   const sender = conversationSelector(message.sourceUuid);
+  const conversation = conversationSelector(message.conversationId);
 
   return {
     sender,
+    inGroup: conversation.type === 'group',
   };
 }
 
@@ -888,38 +1256,62 @@ function createNonBreakingLastSeparator(text?: string): string {
 }
 
 export function getMessagePropStatus(
-  message: MessageAttributesType,
-  readReceiptSetting: boolean
+  message: Pick<
+    MessageAttributesType,
+    'type' | 'errors' | 'sendStateByConversationId'
+  >,
+  ourConversationId: string
 ): LastMessageStatus | undefined {
-  const { sent } = message;
-  const sentTo = message.sent_to || [];
-
-  if (hasErrors(message)) {
-    if (getLastChallengeError(message)) {
-      return 'paused';
-    }
-    if (sent || sentTo.length > 0) {
-      return 'partial-sent';
-    }
-    return 'error';
-  }
   if (!isOutgoing(message)) {
     return undefined;
   }
 
-  const readBy = message.read_by || [];
-  if (readReceiptSetting && readBy.length > 0) {
-    return 'read';
-  }
-  const { delivered } = message;
-  const deliveredTo = message.delivered_to || [];
-  if (delivered || deliveredTo.length > 0) {
-    return 'delivered';
-  }
-  if (sent || sentTo.length > 0) {
-    return 'sent';
+  if (getLastChallengeError(message)) {
+    return 'paused';
   }
 
+  const { sendStateByConversationId = {} } = message;
+
+  if (isMessageJustForMe(sendStateByConversationId, ourConversationId)) {
+    const status =
+      sendStateByConversationId[ourConversationId]?.status ??
+      SendStatus.Pending;
+    const sent = isSent(status);
+    if (
+      hasErrors(message) ||
+      someSendStatus(sendStateByConversationId, isFailed)
+    ) {
+      return sent ? 'partial-sent' : 'error';
+    }
+    return sent ? 'viewed' : 'sending';
+  }
+
+  const sendStates = Object.values(
+    omit(sendStateByConversationId, ourConversationId)
+  );
+  const highestSuccessfulStatus = sendStates.reduce(
+    (result: SendStatus, { status }) => maxStatus(result, status),
+    SendStatus.Pending
+  );
+
+  if (
+    hasErrors(message) ||
+    someSendStatus(sendStateByConversationId, isFailed)
+  ) {
+    return isSent(highestSuccessfulStatus) ? 'partial-sent' : 'error';
+  }
+  if (isViewed(highestSuccessfulStatus)) {
+    return 'viewed';
+  }
+  if (isRead(highestSuccessfulStatus)) {
+    return 'read';
+  }
+  if (isDelivered(highestSuccessfulStatus)) {
+    return 'delivered';
+  }
+  if (isSent(highestSuccessfulStatus)) {
+    return 'sent';
+  }
   return 'sending';
 }
 
@@ -927,7 +1319,7 @@ export function getPropsForEmbeddedContact(
   message: MessageAttributesType,
   regionCode: string,
   accountSelector: (identifier?: string) => boolean
-): ContactType | undefined {
+): EmbeddedContactType | undefined {
   const contacts = message.contact;
   if (!contacts || !contacts.length) {
     return undefined;
@@ -937,7 +1329,7 @@ export function getPropsForEmbeddedContact(
   const numbers = firstContact?.number;
   const firstNumber = numbers && numbers[0] ? numbers[0].value : undefined;
 
-  return contactSelector(firstContact, {
+  return embeddedContactSelector(firstContact, {
     regionCode,
     getAbsoluteAttachmentPath:
       window.Signal.Migrations.getAbsoluteAttachmentPath,
@@ -982,71 +1374,6 @@ export function getPropsForAttachment(
   };
 }
 
-function getPropsForPreview(
-  message: MessageAttributesType
-): Array<LinkPreviewType> {
-  const previews = message.preview || [];
-
-  return previews.map(preview => ({
-    ...preview,
-    isStickerPack: isStickerPack(preview.url),
-    domain: getDomain(preview.url),
-    image: preview.image ? getPropsForAttachment(preview.image) : null,
-  }));
-}
-
-export function getPropsForQuote(
-  message: Pick<MessageAttributesType, 'conversationId' | 'quote'>,
-  conversationSelector: GetConversationByIdType,
-  ourConversationId: string | undefined
-): PropsData['quote'] {
-  const { quote } = message;
-  if (!quote) {
-    return undefined;
-  }
-
-  const {
-    author,
-    authorUuid,
-    bodyRanges,
-    id: sentAt,
-    isViewOnce,
-    referencedMessageNotFound,
-    text,
-  } = quote;
-
-  const contact = conversationSelector(authorUuid || author);
-
-  const authorId = contact.id;
-  const authorName = contact.name;
-  const authorPhoneNumber = contact.phoneNumber;
-  const authorProfileName = contact.profileName;
-  const authorTitle = contact.title;
-  const isFromMe = authorId === ourConversationId;
-
-  const firstAttachment = quote.attachments && quote.attachments[0];
-  const conversation = getConversation(message, conversationSelector);
-
-  return {
-    authorId,
-    authorName,
-    authorPhoneNumber,
-    authorProfileName,
-    authorTitle,
-    bodyRanges: processBodyRanges(bodyRanges, conversationSelector),
-    conversationColor: conversation.conversationColor ?? ConversationColors[0],
-    customColor: conversation.customColor,
-    isFromMe,
-    rawAttachment: firstAttachment
-      ? processQuoteAttachment(firstAttachment)
-      : undefined,
-    isViewOnce,
-    referencedMessageNotFound,
-    sentAt: Number(sentAt),
-    text: createNonBreakingLastSeparator(text),
-  };
-}
-
 function processQuoteAttachment(
   attachment: AttachmentType
 ): QuotedAttachmentType {
@@ -1069,45 +1396,44 @@ function processQuoteAttachment(
   };
 }
 
-export function canReply(
-  message: MessageAttributesType,
-  conversationSelector: GetConversationByIdType
+function canReplyOrReact(
+  message: Pick<
+    MessageAttributesType,
+    'deletedForEveryone' | 'sendStateByConversationId' | 'type'
+  >,
+  ourConversationId: string,
+  conversation: undefined | Readonly<ConversationType>
 ): boolean {
-  const conversation = getConversation(message, conversationSelector);
-  const { delivered, errors } = message;
+  const { deletedForEveryone, sendStateByConversationId } = message;
 
   if (!conversation) {
     return false;
   }
 
-  // If GroupV1 groups have been disabled, we can't reply.
   if (conversation.isGroupV1AndDisabled) {
     return false;
   }
 
-  // If mandatory profile sharing is enabled, and we haven't shared yet, then
-  //   we can't reply.
   if (isMissingRequiredProfileSharing(conversation)) {
     return false;
   }
 
-  // We cannot reply if we haven't accepted the message request
   if (!conversation.acceptedMessageRequest) {
     return false;
   }
 
-  // We cannot reply if this message is deleted for everyone
-  if (message.deletedForEveryone) {
+  if (deletedForEveryone) {
     return false;
   }
 
-  // We can reply if this is outgoing and delivered to at least one recipient
-  if (isOutgoing(message) && delivered && delivered > 0) {
-    return true;
+  if (isOutgoing(message)) {
+    return (
+      isMessageJustForMe(sendStateByConversationId, ourConversationId) ||
+      someSendStatus(omit(sendStateByConversationId, ourConversationId), isSent)
+    );
   }
 
-  // We can reply if there are no errors
-  if (!errors || (errors && errors.length === 0)) {
+  if (isIncoming(message)) {
     return true;
   }
 
@@ -1115,23 +1441,61 @@ export function canReply(
   return false;
 }
 
-export function canDeleteForEveryone(message: MessageAttributesType): boolean {
-  // is someone else's message
-  if (isIncoming(message)) {
+export function canReply(
+  message: Pick<
+    MessageAttributesType,
+    | 'conversationId'
+    | 'deletedForEveryone'
+    | 'sendStateByConversationId'
+    | 'type'
+  >,
+  ourConversationId: string,
+  conversationSelector: GetConversationByIdType
+): boolean {
+  const conversation = getConversation(message, conversationSelector);
+  if (
+    !conversation ||
+    (conversation.announcementsOnly && !conversation.areWeAdmin)
+  ) {
     return false;
   }
+  return canReplyOrReact(message, ourConversationId, conversation);
+}
 
-  // has already been deleted for everyone
-  if (message.deletedForEveryone) {
-    return false;
-  }
+export function canReact(
+  message: Pick<
+    MessageAttributesType,
+    | 'conversationId'
+    | 'deletedForEveryone'
+    | 'sendStateByConversationId'
+    | 'type'
+  >,
+  ourConversationId: string,
+  conversationSelector: GetConversationByIdType
+): boolean {
+  const conversation = getConversation(message, conversationSelector);
+  return canReplyOrReact(message, ourConversationId, conversation);
+}
 
-  // is too old to delete
-  if (Date.now() - message.sent_at > THREE_HOURS) {
-    return false;
-  }
-
-  return true;
+export function canDeleteForEveryone(
+  message: Pick<
+    MessageAttributesType,
+    'type' | 'deletedForEveryone' | 'sent_at' | 'sendStateByConversationId'
+  >
+): boolean {
+  return (
+    // Is this a message I sent?
+    isOutgoing(message) &&
+    // Has the message already been deleted?
+    !message.deletedForEveryone &&
+    // Is it too old to delete?
+    isMoreRecentThan(message.sent_at, THREE_HOURS) &&
+    // Is it pending/sent to anyone?
+    someSendStatus(
+      message.sendStateByConversationId,
+      sendStatus => sendStatus !== SendStatus.Failed
+    )
+  );
 }
 
 export function canDownload(
@@ -1159,39 +1523,8 @@ export function canDownload(
   return true;
 }
 
-export function getAttachmentsForMessage(
-  message: MessageAttributesType
-): Array<AttachmentType> {
-  const { sticker } = message;
-  if (sticker && sticker.data) {
-    const { data } = sticker;
-
-    // We don't show anything if we don't have the sticker or the blurhash...
-    if (!data.blurHash && (data.pending || !data.path)) {
-      return [];
-    }
-
-    return [
-      {
-        ...data,
-        // We want to show the blurhash for stickers, not the spinner
-        pending: false,
-        url: data.path
-          ? window.Signal.Migrations.getAbsoluteAttachmentPath(data.path)
-          : undefined,
-      },
-    ];
-  }
-
-  const attachments = message.attachments || [];
-  return attachments
-    .filter(attachment => !attachment.error)
-    .map(attachment => getPropsForAttachment(attachment))
-    .filter(isNotNil);
-}
-
 export function getLastChallengeError(
-  message: MessageAttributesType
+  message: Pick<MessageAttributesType, 'errors'>
 ): ShallowChallengeError | undefined {
   const { errors } = message;
   if (!errors) {

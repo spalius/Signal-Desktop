@@ -5,15 +5,15 @@
 
 @mixin font-title-1 {
   font-family: $inter;
-  font-weight: 700;
-  font-size: 28px;
-  line-height: 34px;
+  font-weight: 600;
+  font-size: 26px;
+  line-height: 32px;
   letter-spacing: -0.56px;
 }
 
 @mixin font-title-2 {
   font-family: $inter;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 20px;
   line-height: 26px;
   letter-spacing: -0.34px;
@@ -109,6 +109,14 @@
   }
 }
 
+// NOTE: As of this writing, this mixin only works in the main window, because this class
+//   is only applied there.
+@mixin only-when-page-is-visible {
+  .page-is-visible & {
+    @content;
+  }
+}
+
 // Search results loading
 
 @mixin search-results-loading-pulsating-background {
@@ -147,10 +155,13 @@
 
 // Icons
 
-@mixin color-svg($svg, $color, $stretch: true) {
+@mixin color-svg($svg, $color, $stretch: true, $mask-origin: null) {
   -webkit-mask: url($svg) no-repeat center;
   @if $stretch {
     -webkit-mask-size: 100%;
+  }
+  @if $mask-origin {
+    -webkit-mask-origin: $mask-origin;
   }
   background-color: $color;
 }
@@ -212,6 +223,29 @@
   cursor: pointer;
   outline: inherit;
   text-align: inherit;
+}
+
+@mixin staged-attachment-close-button {
+  @include button-reset;
+
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  z-index: 2;
+}
+
+@mixin calling-text-shadow {
+  text-shadow: 0 0 4px $color-black-alpha-40;
+}
+
+@mixin lonely-local-video-preview {
+  max-height: calc(100% - 24px);
+  height: auto;
+  transform: rotateY(180deg);
+  width: calc(100% - 24px);
+  border-radius: 8px;
 }
 
 // --- Buttons
@@ -530,5 +564,52 @@
         map-get($value, 'end')
       );
     }
+  }
+}
+
+@mixin avatar-colors {
+  @each $color, $value in $avatar-colors {
+    &--#{$color} {
+      --bg: #{map-get($value, 'bg')};
+      --fg: #{map-get($value, 'fg')};
+
+      background-color: var(--bg);
+      color: var(--fg);
+
+      &--icon {
+        background-color: var(--fg);
+        @include dark-theme {
+          // For specificity
+          background-color: var(--fg);
+        }
+      }
+    }
+  }
+}
+
+@mixin scrollbar {
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    visibility: hidden;
+    width: 6px;
+
+    @include light-theme {
+      background: $color-black-alpha-40;
+    }
+    @include dark-theme {
+      background: $color-white-alpha-40;
+    }
+  }
+
+  &::-webkit-scrollbar {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    visibility: visible;
   }
 }

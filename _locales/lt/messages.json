@@ -177,11 +177,15 @@
     },
     "avatarMenuViewArchive": {
         "message": "Rodyti archyvą",
-        "description": "One of the menu options available in the Avatar Popup menu"
+        "description": "One of the menu options available in the Avatar popup menu"
     },
     "avatarMenuChatColors": {
         "message": "Pokalbio spalva",
-        "description": "One of the menu options available in the Avatar Popup menu"
+        "description": "One of the menu options available in the Avatar popup menu"
+    },
+    "avatarMenuUpdateAvailable": {
+        "message": "Atnaujinti Signal",
+        "description": "One of the menu options available in the Avatar popup menu"
     },
     "loading": {
         "message": "Įkeliama...",
@@ -411,6 +415,20 @@
         "message": "Gali būti, kad šie žmonės iš naujo įdiegė programėlę ar pakeitė įrenginį. Patvirtinkite savo saugumo numerį su kiekvienu iš jų, kad užtikrintumėte privatumą.",
         "description": "Shown on confirmation dialog when user attempts to send a message"
     },
+    "safetyNumberChangeDialog__pending-messages--1": {
+        "message": "Siųsti laukiančią žinutę",
+        "description": "Shown on confirmation dialog when user attempts to send a message in the outbox"
+    },
+    "safetyNumberChangeDialog__pending-messages--many": {
+        "message": "Siųsti laukiančias žinutes: $count$",
+        "description": "Shown on confirmation dialog when user attempts to send a message in the outbox",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": 123
+            }
+        }
+    },
     "identityKeyErrorOnSend": {
         "message": "Jūsų saugumo numeris su $name1$ pasikeitė. Tai gali reikšti, kad kažkas bando perimti jūsų susirašinėjimą arba, kad $name2$, tiesiog, iš naujo įdiegė Signal. Jūs, tikriausiai, norėtumėte patvirtinti savo saugumo numerį su šiuo adresatu.",
         "description": "Shown when user clicks on a failed recipient in the message detail view after an identity key change",
@@ -452,27 +470,35 @@
         "description": "Shown in conversation banner when more than one group member's safety number has changed, but they were previously verified."
     },
     "debugLogExplanation": {
-        "message": "Šis žurnalas bus viešai paskelbtas internete talkininkams peržiūrėti. Jūs galite jį išnagrinėti ir, prieš pateikdami, paredaguoti.",
+        "message": "Šis žurnalas bus viešai paskelbtas internete talkininkams peržiūrėti. Prieš pateikdami žurnalą, galite atsisiųsti pilną jo versiją.",
         "description": ""
     },
     "debugLogError": {
-        "message": "Kažkas nutiko su nusiuntimu! Apsvarstykite galimybę rankiniu būdu pridėti savo žurnalą į klaidos pranešimą, kurį pateiksite.",
+        "message": "Kažkas nutiko su išsiuntimu! Prašome parašyti el. laišką adresu support@signal.org ir pridėti savo žurnalą kaip tekstinį failą.",
         "description": ""
     },
+    "debugLogSuccess": {
+        "message": "Derinimo žurnalas pateiktas",
+        "description": "Title of the success page for submitting a debug log"
+    },
+    "debugLogSuccessNextSteps": {
+        "message": "Derinimo žurnalas išsiųstas. Kai susisieksite su palaikymu, nukopijuokite žemiau esančią nuorodą ir pridėkite ją kartu su problemos, su kuria susidūrėte, aprašu ir žingsniais, kaip galima ją pakartoti.",
+        "description": "Explanation of next steps to take when submitting debug log"
+    },
     "debugLogCopy": {
-        "message": "Kopijuoti",
+        "message": "Kopijuoti nuorodą",
         "description": "Shown as the text for the copy button on the debug log screen"
     },
-    "debugLogCopyAlt": {
-        "message": "Kopijuoti nuorodą į iškarpinę",
-        "description": "Shown as the alt text for the copy button on the debug log screen"
+    "debugLogSave": {
+        "message": "Įrašyti",
+        "description": "Shown as the text for the download button on the debug log screen"
     },
     "debugLogLinkCopied": {
         "message": "Nuoroda nukopijuota į iškarpinę",
         "description": "Shown in a toast to let the user know that the link to the debug log has been copied to their clipboard"
     },
     "reportIssue": {
-        "message": "Pranešti apie klaidą",
+        "message": "Susisiekti su palaikymu",
         "description": "Link to open the issue tracker"
     },
     "gotIt": {
@@ -621,6 +647,14 @@
             }
         }
     },
+    "decryptionErrorToast": {
+        "message": "Programa susidūrė su iššifravimo klaida.",
+        "description": "An error popup when we haven't added an error for decryption error."
+    },
+    "decryptionErrorToastAction": {
+        "message": "Pateikti žurnalą",
+        "description": "Label for the decryption error toast button"
+    },
     "oneNonImageAtATimeToast": {
         "message": "Įtraukiant ne paveikslų priedus, vienoje žinutėje galimas tik vienas priedas.",
         "description": "An error popup when the user has attempted to add an attachment"
@@ -646,15 +680,15 @@
         "description": "Displayed when the desktop client cannot connect to the server."
     },
     "connecting": {
-        "message": "Jungiamasi",
+        "message": "Jungiamasi...",
         "description": "Displayed when the desktop client is currently connecting to the server."
     },
     "connect": {
-        "message": "Prisijungti",
+        "message": "Spustelėkite, norėdami jungtis iš naujo.",
         "description": "Shown to allow the user to manually attempt a reconnect."
     },
     "connectingHangOn": {
-        "message": "Neturėtų ilgai užtrukti...",
+        "message": "Neturėtų ilgai užtrukti",
         "description": "Subtext description for when the client is connecting to the server."
     },
     "offline": {
@@ -672,6 +706,10 @@
     "debugLog": {
         "message": "Derinimo žurnalas",
         "description": "View menu item to open the debug log (title case)"
+    },
+    "forceUpdate": {
+        "message": "Priverstinai atnaujinti",
+        "description": "View menu item to force the app to update download and install"
     },
     "helpMenuShowKeyboardShortcuts": {
         "message": "Rodyti sparčiuosius klavišus",
@@ -799,6 +837,20 @@
         "message": "Sveiki atvykę į Signal",
         "description": ""
     },
+    "whatsNew": {
+        "message": "Atraskite, $whatsNew$ šiame atnaujinime",
+        "description": "Shown in the main window",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "what's new"
+            }
+        }
+    },
+    "viewReleaseNotes": {
+        "message": "kas naujo",
+        "description": "Clickable link that displays the latest release notes"
+    },
     "selectAContact": {
         "message": "Pasirinkite adresatą ar grupę, kad pradėtumėte pokalbį.",
         "description": ""
@@ -835,7 +887,7 @@
     },
     "mobile": {
         "message": "mobilusis",
-        "description": "Shown on contact detail screen as a label for aa phone or email"
+        "description": "Shown on contact detail screen as a label for a phone or email"
     },
     "email": {
         "message": "el. paštas",
@@ -881,6 +933,18 @@
         "message": "Pradinė žinutė rasta, tačiau neįkelta. Slinkite žemyn, norėdami ją įkelti.",
         "description": "Shown in toast if user clicks on quote references messages not loaded in view, but in database"
     },
+    "voiceRecording--start": {
+        "message": "Pradėti balso žinutės įrašymą",
+        "description": "Tooltip for microphone button to start voice message"
+    },
+    "voiceRecording--complete": {
+        "message": "Užbaigti garso žinutės įrašymą ir ją išsiųsti",
+        "description": "Tooltip for green complete voice message and send"
+    },
+    "voiceRecording--cancel": {
+        "message": "Atsisakyti balso žinutės",
+        "description": "Tooltip for red button to cancel voice message"
+    },
     "voiceRecordingInterruptedMax": {
         "message": "Balso žinutės įrašymas sustabdytas, nes buvo pasiekta maksimalios trukmės riba.",
         "description": "Confirmation dialog message for when the voice recording is interrupted due to max time limit"
@@ -897,15 +961,17 @@
         "message": "Balso žinutėje privalo būti tik vienas priedas.",
         "description": "Shown in toast if tries to record a voice note with any staged attachments"
     },
+    "voiceNoteError": {
+        "message": "Įvyko klaida su balso rašytuvu.",
+        "description": "Shown in a dialog to inform user that we experienced an unrecoverable error"
+    },
     "attachmentSaved": {
-        "message": "Priedas įrašytas. Spustelėkite, norėdami rodyti jį aplanke.",
-        "description": "Shown after user selects to save to downloads",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "proof.jpg"
-            }
-        }
+        "message": "Priedas įrašytas.",
+        "description": "Shown after user selects to save to downloads"
+    },
+    "attachmentSavedShow": {
+        "message": "Rodyti aplanke",
+        "description": "Button label for showing the attachment in your file system"
     },
     "you": {
         "message": "Jūs",
@@ -953,9 +1019,21 @@
         "message": "Nuotrauka",
         "description": "Shown in a quotation of a message containing a photo if no text was originally provided with that image"
     },
+    "text": {
+        "message": "Tekstas",
+        "description": "Label for the word 'text'"
+    },
     "cannotUpdate": {
         "message": "Nepavyksta atnaujinti",
         "description": "Shown as the title of our update error dialogs on windows"
+    },
+    "muted": {
+        "message": "Pranešimai išj.",
+        "description": "Shown in a button when a conversation is muted"
+    },
+    "mute": {
+        "message": "Be garso",
+        "description": "Shown in a button when a conversation is unmuted and can be muted"
     },
     "cannotUpdateDetail": {
         "message": "Nepavyko atnaujinti Signal Desktop, tačiau yra prieinama nauja versija. Apsilankykite  $url$ ir įdiekite naująją versiją rankiniu būdu, o tuomet arba susisiekite su programos palaikymo komanda, arba praneškite apie šią problemą.",
@@ -1013,6 +1091,10 @@
         "message": "Priimti",
         "description": ""
     },
+    "done": {
+        "message": "Atlikta",
+        "description": "Label for done"
+    },
     "on": {
         "message": "Įjungta",
         "description": "Label for when something is turned on"
@@ -1028,10 +1110,6 @@
     "deleteForEveryoneWarning": {
         "message": "Ši žinutė šiame pokalbyje bus ištrinta visiems žmonėms tuo atveju, jeigu jie naudoja paskiausią Signal versiją. Jie galės matyti, kad ištrynėte žinutę.",
         "description": "Text shown in the confirmation dialog for deleting a message for everyone"
-    },
-    "deleteThisMessage": {
-        "message": "Ištrinti šią žinutę",
-        "description": ""
     },
     "from": {
         "message": "Nuo",
@@ -1065,10 +1143,6 @@
         "message": "Rodyti narius",
         "description": ""
     },
-    "resetSession": {
-        "message": "Atstatyti seansą",
-        "description": "This is a menu item for resetting the session, using the imperative case, as in a command."
-    },
     "showSafetyNumber": {
         "message": "Rodyti saugumo numerį",
         "description": ""
@@ -1078,7 +1152,7 @@
         "description": "This is a menu item for viewing all media (images + video) in a conversation, using the imperative case, as in a command."
     },
     "verifyHelp": {
-        "message": "Jeigu norite patvirtinti savo ištisinio šifravimo su $name$ saugumą, palyginkite aukščiau esančius numerius su numeriais šio asmens įrenginyje.",
+        "message": "Norėdami patvirtinti savo ištisinio šifravimo su $name$ saugumą, palyginkite aukščiau esančius numerius su numeriais šio asmens įrenginyje.",
         "description": "",
         "placeholders": {
             "name": {
@@ -1171,11 +1245,31 @@
     },
     "DeliveryIssue--summary": {
         "message": "Nepavyko jums nuo $sender$ pristatyti žinutės, lipduko, reakcijos, pranešimo apie žinutės skaitymą ar medijos. Gali būti, kad šis žmogus bandė siųsti jums tiesiogiai arba grupėje.",
-        "description": "Shown on explainer dialog available from delivery issue timeline events",
+        "description": "Shown on explainer dialog available from delivery issue timeline events in 1:1 conversations",
         "placeholders": {
             "name": {
                 "content": "$1",
                 "example": "Alice"
+            }
+        }
+    },
+    "DeliveryIssue--summary--group": {
+        "message": "Šiame pokalbyje nepavyko jums nuo $sender$ pristatyti žinutės, lipduko, reakcijos, pranešimo apie žinutės skaitymą ar medijos.",
+        "description": "Shown on explainer dialog available from delivery issue timeline events in groups",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "ChangeNumber--notification": {
+        "message": "$sender$ pasikeitė numerį į naują",
+        "description": "Shown in timeline when a member of a conversation changes their phone number",
+        "placeholders": {
+            "sender": {
+                "content": "$1",
+                "example": "Sam"
             }
         }
     },
@@ -1205,7 +1299,11 @@
     },
     "save": {
         "message": "Įrašyti",
-        "description": "Used as a 'commit changes' button in the Caption Editor for outgoing image attachments"
+        "description": "Used as a 'commit changes' button in the caption editor for outgoing image attachments"
+    },
+    "reset": {
+        "message": "Atstatyti",
+        "description": "Used on reset buttons"
     },
     "fileIconAlt": {
         "message": "Failo piktograma",
@@ -1239,7 +1337,11 @@
         "message": "Susieti naują įrenginį",
         "description": "The menu option shown in Signal iOS to add a new linked device"
     },
-    "deviceName": {
+    "LinkScreen__scan-this-code": {
+        "message": "Nuskenuokite šį kodą naudodami telefone įdiegtą Signal programėlę",
+        "description": "Alt text for the QR code on the device link screen"
+    },
+    "Preferences--device-name": {
         "message": "Įrenginio pavadinimas",
         "description": "The label in settings panel shown for the user-provided name for this desktop instance"
     },
@@ -1275,13 +1377,21 @@
         "message": "Bandykite dar kartą",
         "description": ""
     },
-    "theme": {
+    "Preferences--theme": {
         "message": "Apipavidalinimas",
         "description": "Header for theme settings"
     },
     "calling": {
         "message": "Skambinimas",
         "description": "Header for calling options on the settings screen"
+    },
+    "calling__call-back": {
+        "message": "Atskambinti",
+        "description": "Button to call someone back"
+    },
+    "calling__call-again": {
+        "message": "Skambinti vėl",
+        "description": "Button to call someone again"
     },
     "calling__start": {
         "message": "Pradėti skambutį",
@@ -1297,7 +1407,11 @@
     },
     "calling__call-is-full": {
         "message": "Skambutis yra pilnas",
-        "description": "Button label in the call lobby when you can't join because the call is full"
+        "description": "Text in the call lobby when you can't join because the call is full"
+    },
+    "calling__button--video__label": {
+        "message": "Kamera",
+        "description": "Label under the video button"
     },
     "calling__button--video-disabled": {
         "message": "Kamera išjungta",
@@ -1311,6 +1425,10 @@
         "message": "Įjungti kamerą",
         "description": "Button tooltip label for turning on the camera"
     },
+    "calling__button--audio__label": {
+        "message": "Išj. pranešimus",
+        "description": "Label under the audio button"
+    },
     "calling__button--audio-disabled": {
         "message": "Mikrofonas išjungtas",
         "description": "Button tooltip label when the microphone is disabled"
@@ -1322,6 +1440,10 @@
     "calling__button--audio-on": {
         "message": "Įjungti mikrofoną",
         "description": "Button tooltip label for turning on the microphone"
+    },
+    "calling__button--presenting__label": {
+        "message": "Bendrinti",
+        "description": "Label under the share screen button"
     },
     "calling__button--presenting-disabled": {
         "message": "Pristatinėjimas išjungtas",
@@ -1335,15 +1457,31 @@
         "message": "Stabdyti pristatinėjimą",
         "description": "Button tooltip label for stopping screen sharing"
     },
+    "calling__button--ring__label": {
+        "message": "Skambinti",
+        "description": "Label under the ring button"
+    },
+    "calling__button--ring__disabled-because-group-is-too-large": {
+        "message": "Grupė yra per didelė, kad būtų skambinama dalyviams.",
+        "description": "Button tooltip label when you can't ring because the group is too large"
+    },
+    "calling__button--ring__off": {
+        "message": "Pranešti, neskambinti",
+        "description": "Button tooltip label for turning ringing off"
+    },
+    "calling__button--ring__on": {
+        "message": "Įjungti skambinimą",
+        "description": "Button tooltip label for turning ringing on"
+    },
     "calling__your-video-is-off": {
         "message": "Jūsų kamera išjungta",
         "description": "Label in the calling lobby indicating that your camera is off"
     },
-    "calling__lobby-summary--zero": {
+    "calling__pre-call-info--empty-group": {
         "message": "Čia daugiau nieko nėra",
         "description": "Shown in the calling lobby to describe who is in the call"
     },
-    "calling__lobby-summary--single": {
+    "calling__pre-call-info--1-person-in-call": {
         "message": "$first$ yra šiame skambutyje",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1353,11 +1491,11 @@
             }
         }
     },
-    "calling__lobby-summary--self": {
+    "calling__pre-call-info--another-device-in-call": {
         "message": "Vienas iš jūsų įrenginių yra šiame skambutyje",
         "description": "Shown in the calling lobby to describe when it is just you"
     },
-    "calling__lobby-summary--double": {
+    "calling__pre-call-info--2-people-in-call": {
         "message": "$first$ ir $second$ yra šiame skambutyje",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1371,7 +1509,7 @@
             }
         }
     },
-    "calling__lobby-summary--triple": {
+    "calling__pre-call-info--3-people-in-call": {
         "message": "$first$, $second$ ir $third$ yra šiame skambutyje",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1389,11 +1527,131 @@
             }
         }
     },
-    "calling__lobby-summary--many": {
+    "calling__pre-call-info--many-people-in-call": {
         "message": "$first$, $second$ ir dar $others$ žmonės(-ių) yra šiame skambutyje",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
             "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "others": {
+                "content": "$3",
+                "example": "5"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-1": {
+        "message": "Signal paskambins ir susisieks su $person$",
+        "description": "Shown in the calling lobby to describe who will be rung",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-2": {
+        "message": "Signal skambins naudotojams $first$ ir $second$",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-3": {
+        "message": "Signal skambins naudotojams $first$, $second$ ir $third$",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "third": {
+                "content": "$3",
+                "example": "April"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-many": {
+        "message": "Signal skambins naudotojams $first$, $second$ bei dar $others$ žmonėms",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "others": {
+                "content": "$3",
+                "example": "5"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-1": {
+        "message": "$person$ gaus pranešimą",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-2": {
+        "message": "$first$ ir $second$ gaus pranešimą",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-3": {
+        "message": "$first$, $second$ ir $third$ gaus pranešimą",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "third": {
+                "content": "$3",
+                "example": "April"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-many": {
+        "message": "$first$, $second$ ir dar $others$ gaus pranešimą",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "person": {
                 "content": "$1",
                 "example": "Sam"
             },
@@ -1437,7 +1695,7 @@
     },
     "calling__block-info": {
         "message": "Jūs nematysite ir negirdėsite naudotojo, o jis nematys ir negirdės jūsų.",
-        "description": "Shown in the modal dialog to describe how blocking works in a gorup call"
+        "description": "Shown in the modal dialog to describe how blocking works in a group call"
     },
     "calling__overflow__scroll-up": {
         "message": "Slinkti aukštyn",
@@ -1546,7 +1804,7 @@
         "description": "Header for general options on the settings screen"
     },
     "spellCheckDescription": {
-        "message": "Įjungti rašybos tikrinimą",
+        "message": "Tikrinti teksto, kuris įvedamas į žinutės rašymo langelį, rašybą",
         "description": "Description of the spell check setting"
     },
     "spellCheckWillBeEnabled": {
@@ -1557,12 +1815,20 @@
         "message": "Rašybos tikrinimas bus išjungtas, kitą kartą paleidus Signal.",
         "description": "Shown when the user disables spellcheck to indicate that they must restart Signal."
     },
+    "SystemTraySetting__minimize-to-system-tray": {
+        "message": "Suskleisti į sistemos dėklą",
+        "description": "In the settings, shown next to the checkbox option for minimizing to the system tray"
+    },
+    "SystemTraySetting__minimize-to-and-start-in-system-tray": {
+        "message": "Paleisti suskleistą į dėklą",
+        "description": "In the settings, shown next to the checkbox option for starting in the system tray"
+    },
     "autoLaunchDescription": {
         "message": "Atverti, įjungiant kompiuterį",
         "description": "Description for the automatic launch setting"
     },
     "clearDataHeader": {
-        "message": "Išvalyti duomenis",
+        "message": "Išvalyti programos duomenis",
         "description": "Header in the settings dialog for the section dealing with data deletion"
     },
     "clearDataExplanation": {
@@ -1700,7 +1966,7 @@
         "description": "Warning notification that this version of the app has expired"
     },
     "upgrade": {
-        "message": "Naujinti",
+        "message": "Spustelėkite, norėdami pereiti į signal.org/download",
         "description": "Label text for button to upgrade the app to the latest version"
     },
     "mediaMessage": {
@@ -1712,7 +1978,7 @@
         "description": "Error message displayed when sending to an unregistered user."
     },
     "sync": {
-        "message": "Adresatai",
+        "message": "Importuoti adresatus",
         "description": "Label for contact and group sync settings"
     },
     "syncExplanation": {
@@ -1837,7 +2103,7 @@
     },
     "disappearingMessages": {
         "message": "Išnykstančios žinutės",
-        "description": "Conversation menu option to enable disappearing messages. Title of the settings section for Disappearing Messages"
+        "description": "Conversation menu option to enable disappearing messages. Title of the settings section for Disappearing Messages. Label of the disappearing timer select in group creation flow"
     },
     "disappearingMessagesDisabled": {
         "message": "Išnykstančios žinutės išjungtos",
@@ -1872,7 +2138,7 @@
         }
     },
     "audioNotificationDescription": {
-        "message": "Atkurti garso pranešimus",
+        "message": "Atkurti pranešimų garsus",
         "description": "Description for audio notification setting"
     },
     "callRingtoneNotificationDescription": {
@@ -1918,6 +2184,10 @@
                 "example": "Bob Smith"
             }
         }
+    },
+    "SafetyNumberModal__title": {
+        "message": "Patvirtinti saugumo numerį",
+        "description": "Title for the modal for safety number verification"
     },
     "safetyNumberChanged": {
         "message": "Pasikeitė saugumo numeris",
@@ -2110,7 +2380,7 @@
         "description": "When a person inputs a number that is invalid"
     },
     "unlinkedWarning": {
-        "message": "Norėdami tęsti susirašinėjimą, iš naujo susiekite Signal Desktop su savo mobiliuoju įrenginiu.",
+        "message": "Spustelėkite, norėdami iš naujo susieti Signal Desktop su savo mobiliuoju įrenginiu, kad tęstumėte susirašinėjimą.",
         "description": ""
     },
     "unlinked": {
@@ -2122,11 +2392,15 @@
         "description": ""
     },
     "autoUpdateNewVersionTitle": {
-        "message": "Yra prieinamas Signal atnaujinimas",
+        "message": "Yra prieinamas atnaujinimas",
         "description": ""
     },
     "autoUpdateNewVersionMessage": {
-        "message": "Yra prieinama nauja Signal versija.",
+        "message": "Spustelėkite, norėdami paleisti Signal iš naujo",
+        "description": ""
+    },
+    "downloadNewVersionMessage": {
+        "message": "Spustelėkite, norėdami atsisiųsti atnaujinimą",
         "description": ""
     },
     "autoUpdateNewVersionInstructions": {
@@ -2139,6 +2413,10 @@
     },
     "autoUpdateLaterButtonLabel": {
         "message": "Vėliau",
+        "description": ""
+    },
+    "autoUpdateIgnoreButtonLabel": {
+        "message": "Nepaisyti atnaujinimo",
         "description": ""
     },
     "leftTheGroup": {
@@ -2210,6 +2488,38 @@
             "names": {
                 "content": "$1",
                 "example": "Alice, Bob"
+            }
+        }
+    },
+    "ConversationList__aria-label": {
+        "message": "Pokalbis su $title$, neskaitytų žinučių: $unreadCount$, paskutinė žinutė: $lastMessage$.",
+        "description": "Aria label for the conversation list item",
+        "placeholders": {
+            "title": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "unreadCount": {
+                "content": "$2",
+                "example": "23"
+            },
+            "lastMessage": {
+                "content": "$3",
+                "example": "How about Friday?"
+            }
+        }
+    },
+    "ConversationList__last-message-undefined": {
+        "message": "Gali būti, kad paskutinė žinutė ištrinta.",
+        "description": "For aria-label within conversation list. Describes if last message is not defined."
+    },
+    "BaseConversationListItem__aria-label": {
+        "message": "Pereiti į pokalbį su $title$",
+        "description": "Aria label for the conversation list item button",
+        "placeholders": {
+            "title": {
+                "content": "$1",
+                "example": "Alice"
             }
         }
     },
@@ -2444,6 +2754,10 @@
     "confirmation-dialog--Cancel": {
         "message": "Atsisakyti",
         "description": "Appears on the cancel button in confirmation dialogs."
+    },
+    "MessageBody--read-more": {
+        "message": "Skaityti daugiau",
+        "description": "When a message is too long this is the affordance to expand the message"
     },
     "Message--unsupported-message": {
         "message": "$contact$ išsiuntė jums žinutę, kurios nepavyksta apdoroti ar parodyti, nes žinutė naudoja naująją Signal ypatybę.",
@@ -2721,6 +3035,10 @@
         "message": "Pokalbis archyvuotas",
         "description": "A toast that shows up when user archives a conversation"
     },
+    "conversationArchivedUndo": {
+        "message": "Atšaukti",
+        "description": "Undo button for archiving a conversation"
+    },
     "conversationReturnedToInbox": {
         "message": "Pokalbis grąžintas į skyrelį Gauta",
         "description": "A toast that shows up when the user unarchives a conversation"
@@ -2780,6 +3098,14 @@
     "StickerCreator--DropStage--title": {
         "message": "Pridėkite savo lipdukus",
         "description": "Title for the drop stage of the sticker creator"
+    },
+    "StickerCreator--DropStage--removeSticker": {
+        "message": "Šalinti lipduką",
+        "description": "Label for the X button used to remove a staged sticker"
+    },
+    "StickerCreator--DropStage--dragDrop": {
+        "message": "Norėdami pridėti lipduką, spustelėkite arba tempkite failą",
+        "description": "Shown on the + section of the file addition stage of sticker pack creation"
     },
     "StickerCreator--DropStage--help": {
         "message": "Lipdukai privalo būti PNG, APNG ar WebP formato su permatomu fonu ir 512x512 pikselių dydžio. Rekomenduojama paraštė yra 16 pikselių.",
@@ -2955,11 +3281,15 @@
         "message": "Norėdami naudoti lipdukų paketo kūrėją, nusistatykite Signal savo telefone ir staliniame kompiuteryje",
         "description": "The error message which appears when the user has not linked their account and attempts to use the Sticker Creator"
     },
+    "Reactions--remove": {
+        "message": "Šalinti reakciją",
+        "description": ""
+    },
     "Reactions--error": {
         "message": "Nepavyko išsiųsti reakcijos. Bandykite dar kartą.",
         "description": "Shown when a reaction fails to send"
     },
-    "ReactionsViewer--more": {
+    "Reactions--more": {
         "message": "Daugiau",
         "description": "Use in the reaction picker as the alt text for the 'more' button"
     },
@@ -2989,13 +3319,7 @@
     },
     "MessageRequests--message-group": {
         "message": "Prisijungti prie šios grupės ir bendrinti jūsų vardą bei nuotrauką su grupės nariais? Jie nežinos, kad matėte jų žinutes tol, kol nesutiksite.",
-        "description": "Shown as the message for a message request in a group",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the message for a message request in a group"
     },
     "MessageRequests--message-group-blocked": {
         "message": "Atblokuoti šią grupę ir bendrinti jūsų vardą bei nuotrauką su grupės nariais? Jūs negausite jokių žinučių tol, kol jų neatblokuosite.",
@@ -3021,23 +3345,11 @@
     },
     "MessageRequests--unblock-direct-confirm-body": {
         "message": "Galėsite vieni kitiems rašyti žinutes bei skambinti.",
-        "description": "Shown as the body in the confirmation modal for unblocking a private message request",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the body in the confirmation modal for unblocking a private message request"
     },
     "MessageRequests--unblock-group-confirm-body": {
         "message": "Grupės nariai galės ir vėl jus pridėti į šią grupę.",
-        "description": "Shown as the body in the confirmation modal for unblocking a group message request",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the body in the confirmation modal for unblocking a group message request"
     },
     "MessageRequests--block-and-report-spam": {
         "message": "Pranešti apie brukalą ir užblokuoti",
@@ -3177,7 +3489,7 @@
     },
     "member-of-2-groups": {
         "message": "$group1$ ir $group2$ grupių narys",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least two mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of two mutual groups",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3191,7 +3503,7 @@
     },
     "member-of-3-groups": {
         "message": "$group1$, $group2$ ir $group3$ grupių narys",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least three mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of three mutual groups",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3207,9 +3519,27 @@
             }
         }
     },
-    "member-of-more-than-3-groups": {
+    "member-of-more-than-3-groups--one-more": {
+        "message": "$group1$, $group2$, $group3$ ir dar vienos grupės narys",
+        "description": "Shown in the conversation hero to indicate this user is a member of four mutual groups",
+        "placeholders": {
+            "group1": {
+                "content": "$1",
+                "example": "NYC Rock Climbers"
+            },
+            "group2": {
+                "content": "$2",
+                "example": "Dinner Party"
+            },
+            "group3": {
+                "content": "$3",
+                "example": "Friends 🌿"
+            }
+        }
+    },
+    "member-of-more-than-3-groups--multiple-more": {
         "message": "$group1$, $group2$, $group3$ ir dar $remainingCount$ grupių narys",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least three mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of 5+ mutual groups.",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3307,9 +3637,87 @@
         "message": "Gaunamasis vaizdo skambutis...",
         "description": "Shown in both the incoming call bar and notification for an incoming video call"
     },
-    "outgoingCallPrering": {
-        "message": "Skambinama...",
-        "description": "Shown in the call screen when placing an outgoing call that isn't ringing yet"
+    "incomingGroupCall__ringing-you": {
+        "message": "Jums skambina $ringer$",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-1-other": {
+        "message": "$ringer$ skambina jums ir naudotojui $otherMember$",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "otherMember": {
+                "content": "$2",
+                "example": "Bob"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-2-others": {
+        "message": "$ringer$ skambina jums ir naudotojams $first$ bei $second$",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-3-others": {
+        "message": "$ringer$ skambina jums ir naudotojams $first$, $second$ bei dar 1 žmogui",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-many": {
+        "message": "$ringer$ skambina jums ir naudotojams $first$, $second$ bei dar $remaining$ žmonėms",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            },
+            "remaining": {
+                "content": "$4",
+                "example": "5"
+            }
+        }
     },
     "outgoingCallRinging": {
         "message": "Skambinama...",
@@ -3426,7 +3834,7 @@
         "description": "Title for the select your screen sharing sources modal"
     },
     "calling__SelectPresentingSourcesModal--confirm": {
-        "message": "Bendrinti ekraną",
+        "message": "Pradėti bendrinti",
         "description": "Confirm button for sharing screen modal"
     },
     "calling__SelectPresentingSourcesModal--entireScreen": {
@@ -3470,6 +3878,10 @@
     "muteNotificationsTitle": {
         "message": "Išjungti pranešimus",
         "description": "Label for the mute notifications drop-down selector"
+    },
+    "notMuted": {
+        "message": "Pranešimai neišjungti",
+        "description": "Label when the conversation is not muted"
     },
     "muteHour": {
         "message": "Išjungti pranešimus vienai valandai",
@@ -3515,19 +3927,31 @@
     },
     "ErrorModal--title": {
         "message": "Kažkas nutiko!",
-        "description": "Title of pop-up dialog when user-initiated task has gone wrong"
+        "description": "Title of popup dialog when user-initiated task has gone wrong"
     },
     "ErrorModal--description": {
         "message": "Bandykite dar kartą arba susisiekite su palaikymu.",
-        "description": "Description text in pop-up dialog when user-initiated task has gone wrong"
+        "description": "Description text in popup dialog when user-initiated task has gone wrong"
     },
     "Confirmation--confirm": {
         "message": "Gerai",
-        "description": "Button to dismiss pop-up dialog when user-initiated task has gone wrong"
+        "description": "Button to dismiss popup dialog when user-initiated task has gone wrong"
     },
     "unknown-sgnl-link": {
         "message": "Atleiskite, ta sgnl:// nuoroda neturi prasmės!",
         "description": "Shown if you click on a sgnl:// link not currently supported by Desktop"
+    },
+    "GroupV2--cannot-send": {
+        "message": "Jūs negalite siųsti žinučių į tą grupę.",
+        "description": "Shown in toast when you attempt to forward a message to an announcement only group"
+    },
+    "GroupV2--add--missing-capability": {
+        "message": "Šie žmonės negali būti pridėti į grupę tol, kol neatnaujins Signal.",
+        "description": "Shown in a confirmation dialog when members who cannot view announcement only group cannot be added"
+    },
+    "GroupV2--cannot-start-group-call": {
+        "message": "Tik grupės administratoriai gali pradėti skambutį.",
+        "description": "Shown in toast when a non-admin starts a group call in an announcements only group"
     },
     "GroupV2--join--invalid-link--title": {
         "message": "Neteisinga nuoroda",
@@ -3626,7 +4050,7 @@
         "description": "Shown if something went wrong when you try to join via a group link"
     },
     "GroupV2--join--general-join-failure": {
-        "message": "Nepavyko prisijungti per šią nuorodą. Bandykite prisijungti dar kartą vėliau.",
+        "message": "Nepavyko prisijungti prie grupės. Vėliau bandykite dar kartą.",
         "description": "Shown if something went wrong when you try to join via a group link"
     },
     "GroupV2--admin": {
@@ -4191,7 +4615,13 @@
     },
     "GroupV2--member-privilege--demote--other--unknown": {
         "message": "Administratorius panaikino $memberName$ turėtas administratoriaus teises.",
-        "description": "Shown in timeline or conversation preview when v2 group changes"
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "memberName": {
+                "content": "$1",
+                "example": "Bob"
+            }
+        }
     },
     "GroupV2--member-privilege--demote--you--other": {
         "message": "$adminName$ panaikino jūsų, kaip administratoriaus, teises.",
@@ -4701,6 +5131,42 @@
         "message": "Grupės aprašas buvo pakeistas.",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
+    "GroupV2--announcements--admin--you": {
+        "message": "Jūs pakeitėte grupės nustatymus taip, kad tik administratoriams būtų leista siųsti žinutes.",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--admin--other": {
+        "message": "$memberName$ pakeitė grupės nustatymus taip, kad tik administratoriams būtų leista siųsti žinutes.",
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "adminName": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "GroupV2--announcements--admin--unknown": {
+        "message": "Grupė buvo pakeista taip, kad tik administratoriams būtų leista siųsti žinutes.",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--member--you": {
+        "message": "Jūs pakeitėte grupės nustatymus taip, kad visiems nariams būtų leista siųsti žinutes.",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--member--other": {
+        "message": "$memberName$ pakeitė grupės nustatymus taip, kad visiems nariams būtų leista siųsti žinutes.",
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "adminName": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "GroupV2--announcements--member--unknown": {
+        "message": "Grupė buvo pakeista taip, kad visiems nariams būtų leista siųsti žinutes.",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
     "GroupV1--Migration--disabled": {
         "message": "Naujinkite šią grupę, norėdami aktyvuoti tokias naujas ypatybes kaip @paminėjimai ir administratoriai. Nariai, kurie šioje grupėje nebendrino savo vardo ar nuotraukos, bus pakviesti prie jos prisijungti. $learnMore$",
         "description": "Shown instead of composition area when user is forced to migrate a legacy group (GV1).",
@@ -4848,7 +5314,7 @@
         "description": "Displayed while checking if the contact is SMS-only"
     },
     "countMutedConversationsDescription": {
-        "message": "Skaičiuoti ir rodyti ženkliuke pokalbius su išjungtais pranešimais",
+        "message": "Įtraukti pokalbius su išjungtais pranešimais į ženkliuke rodomą skaičių",
         "description": "Description for counting muted conversations in badge setting"
     },
     "ContactModal--message": {
@@ -4874,7 +5340,7 @@
         }
     },
     "ContactModal--rm-admin-info": {
-        "message": "Pašalinti $contact$ iš grupės administratorių",
+        "message": "Pašalinti $contact$ iš grupės administratorių?",
         "description": "Shown in a confirmation dialog when you are about to remove admin privileges from someone",
         "placeholders": {
             "contact": {
@@ -4895,6 +5361,14 @@
         "message": "Grupės nustatymai",
         "description": "This is a button in the conversation context menu to show group settings"
     },
+    "showConversationDetails--direct": {
+        "message": "Pokalbio nustatymai",
+        "description": "This is a button in the conversation context menu to show chat settings"
+    },
+    "ConversationDetails__unmute--title": {
+        "message": "Įjungti šio pokalbio pranešimus?",
+        "description": "Title for the modal to unmute a chat"
+    },
     "ConversationDetails--group-link": {
         "message": "Grupės nuoroda",
         "description": "This is the label for the group link management panel"
@@ -4906,6 +5380,10 @@
     "ConversationDetails--disappearing-messages-info": {
         "message": "Kai įjungta, šioje grupėje išsiųstos ir gautos žinutės išnyks po to, kai bus perskaitytos.",
         "description": "This is the info about the disappearing messages setting"
+    },
+    "ConversationDetails--notifications": {
+        "message": "Pranešimai",
+        "description": "This is the label for notifications in the conversation details screen"
     },
     "ConversationDetails--group-info-label": {
         "message": "Kas gali taisyti grupės informaciją",
@@ -4922,6 +5400,14 @@
     "ConversationDetails--add-members-info": {
         "message": "Pasirinkite kas gali pridėti narius į šią grupę.",
         "description": "This is the additional info for the 'who can add members' panel"
+    },
+    "ConversationDetails--announcement-label": {
+        "message": "Kas gali siųsti žinutes",
+        "description": "This is the additional info for the 'who can send messages' panel"
+    },
+    "ConversationDetails--announcement-info": {
+        "message": "Pasirinkite, kas gali siųsti žinutes į grupę.",
+        "description": "This is the additional info for the 'who can send messages' panel"
     },
     "ConversationDetails--requests-and-invites": {
         "message": "Prašymai ir pakvietimai",
@@ -5004,6 +5490,22 @@
     "ConversationDetailsMembershipList--show-all": {
         "message": "Rodyti visus",
         "description": "This is a button on the conversation details to show all members"
+    },
+    "ConversationNotificationsSettings__mentions__label": {
+        "message": "Paminėjimai",
+        "description": "In the conversation notifications settings, this is the label for the mentions option"
+    },
+    "ConversationNotificationsSettings__mentions__info": {
+        "message": "Gauti pranešimus, kai jus pamini pokalbiuose, kuriuose pranešimai yra išjungti",
+        "description": "In the conversation notifications settings, this is the sub-label for the mentions option"
+    },
+    "ConversationNotificationsSettings__mentions__select__always-notify": {
+        "message": "Visada pranešti",
+        "description": "In the conversation notifications settings, this is the option that always notifies you for @mentions"
+    },
+    "ConversationNotificationsSettings__mentions__select__dont-notify-for-mentions-if-muted": {
+        "message": "Nepranešti, jei pranešimai išjungti",
+        "description": "In the conversation notifications settings, this is the option that doesn't notify you for @mentions if the conversation is muted"
     },
     "GroupLinkManagement--clipboard": {
         "message": "Grupės nuoroda nukopijuota.",
@@ -5147,7 +5649,7 @@
     },
     "PendingRequests--info": {
         "message": "Šiame sąraše esantys žmonės bando prisijungti prie „$name$“ per grupės nuorodą.",
-        "description": "Inforamtion shown below the pending admin approval list",
+        "description": "Information shown below the pending admin approval list",
         "placeholders": {
             "name": {
                 "content": "$1",
@@ -5162,6 +5664,10 @@
     "AvatarInput--no-photo-label--group": {
         "message": "Pridėti grupės nuotrauką",
         "description": "The label for the avatar uploader when no group photo is selected"
+    },
+    "AvatarInput--no-photo-label--profile": {
+        "message": "Pridėti nuotrauką",
+        "description": "The label for the avatar uploader when no profile photo is selected"
     },
     "AvatarInput--change-photo-label": {
         "message": "Keisti nuotrauką",
@@ -5268,16 +5774,34 @@
         "description": "The text of the button to create new groups"
     },
     "selectContact": {
-        "message": "Pažymėti adresatą",
-        "description": "The label for contact checkboxes that are non-selected (clicking them should select the contact)"
+        "message": "Pasirinkti adresatą $name$",
+        "description": "The label for contact checkboxes that are non-selected (clicking them should select the contact)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "deselectContact": {
-        "message": "Nebežymėti adresato",
-        "description": "The label for contact checkboxes that are selected (clicking them should de-select the contact)"
+        "message": "Nebepasirinkti adresato $name$",
+        "description": "The label for contact checkboxes that are selected (clicking them should de-select the contact)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "cannotSelectContact": {
-        "message": "Nepavyksta pažymėti adresato",
-        "description": "The label for contact checkboxes that are disabled"
+        "message": "Nepavyksta pasirinkti adresato $name$",
+        "description": "The label for contact checkboxes that are disabled",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "alreadyAMember": {
         "message": "Jau narys",
@@ -5434,7 +5958,7 @@
         "description": "First paragraph in the captcha dialog"
     },
     "CaptchaDialog--can-close__title": {
-        "message": "Tęsti be patikrinimo?",
+        "message": "Tęsti be patvirtinimo?",
         "description": "Header in the captcha dialog that can be closed"
     },
     "CaptchaDialog--can-close__body": {
@@ -5455,7 +5979,7 @@
     },
     "deleteForEveryoneFailed": {
         "message": "Nepavyko ištrinti žinutės visiems. Vėliau bandykite dar kartą.",
-        "description": "Displayed when delete-for-everyone has failed to send to all recepients"
+        "description": "Displayed when delete-for-everyone has failed to send to all recipients"
     },
     "ChatColorPicker__delete--title": {
         "message": "Ištrinti spalvą",
@@ -5597,7 +6121,7 @@
     },
     "settings__DisappearingMessages__timer__label": {
         "message": "Numatytasis laikmatis naujuose pokalbiuose",
-        "description": "Label for the Disapearring Messages default timer setting"
+        "description": "Label for the Disappearing Messages default timer setting"
     },
     "UniversalTimerNotification__text": {
         "message": "Kai rašysite jiems žinutes, išnykstančių žinučių laikas bus nustatytas į $timeValue$.",
@@ -5608,6 +6132,10 @@
                 "example": "1 week"
             }
         }
+    },
+    "ErrorBoundaryNotification__text": {
+        "message": "Nepavyko parodyti šios žinutės. Spustelėkite, norėdami pateikti derinimo žurnalą.",
+        "description": "An error notification displayed when message fails to render due to an internal error"
     },
     "GroupDescription__read-more": {
         "message": "skaityti daugiau",
@@ -5620,5 +6148,365 @@
     "ConversationDetailsHeader--add-group-description": {
         "message": "Pridėkite grupės aprašą...",
         "description": "Placeholder text in the details header for those that can edit the group description"
+    },
+    "MediaQualitySelector--button": {
+        "message": "Pasirinkti medijos kokybę",
+        "description": "aria-label for the media quality selector button"
+    },
+    "MediaQualitySelector--title": {
+        "message": "Medijos kokybė",
+        "description": "Popup selector title"
+    },
+    "MediaQualitySelector--standard-quality-title": {
+        "message": "Standartinė",
+        "description": "Title for option for standard quality"
+    },
+    "MediaQualitySelector--standard-quality-description": {
+        "message": "Greičiau, mažiau duomenų",
+        "description": "Description of standard quality selector"
+    },
+    "MediaQualitySelector--high-quality-title": {
+        "message": "Aukšta",
+        "description": "Title for option for high quality"
+    },
+    "MediaQualitySelector--high-quality-description": {
+        "message": "Lėčiau, daugiau duomenų",
+        "description": "Description of high quality selector"
+    },
+    "MessageDetailsHeader--Failed": {
+        "message": "Neišsiųsta",
+        "description": "In the message details screen, shown above contacts where the message failed to deliver"
+    },
+    "MessageDetailsHeader--Pending": {
+        "message": "Laukiama",
+        "description": "In the message details screen, shown above contacts where the message is still sending"
+    },
+    "MessageDetailsHeader--Sent": {
+        "message": "Kam išsiųsta",
+        "description": "In the message details screen, shown above contacts where the message has been sent (but not delivered, read, or viewed)"
+    },
+    "MessageDetailsHeader--Delivered": {
+        "message": "Kam pristatyta",
+        "description": "In the message details screen, shown above contacts who have received your message"
+    },
+    "MessageDetailsHeader--Read": {
+        "message": "Perskaitė",
+        "description": "In the message details screen, shown above contacts who have read this message"
+    },
+    "MessageDetailsHeader--Viewed": {
+        "message": "Peržiūrėjo",
+        "description": "In the message details screen, shown above contacts who have viewed this message"
+    },
+    "ProfileEditor--about": {
+        "message": "Apie",
+        "description": "Default text for about field"
+    },
+    "ProfileEditor--about-placeholder": {
+        "message": "Parašykite ką nors apie save...",
+        "description": "Placeholder text for about input field"
+    },
+    "ProfileEditor--first-name": {
+        "message": "Vardas (būtinas)",
+        "description": "Placeholder text for first name field"
+    },
+    "ProfileEditor--last-name": {
+        "message": "Pavardė (nebūtina)",
+        "description": "Placeholder text for last name field"
+    },
+    "ConfirmDiscardDialog--discard": {
+        "message": "Ar norėtumėte atmesti šiuos pakeitimus?",
+        "description": "ConfirmationDialog text for discarding changes"
+    },
+    "ProfileEditor--info": {
+        "message": "Jūsų profilis yra šifruotas. Jūsų profilis ir jam atliekami pakeitimai bus matomi jūsų adresatams bei, kai inicijuosite ar priimsite naujus pokalbius. $learnMore$",
+        "description": "Information shown at the bottom of the profile editor section",
+        "placeholders": {
+            "learnMore": {
+                "content": "$1",
+                "example": "Learn More."
+            }
+        }
+    },
+    "ProfileEditor--learnMore": {
+        "message": "Sužinoti daugiau",
+        "description": "Text that links to a support article"
+    },
+    "Bio--speak-freely": {
+        "message": "Bendraukite atvirai",
+        "description": "A default bio option"
+    },
+    "Bio--encrypted": {
+        "message": "Šifruota",
+        "description": "A default bio option"
+    },
+    "Bio--free-to-chat": {
+        "message": "Galiu kalbėti",
+        "description": "A default bio option"
+    },
+    "Bio--coffee-lover": {
+        "message": "Mėgstu kavą",
+        "description": "A default bio option"
+    },
+    "Bio--taking-break": {
+        "message": "Man pertrauka",
+        "description": "A default bio option"
+    },
+    "ProfileEditorModal--profile": {
+        "message": "Profilis",
+        "description": "Title for profile editing"
+    },
+    "ProfileEditorModal--name": {
+        "message": "Jūsų vardas",
+        "description": "Title for editing your name"
+    },
+    "ProfileEditorModal--about": {
+        "message": "Apie",
+        "description": "Title for about editing"
+    },
+    "ProfileEditorModal--error": {
+        "message": "Nepavyko atnaujinti jūsų profilio. Bandykite dar kartą.",
+        "description": "Error message when something goes wrong updating your profile."
+    },
+    "AnnouncementsOnlyGroupBanner--modal": {
+        "message": "Rašyti žinutę administratoriui",
+        "description": "Modal title for the list of admins in a group"
+    },
+    "AnnouncementsOnlyGroupBanner--announcements-only": {
+        "message": "Tik $admins$ gali siųsti žinutes",
+        "description": "Displayed if sending of messages is disabled to non-admins",
+        "placeholders": {
+            "admins": {
+                "content": "$1",
+                "example": "admins"
+            }
+        }
+    },
+    "AnnouncementsOnlyGroupBanner--admins": {
+        "message": "administratoriai",
+        "description": "Clickable text describing administrators of a group, used in the message an admin label"
+    },
+    "AvatarEditor--choose": {
+        "message": "Pasirinkti avatarą",
+        "description": "Label for the avatar selector"
+    },
+    "AvatarColorPicker--choose": {
+        "message": "Pasirinkite spalvą",
+        "description": "Label for when you need to choose your fighter, err color"
+    },
+    "LeftPaneSetGroupMetadataHelper__avatar-modal-title": {
+        "message": "Grupės avataras",
+        "description": "Title for the avatar picker in the group creation flow"
+    },
+    "Preferences__button--general": {
+        "message": "Bendra",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--appearance": {
+        "message": "Išvaizda",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--chats": {
+        "message": "Pokalbiai",
+        "description": "Button to switch the settings view (and a title of pane)"
+    },
+    "Preferences__button--calls": {
+        "message": "Skambučiai",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--notifications": {
+        "message": "Pranešimai",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--privacy": {
+        "message": "Privatumas",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences--lastSynced": {
+        "message": "Paskutinis importavimas $date$ $time$",
+        "description": "Label for date and time of last sync operation",
+        "placeholders": {
+            "date": {
+                "content": "$1",
+                "example": "6/9/2020"
+            },
+            "time": {
+                "content": "$2",
+                "example": "7:37:25 PM"
+            }
+        }
+    },
+    "Preferences--system": {
+        "message": "Sisteminis",
+        "description": "Title for system type settings"
+    },
+    "Preferences--zoom": {
+        "message": "Mastelio lygis",
+        "description": "Label for changing the zoom level"
+    },
+    "Preferences__link-previews--title": {
+        "message": "Generuoti nuorodų peržiūras",
+        "description": "Title for the generate link previews setting"
+    },
+    "Preferences__link-previews--description": {
+        "message": "Norėdami keisti šį nustatymą, atverkite Signal programėlę savo mobiliajame įrenginyje ir pereikite į Nustatymai > Pokalbiai",
+        "description": "Description for the generate link previews setting"
+    },
+    "Preferences--advanced": {
+        "message": "Išplėstiniai",
+        "description": "Title for advanced settings"
+    },
+    "Preferences--notification-content": {
+        "message": "Pranešimų turinys",
+        "description": "Label for the notification content setting select box"
+    },
+    "Preferences--blocked": {
+        "message": "Užblokuotas",
+        "description": "Label for blocked contacts setting"
+    },
+    "Preferences--blocked-count-singular": {
+        "message": "$num$ adresatas",
+        "description": "Number of contacts blocked singular",
+        "placeholders": {
+            "num": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "Preferences--blocked-count-plural": {
+        "message": "Adresatų: $num$",
+        "description": "Number of contacts blocked plural",
+        "placeholders": {
+            "num": {
+                "content": "$1",
+                "example": "20"
+            }
+        }
+    },
+    "Preferences__who-can--title": {
+        "message": "Kas gali...",
+        "description": "Title for the 'who can do X' setting"
+    },
+    "Preferences__privacy--description": {
+        "message": "Norėdami keisti šiuos nustatymus, atverkite Signal programėlę savo mobiliajame įrenginyje ir pereikite į Nustatymai > Privatumas",
+        "description": "Description for the 'who can do X' setting"
+    },
+    "Preferences__who-can--everybody": {
+        "message": "Visi",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences__who-can--contacts": {
+        "message": "Mano adresatai",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences__who-can--nobody": {
+        "message": "Niekas",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences--messaging": {
+        "message": "Susirašinėjimas",
+        "description": "Title for the messaging settings"
+    },
+    "Preferences--see-me": {
+        "message": "Matyti mano telefono numerį",
+        "description": "Label for the see my phone number setting"
+    },
+    "Preferences--find-me": {
+        "message": "Rasti mane pagal telefono numerį",
+        "description": "Label for the find me by my phone number setting"
+    },
+    "Preferences--read-receipts": {
+        "message": "Pranešimai apie žinučių skaitymą",
+        "description": "Label for the read receipts setting"
+    },
+    "Preferences--typing-indicators": {
+        "message": "Rašymo indikatoriai",
+        "description": "Label for the typing indicators setting"
+    },
+    "Preferences--updates": {
+        "message": "Atnaujinimai",
+        "description": "Header for settings having to do with updates"
+    },
+    "Preferences__download-update": {
+        "message": "Automatiškai atsisiųsti atnaujinimus",
+        "description": "Label for checkbox for the auto download updates setting"
+    },
+    "Preferences__enable-notifications": {
+        "message": "Įjungti pranešimus",
+        "description": "Label for checkbox for the notifications setting"
+    },
+    "Preferences__devices": {
+        "message": "Įrenginiai",
+        "description": "Label for Device list in call settings pane"
+    },
+    "DialogUpdate--version-available": {
+        "message": "Yra prieinamas atnaujinimas į versiją $version$",
+        "description": "Tooltip for new update available",
+        "placeholders": {
+            "status": {
+                "content": "$1",
+                "example": "v7.7.7"
+            }
+        }
+    },
+    "NSIS__retry-dialog--first-line": {
+        "message": "Nepavyksta užverti Signal.",
+        "description": "First line of the dialog displayed when Windows installer can't close application automatically and needs user intervention to complete the installation."
+    },
+    "NSIS__retry-dialog--second-line": {
+        "message": "Pabandykite ją užverti rankiniu būdu ir norėdami tęsti spustelėkite „Bandyti dar kartą“.",
+        "description": "Second line of the dialog displayed when Windows installer can't close application automatically and needs user intervention to complete the installation."
+    },
+    "CustomizingPreferredReactions__title": {
+        "message": "Tinkinti reakcijas",
+        "description": "Shown in the header of the modal for customizing the preferred reactions. Also shown in the tooltip for the button that opens this modal."
+    },
+    "CustomizingPreferredReactions__subtitle": {
+        "message": "Spustelėkite norėdami pakeisti šypsenėlę",
+        "description": "Instructions in the modal for customizing the preferred reactions."
+    },
+    "CustomizingPreferredReactions__had-save-error": {
+        "message": "Įrašant jūsų nustatymus, įvyko klaida. Bandykite dar kartą.",
+        "description": "Shown if there is an error when saving your preferred reaction settings. Should be very rare to see this message."
+    },
+    "WhatsNew__modal-title": {
+        "message": "Kas naujo",
+        "description": "Title for the whats new modal"
+    },
+    "WhatsNew__v5.19--1": {
+        "message": "Giliai įkvėpkite ir mėgaukitės naujomis dialogų ir iškylančiųjų langų animacijomis.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--2": {
+        "message": "Klaviatūros išdėstymų perjungimas visada būna šiek tiek keblus, bet dabar, spartieji klavišai seks paskui jus ir gerbs jūsų spaudžiamą klavišų pasirinkimą.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--3": {
+        "message": "Dabar, kas kartą prasidedant grupės skambučiui, gausite pranešimą. Daugiau į skambutį nebevėluosite, nebent patys to norėsite.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--4": {
+        "message": "Ši ypatybė skirta visiems, kurie daugiau reaguoja 💅 nei 👍: dabar, galite tinkinti šypsenėles, kurios pagal numatymą atsiras, kai norėsite reaguoti į žinutę.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.20": {
+        "message": "Šioje versijoje yra daug smulkių patobulinimų ir klaidų ištaisymų, kurie padės Signal sklandžiai veikti.",
+        "description": "Release notes for v5.20"
+    },
+    "WhatsNew__v5.21--1": {
+        "message": "Iš pirmo žvilgsnio pamatykite daugiau informacijos 👀. Kairysis polangis įgavo atnaujintą išvaizdą ir stilių 😎.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__v5.21--2": {
+        "message": "Žinokite nuo iki. Dabar išsamesnėje žinutės informacijoje yra rodoma laiko žymą, jei prieinama, susieta su pristatymo, skaitymo, išsiuntimo ir kitais būsenos pranešimais.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__v5.21--3": {
+        "message": "Dabar, ekrano skaityklės naudotojams turėtų būti lengviau naršyti po pokalbių sąrašą kairiajame polangyje.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__bugfixes": {
+        "message": "Šioje versijoje yra daug smulkių patobulinimų ir klaidų ištaisymų, kurie padės Signal sklandžiai veikti.",
+        "description": "Release notes for releases that only include bug fixes"
     }
 }

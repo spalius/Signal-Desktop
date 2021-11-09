@@ -2,15 +2,17 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import * as React from 'react';
+import { times } from 'lodash';
 import { storiesOf } from '@storybook/react';
 import { boolean } from '@storybook/addon-knobs';
 import { action } from '@storybook/addon-actions';
 
 import { AvatarColors } from '../types/Colors';
-import { ConversationType } from '../state/ducks/conversations';
-import { CallingPip, PropsType } from './CallingPip';
+import type { ConversationType } from '../state/ducks/conversations';
+import type { PropsType } from './CallingPip';
+import { CallingPip } from './CallingPip';
+import type { ActiveCallType } from '../types/Calling';
 import {
-  ActiveCallType,
   CallMode,
   CallState,
   GroupCallConnectionState,
@@ -18,7 +20,7 @@ import {
 } from '../types/Calling';
 import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
 import { fakeGetGroupCallVideoFrameSource } from '../test-both/helpers/fakeGetGroupCallVideoFrameSource';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 
 const i18n = setupI18n('en', enMessages);
@@ -39,6 +41,7 @@ const getCommonActiveCallData = () => ({
   hasLocalVideo: boolean('hasLocalVideo', false),
   isInSpeakerView: boolean('isInSpeakerView', false),
   joinedAt: Date.now(),
+  outgoingRing: true,
   pip: true,
   settingsDialogOpen: false,
   showParticipantsList: false,
@@ -64,6 +67,7 @@ const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
   setLocalPreview: action('set-local-preview'),
   setRendererCanvas: action('set-renderer-canvas'),
   togglePip: action('toggle-pip'),
+  toggleSpeakerView: action('toggleSpeakerView'),
 });
 
 const story = storiesOf('Components/CallingPip', module);
@@ -109,6 +113,7 @@ story.add('Group Call', () => {
       callMode: CallMode.Group as CallMode.Group,
       connectionState: GroupCallConnectionState.Connected,
       conversationsWithSafetyNumberChanges: [],
+      groupMembers: times(3, () => getDefaultConversation()),
       joinState: GroupCallJoinState.Joined,
       maxDevices: 5,
       deviceCount: 0,

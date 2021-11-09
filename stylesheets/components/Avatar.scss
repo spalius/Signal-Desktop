@@ -2,39 +2,46 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 .module-Avatar {
-  align-items: center;
-  border-radius: 100%;
   display: inline-flex;
-  justify-content: center;
   line-height: 0;
-  overflow: hidden;
   position: relative;
   user-select: none;
   vertical-align: middle;
 
-  &__button {
-    @include button-reset;
-
-    align-items: center;
-    display: flex;
-    height: 100%;
-    justify-content: center;
+  &__contents {
+    @include avatar-colors;
+    position: relative;
+    overflow: hidden;
+    border-radius: 100%;
     width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    outline: none;
 
-    @include keyboard-mode {
-      &:focus {
-        box-shadow: 0px 0px 0px 2px $color-ultramarine;
+    @at-root button#{&} {
+      @include keyboard-mode {
+        &:focus {
+          box-shadow: 0 0 0 3px $color-ultramarine;
+        }
       }
     }
+  }
+
+  &__image,
+  &__label,
+  &__icon,
+  &__spinner-container,
+  &__click-to-view {
+    width: 100%;
+    height: 100%;
   }
 
   &__image {
     background-position: center center;
     background-size: cover;
-    display: flex;
-    height: 100%;
     transition: filter 100ms ease-out;
-    width: 100%;
   }
 
   &__click-to-view {
@@ -44,12 +51,10 @@
     color: $color-white;
     display: flex;
     flex-direction: column;
-    height: 100%;
     justify-content: center;
     left: 0;
     position: absolute;
     top: 0;
-    width: 100%;
 
     &::before {
       @include color-svg(
@@ -71,46 +76,29 @@
   &__label {
     align-items: center;
     display: flex;
-    font-weight: bold;
     justify-content: center;
     text-align: center;
     text-transform: uppercase;
     transition: font-size 100ms ease-out;
-
-    @include light-theme {
-      color: $color-white;
-    }
-    @include dark-theme {
-      color: $color-gray-05;
-    }
   }
 
   &__icon {
-    @mixin avatar-icon($icon) {
-      @include light-theme {
-        @include color-svg($icon, $color-white);
-      }
-      @include dark-theme {
-        @include color-svg($icon, $color-gray-05);
-      }
-    }
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: 62%;
+    background-color: var(--fg);
 
     &--direct {
-      @include avatar-icon('../images/icons/v2/profile-outline-20.svg');
-      height: 60%;
-      width: 60%;
+      -webkit-mask-image: url('../images/icons/v2/profile-outline-20.svg');
+      -webkit-mask-size: 60%;
     }
 
     &--group {
-      @include avatar-icon('../images/icons/v2/group-outline-20.svg');
-      height: 60%;
-      width: 60%;
+      -webkit-mask-image: url('../images/icons/v2/group-outline-24.svg');
     }
 
     &--note-to-self {
-      @include avatar-icon('../images/note-28.svg');
-      height: 70%;
-      width: 70%;
+      -webkit-mask-image: url('../images/icons/v2/note-24.svg');
     }
   }
 
@@ -118,24 +106,10 @@
     padding: 4px;
   }
 
-  &--no-image {
-    background-color: $avatar-color-steel;
-  }
-
-  &--signal-blue {
-    background-color: $avatar-color-ultramarine;
-    @include dark-theme {
-      background-color: $avatar-color-ultramarine;
-    }
-  }
-
-  @each $color, $value in $avatar-colors {
-    &--#{$color} {
-      background-color: $value;
-
-      @include dark-theme {
-        background-color: $value;
-      }
-    }
+  &__badge {
+    bottom: 0;
+    position: absolute;
+    right: 0;
+    z-index: 1;
   }
 }

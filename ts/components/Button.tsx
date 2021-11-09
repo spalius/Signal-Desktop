@@ -1,7 +1,8 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { MouseEventHandler, ReactNode } from 'react';
+import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 
 import { assert } from '../util/assert';
@@ -12,17 +13,33 @@ export enum ButtonSize {
 }
 
 export enum ButtonVariant {
-  Primary,
-  Secondary,
-  SecondaryAffirmative,
-  SecondaryDestructive,
-  Destructive,
+  Calling = 'Calling',
+  Destructive = 'Destructive',
+  Details = 'Details',
+  Primary = 'Primary',
+  Secondary = 'Secondary',
+  SecondaryAffirmative = 'SecondaryAffirmative',
+  SecondaryDestructive = 'SecondaryDestructive',
+  SystemMessage = 'SystemMessage',
+}
+
+export enum ButtonIconType {
+  audio = 'audio',
+  muted = 'muted',
+  photo = 'photo',
+  search = 'search',
+  text = 'text',
+  unmuted = 'unmuted',
+  video = 'video',
 }
 
 type PropsType = {
   className?: string;
   disabled?: boolean;
+  icon?: ButtonIconType;
   size?: ButtonSize;
+  style?: CSSProperties;
+  tabIndex?: number;
   variant?: ButtonVariant;
 } & (
   | {
@@ -64,6 +81,9 @@ const VARIANT_CLASS_NAMES = new Map<ButtonVariant, string>([
     'module-Button--secondary module-Button--secondary--destructive',
   ],
   [ButtonVariant.Destructive, 'module-Button--destructive'],
+  [ButtonVariant.Calling, 'module-Button--calling'],
+  [ButtonVariant.SystemMessage, 'module-Button--system-message'],
+  [ButtonVariant.Details, 'module-Button--details'],
 ]);
 
 export const Button = React.forwardRef<HTMLButtonElement, PropsType>(
@@ -72,8 +92,13 @@ export const Button = React.forwardRef<HTMLButtonElement, PropsType>(
       children,
       className,
       disabled = false,
-      size = ButtonSize.Medium,
+      icon,
+      style,
+      tabIndex,
       variant = ButtonVariant.Primary,
+      size = variant === ButtonVariant.Details
+        ? ButtonSize.Small
+        : ButtonSize.Medium,
     } = props;
     const ariaLabel = props['aria-label'];
 
@@ -100,11 +125,14 @@ export const Button = React.forwardRef<HTMLButtonElement, PropsType>(
           'module-Button',
           sizeClassName,
           variantClassName,
+          icon && `module-Button--icon--${icon}`,
           className
         )}
         disabled={disabled}
         onClick={onClick}
         ref={ref}
+        style={style}
+        tabIndex={tabIndex}
         // The `type` should either be "button" or "submit", which is effectively static.
         // eslint-disable-next-line react/button-has-type
         type={type}

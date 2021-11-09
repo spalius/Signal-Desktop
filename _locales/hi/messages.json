@@ -56,7 +56,7 @@
         "description": "The label that is used for the Preferences menu in the program main menu. This should be consistent with the standard naming for ‘Preferences’ on the operating system."
     },
     "appMenuServices": {
-        "message": "Services",
+        "message": "सेवाएं",
         "description": "Application menu item for macOS 'Services'"
     },
     "appMenuHide": {
@@ -177,11 +177,15 @@
     },
     "avatarMenuViewArchive": {
         "message": "संग्रह देखें",
-        "description": "One of the menu options available in the Avatar Popup menu"
+        "description": "One of the menu options available in the Avatar popup menu"
     },
     "avatarMenuChatColors": {
         "message": "चैट का रंग",
-        "description": "One of the menu options available in the Avatar Popup menu"
+        "description": "One of the menu options available in the Avatar popup menu"
+    },
+    "avatarMenuUpdateAvailable": {
+        "message": "Signal अपडेट करें",
+        "description": "One of the menu options available in the Avatar popup menu"
     },
     "loading": {
         "message": "लोड हो रहा है",
@@ -411,6 +415,20 @@
         "message": "हो सकता है कि निम्नलिखित लोगों ने रीइंस्टॉल किया हो या डिवाइसेस को बदल लिया हो। गोपनीयता को सुनिश्चित करने के लिए उनके साथ अपने सुरक्षा नंबर को वेरिफाई करें।",
         "description": "Shown on confirmation dialog when user attempts to send a message"
     },
+    "safetyNumberChangeDialog__pending-messages--1": {
+        "message": "पेंडिंग मेसेज भेजें",
+        "description": "Shown on confirmation dialog when user attempts to send a message in the outbox"
+    },
+    "safetyNumberChangeDialog__pending-messages--many": {
+        "message": "भेजें $count$ पेंडिंग मेसेज",
+        "description": "Shown on confirmation dialog when user attempts to send a message in the outbox",
+        "placeholders": {
+            "count": {
+                "content": "$1",
+                "example": 123
+            }
+        }
+    },
     "identityKeyErrorOnSend": {
         "message": "$name1$ के साथ आपका सुरक्षा नंबर बदल गया है। इसका मतलब या तो यह हो सकता है कि कोई आपके संवाद को रोकने का प्रयास कर रहा है या बस $name2$ ने Signal को री-इंस्टॉल किया है। आप इस संपर्क के साथ अपने सुरक्षा नंबर को वेरिफाई करना चाह सकता हैं।",
         "description": "Shown when user clicks on a failed recipient in the message detail view after an identity key change",
@@ -452,27 +470,35 @@
         "description": "Shown in conversation banner when more than one group member's safety number has changed, but they were previously verified."
     },
     "debugLogExplanation": {
-        "message": "यह लेख ऑनलाइन भेजा जाएगा अन्या सहयोगियो के जाँच पड़ताल के लिए| भेजने से पहेले ठीक से जांच कर ले|",
+        "message": "योगदान करने वालों के देखने के लिए यह लॉग सार्वजनिक रूप से ऑनलाइन पोस्ट किया जाएगा. सबमिट करने से पहले आप पूरा लॉग डाउनलोड कर सकते हैं.",
         "description": ""
     },
     "debugLogError": {
-        "message": "अपलोड के साथ कुछ गलती हुई है। कृपया बग फ़ाइल में अपना लॉग खुद डालने पर विचार करें।",
+        "message": "अपलोड में कुछ गड़बड़ी हुई! कृपया support@signal.org पर ईमेल करें और अपने लॉग को टेक्स्ट फ़ाइल के रूप में लगाएं .",
         "description": ""
     },
+    "debugLogSuccess": {
+        "message": "डीबग लॉग सबमिट किया गया",
+        "description": "Title of the success page for submitting a debug log"
+    },
+    "debugLogSuccessNextSteps": {
+        "message": "डीबग लॉग अपलोड किया गया. जब आप समर्थन से संपर्क करते हैं, तो नीचे दिए गए लिंक को कॉपी करें और इसे आपके द्वारा देखी गई समस्या के विवरण और इसे फिर से बनाने के स्टेप के साथ लगाएं.",
+        "description": "Explanation of next steps to take when submitting debug log"
+    },
     "debugLogCopy": {
-        "message": "कॉपी",
+        "message": "लिंक कॉपी करें",
         "description": "Shown as the text for the copy button on the debug log screen"
     },
-    "debugLogCopyAlt": {
-        "message": "अपने क्लिपबोर्ड में लिंक को कॉपी करें",
-        "description": "Shown as the alt text for the copy button on the debug log screen"
+    "debugLogSave": {
+        "message": "सेव",
+        "description": "Shown as the text for the download button on the debug log screen"
     },
     "debugLogLinkCopied": {
         "message": "लिंक आपके क्लिपबोर्ड में कॉपी किया गया",
         "description": "Shown in a toast to let the user know that the link to the debug log has been copied to their clipboard"
     },
     "reportIssue": {
-        "message": "मामले की रिपोर्ट करें",
+        "message": "समर्थन से संपर्क करें",
         "description": "Link to open the issue tracker"
     },
     "gotIt": {
@@ -621,6 +647,14 @@
             }
         }
     },
+    "decryptionErrorToast": {
+        "message": "डेस्कटॉप एक डिक्रिप्शन एरर में चला गया.",
+        "description": "An error popup when we haven't added an error for decryption error."
+    },
+    "decryptionErrorToastAction": {
+        "message": "लॉग सबमिट करें",
+        "description": "Label for the decryption error toast button"
+    },
     "oneNonImageAtATimeToast": {
         "message": "तस्वीर से अलग सारे अटैचमेंट के लिये सीमा, एक मेसेज में एक अटैचमेंट है।",
         "description": "An error popup when the user has attempted to add an attachment"
@@ -646,15 +680,15 @@
         "description": "Displayed when the desktop client cannot connect to the server."
     },
     "connecting": {
-        "message": "कनेक्टिंग",
+        "message": "जोड़ने",
         "description": "Displayed when the desktop client is currently connecting to the server."
     },
     "connect": {
-        "message": "कनेक्ट करें",
+        "message": "फिर से कनेक्ट करने के लिए क्लिक करें.",
         "description": "Shown to allow the user to manually attempt a reconnect."
     },
     "connectingHangOn": {
-        "message": "ज़यादा समय नहीं लगेगा...",
+        "message": "ज़्यादा वक़्त नहीं लगेगा",
         "description": "Subtext description for when the client is connecting to the server."
     },
     "offline": {
@@ -672,6 +706,10 @@
     "debugLog": {
         "message": "लॉग को डीबग करें",
         "description": "View menu item to open the debug log (title case)"
+    },
+    "forceUpdate": {
+        "message": "बलपूर्वक जानकारी",
+        "description": "View menu item to force the app to update download and install"
     },
     "helpMenuShowKeyboardShortcuts": {
         "message": "कीबोर्ड के शॉर्टकट दिखाएं",
@@ -710,7 +748,7 @@
         "description": "Item under the Help menu, which opens a small about window"
     },
     "screenShareWindow": {
-        "message": "Sharing screen",
+        "message": "स्क्रीन साझा करना",
         "description": "Title for screen sharing window"
     },
     "speech": {
@@ -762,7 +800,7 @@
         }
     },
     "noSearchResults--sms-only": {
-        "message": "SMS/MMS contacts are not available on Desktop.",
+        "message": "डेस्कटॉप पर SMS/MMS संपर्क उपलब्ध नहीं हैं।",
         "description": "Shown in the search left pane when no results were found and primary device has SMS/MMS handling enabled"
     },
     "noSearchResultsInConversation": {
@@ -798,6 +836,20 @@
     "welcomeToSignal": {
         "message": "Signal में आपका स्वागत है ",
         "description": ""
+    },
+    "whatsNew": {
+        "message": "इस अपडेट में $whatsNew$ देखें",
+        "description": "Shown in the main window",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "what's new"
+            }
+        }
+    },
+    "viewReleaseNotes": {
+        "message": "नया क्या है",
+        "description": "Clickable link that displays the latest release notes"
     },
     "selectAContact": {
         "message": "चेटिंग की शुरुआत करने के लिए कॉंटॅक्ट या ग्रूप चुने ",
@@ -835,7 +887,7 @@
     },
     "mobile": {
         "message": "मोबाइल",
-        "description": "Shown on contact detail screen as a label for aa phone or email"
+        "description": "Shown on contact detail screen as a label for a phone or email"
     },
     "email": {
         "message": "ई-मेल",
@@ -881,6 +933,18 @@
         "message": "मूल मेसेज मिल गया पर लोड नहीं हुआ। लोड करने के लिये ऊपर स्क्रोल करें।",
         "description": "Shown in toast if user clicks on quote references messages not loaded in view, but in database"
     },
+    "voiceRecording--start": {
+        "message": "वॉइस मेसेज रिकॉर्ड करना शुरू करें",
+        "description": "Tooltip for microphone button to start voice message"
+    },
+    "voiceRecording--complete": {
+        "message": "वॉइस मेसेज पूरा करें और भेजें",
+        "description": "Tooltip for green complete voice message and send"
+    },
+    "voiceRecording--cancel": {
+        "message": "वॉइस मेसेज को रद्द करें",
+        "description": "Tooltip for red button to cancel voice message"
+    },
     "voiceRecordingInterruptedMax": {
         "message": "ऑडियो मेसेज की रिकॉर्डिंग बंद हो गई क्योंकि अधिकतम समय सीमा पूरी हो गई थी।",
         "description": "Confirmation dialog message for when the voice recording is interrupted due to max time limit"
@@ -897,15 +961,17 @@
         "message": "एक वॉयस मेसेज में एक ही अटैचमेंट हो सकता है।",
         "description": "Shown in toast if tries to record a voice note with any staged attachments"
     },
+    "voiceNoteError": {
+        "message": "वॉइस रिकॉर्डर के साथ कोई एरर था.",
+        "description": "Shown in a dialog to inform user that we experienced an unrecoverable error"
+    },
     "attachmentSaved": {
-        "message": "अटैचमेंट सेव हुई। फोल्डर में दिखाने के लिए क्लिक करें।",
-        "description": "Shown after user selects to save to downloads",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "proof.jpg"
-            }
-        }
+        "message": "अटैचमेंट सेव किया गया.",
+        "description": "Shown after user selects to save to downloads"
+    },
+    "attachmentSavedShow": {
+        "message": "फ़ोल्डर में दिखाएं",
+        "description": "Button label for showing the attachment in your file system"
     },
     "you": {
         "message": "आप",
@@ -953,9 +1019,21 @@
         "message": "तस्वीर",
         "description": "Shown in a quotation of a message containing a photo if no text was originally provided with that image"
     },
+    "text": {
+        "message": "टेक्स्ट",
+        "description": "Label for the word 'text'"
+    },
     "cannotUpdate": {
         "message": "अपडेट नहीं कर सकते",
         "description": "Shown as the title of our update error dialogs on windows"
+    },
+    "muted": {
+        "message": "म्यूट किया हुआ",
+        "description": "Shown in a button when a conversation is muted"
+    },
+    "mute": {
+        "message": "म्युट",
+        "description": "Shown in a button when a conversation is unmuted and can be muted"
     },
     "cannotUpdateDetail": {
         "message": "Signal Desktop अपडेट नहीं हो पाया, पर एक नया वर्ज़न उपलब्ध है। कृपया $url$ पर जाएँ और नया वर्ज़न डाउनलोड कर के इंस्टॉल कर लें, फिर या तो समर्थन से संपर्क करें या फिर इस परेशानी के बारे में बग फ़ाइल कर दें।",
@@ -1013,6 +1091,10 @@
         "message": "स्वीकृत ",
         "description": ""
     },
+    "done": {
+        "message": "पूर्ण",
+        "description": "Label for done"
+    },
     "on": {
         "message": "पर",
         "description": "Label for when something is turned on"
@@ -1022,16 +1104,12 @@
         "description": "Label for when something is turned off"
     },
     "deleteWarning": {
-        "message": "This message will be deleted from this device.",
+        "message": "यह संदेश इस डिवाइस से हटा दिया जाएगा।",
         "description": "Text shown in the confirmation dialog for deleting a message locally"
     },
     "deleteForEveryoneWarning": {
         "message": "यह मैसेज वार्तालाप में शामिल सभी के लिए मिटा दिया जाएगा यदि वे Signal के नवीनमत वर्ज़न पर हैं। वे देख सकेंगे कि आपने एक मैसेज को मिटा दिया है।",
         "description": "Text shown in the confirmation dialog for deleting a message for everyone"
-    },
-    "deleteThisMessage": {
-        "message": "यह मेसेज हटाएं",
-        "description": ""
     },
     "from": {
         "message": "द्वारा",
@@ -1065,10 +1143,6 @@
         "message": "सदस्यों को दिखाएं",
         "description": ""
     },
-    "resetSession": {
-        "message": "सत्र दोबारा शुरू करे ",
-        "description": "This is a menu item for resetting the session, using the imperative case, as in a command."
-    },
     "showSafetyNumber": {
         "message": "सुरक्षा नंबर देखें",
         "description": ""
@@ -1078,7 +1152,7 @@
         "description": "This is a menu item for viewing all media (images + video) in a conversation, using the imperative case, as in a command."
     },
     "verifyHelp": {
-        "message": "यदि आप अपने एंड-टू-एंड एन्क्रिप्शन की सुरक्षा की पुष्टि करना चाहते हैं तो$name$ऊपर दिए गए नंबरों की संख्या उनके डिवाइस पर तुलना करें।",
+        "message": "$name$ के साथ अपने एंड-टू-एंड एन्क्रिप्शन की सुरक्षा की पुष्टि करने के लिए, ऊपर दिए गए नंबरों की उनके डिवाइस से तुलना करें.",
         "description": "",
         "placeholders": {
             "name": {
@@ -1148,11 +1222,11 @@
         "description": "Shown on explainer dialog available from chat session refreshed timeline events"
     },
     "DeliveryIssue--preview": {
-        "message": "Delivery issue",
+        "message": "डिलिवरी का मामला",
         "description": "Shown in left pane preview when message delivery issue happens"
     },
     "DeliveryIssue--notification": {
-        "message": "A message from $sender$ couldn’t be delivered",
+        "message": "$sender$ का संदेश डिलीवर नहीं किया जा सका",
         "description": "Shown in timeline when message delivery issue happens",
         "placeholders": {
             "name": {
@@ -1166,16 +1240,36 @@
         "description": "Shown in timeline when message delivery issue happens, to provide access to a popup info dialog"
     },
     "DeliveryIssue--title": {
-        "message": "Delivery Issue",
+        "message": "डिलिवरी का मामला",
         "description": "Shown on explainer dialog available from delivery issue timeline events"
     },
     "DeliveryIssue--summary": {
-        "message": "A message, sticker, reaction, read receipt or media couldn’t be delivered to you from $sender$. They may have tried sending it to you directly, or in a group.",
-        "description": "Shown on explainer dialog available from delivery issue timeline events",
+        "message": "$sender$ की ओर से आपको कोई मैसेज, स्टिकर, रिएक्शन, रीड रिसीट या मीडिया डिलीवर नहीं किया जा सका। हो सकता है कि उन्होंने इसे सीधे आपको या किसी समूह में भेजने का प्रयास किया हो।",
+        "description": "Shown on explainer dialog available from delivery issue timeline events in 1:1 conversations",
         "placeholders": {
             "name": {
                 "content": "$1",
                 "example": "Alice"
+            }
+        }
+    },
+    "DeliveryIssue--summary--group": {
+        "message": "इस चैट में $sender$ द्वारा भेजा गया कोई संदेश, स्टिकर, प्रतिक्रिया, पढ़ा गया रिसीप्ट या मीडिया आपको डिलीवर नहीं किया जा सका।",
+        "description": "Shown on explainer dialog available from delivery issue timeline events in groups",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "ChangeNumber--notification": {
+        "message": "$sender$ ने अपना नंबर किसी नए नंबर से बदल लिया",
+        "description": "Shown in timeline when a member of a conversation changes their phone number",
+        "placeholders": {
+            "sender": {
+                "content": "$1",
+                "example": "Sam"
             }
         }
     },
@@ -1205,7 +1299,11 @@
     },
     "save": {
         "message": "संरक्षित करें",
-        "description": "Used as a 'commit changes' button in the Caption Editor for outgoing image attachments"
+        "description": "Used as a 'commit changes' button in the caption editor for outgoing image attachments"
+    },
+    "reset": {
+        "message": "फिर से स्थापित करना",
+        "description": "Used on reset buttons"
     },
     "fileIconAlt": {
         "message": "फ़ाइल आइकॅन",
@@ -1239,7 +1337,11 @@
         "message": "नया डिवाइस लिंक करें",
         "description": "The menu option shown in Signal iOS to add a new linked device"
     },
-    "deviceName": {
+    "LinkScreen__scan-this-code": {
+        "message": "इस कोड को अपने फ़ोन के Signal ऐप में स्कैन करें",
+        "description": "Alt text for the QR code on the device link screen"
+    },
+    "Preferences--device-name": {
         "message": "डिवाइस का नाम",
         "description": "The label in settings panel shown for the user-provided name for this desktop instance"
     },
@@ -1275,13 +1377,21 @@
         "message": "फिर से कोशिश करो",
         "description": ""
     },
-    "theme": {
+    "Preferences--theme": {
         "message": "विषय",
         "description": "Header for theme settings"
     },
     "calling": {
         "message": "कॉल की जा रही है",
         "description": "Header for calling options on the settings screen"
+    },
+    "calling__call-back": {
+        "message": "वापस कॉल करें",
+        "description": "Button to call someone back"
+    },
+    "calling__call-again": {
+        "message": "दोबारा कोल करें",
+        "description": "Button to call someone again"
     },
     "calling__start": {
         "message": "कॉल शुरू करें",
@@ -1297,7 +1407,11 @@
     },
     "calling__call-is-full": {
         "message": "कॉल पूर्ण है",
-        "description": "Button label in the call lobby when you can't join because the call is full"
+        "description": "Text in the call lobby when you can't join because the call is full"
+    },
+    "calling__button--video__label": {
+        "message": "कैमरा",
+        "description": "Label under the video button"
     },
     "calling__button--video-disabled": {
         "message": "कैमरा डिसेबल किया गया",
@@ -1311,6 +1425,10 @@
         "message": "कैमरा चालू करें",
         "description": "Button tooltip label for turning on the camera"
     },
+    "calling__button--audio__label": {
+        "message": "म्युट",
+        "description": "Label under the audio button"
+    },
     "calling__button--audio-disabled": {
         "message": "माइक्रोफोन डिसेबल किया गया",
         "description": "Button tooltip label when the microphone is disabled"
@@ -1323,27 +1441,47 @@
         "message": "माइक को अनम्यूट करें",
         "description": "Button tooltip label for turning on the microphone"
     },
+    "calling__button--presenting__label": {
+        "message": "साझा करें",
+        "description": "Label under the share screen button"
+    },
     "calling__button--presenting-disabled": {
-        "message": "Presenting disabled",
+        "message": "प्रस्तुत निर्योग्य है",
         "description": "Button tooltip label for when screen sharing is disabled"
     },
     "calling__button--presenting-on": {
-        "message": "Start presenting",
+        "message": "प्रस्तुत करना शुरू करें",
         "description": "Button tooltip label for starting to share screen"
     },
     "calling__button--presenting-off": {
-        "message": "Stop presenting",
+        "message": "प्रस्तुत करना बंद करें",
         "description": "Button tooltip label for stopping screen sharing"
+    },
+    "calling__button--ring__label": {
+        "message": "रिंग करें",
+        "description": "Label under the ring button"
+    },
+    "calling__button--ring__disabled-because-group-is-too-large": {
+        "message": "भाग लेने वालों को रिंग करने के लिए ग्रूप बहुत बड़ा है.",
+        "description": "Button tooltip label when you can't ring because the group is too large"
+    },
+    "calling__button--ring__off": {
+        "message": "सूचित करें, घंटी न बजाएं",
+        "description": "Button tooltip label for turning ringing off"
+    },
+    "calling__button--ring__on": {
+        "message": "रिंगिंग को एनेबल करें",
+        "description": "Button tooltip label for turning ringing on"
     },
     "calling__your-video-is-off": {
         "message": "आपका कैमरा बंद है",
         "description": "Label in the calling lobby indicating that your camera is off"
     },
-    "calling__lobby-summary--zero": {
+    "calling__pre-call-info--empty-group": {
         "message": "यहाँ और कोई नहीं है",
         "description": "Shown in the calling lobby to describe who is in the call"
     },
-    "calling__lobby-summary--single": {
+    "calling__pre-call-info--1-person-in-call": {
         "message": "$first$ इस कॉल में है",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1353,11 +1491,11 @@
             }
         }
     },
-    "calling__lobby-summary--self": {
+    "calling__pre-call-info--another-device-in-call": {
         "message": "आपका कोई दूसरा डिवाइस इस कॉल में है",
         "description": "Shown in the calling lobby to describe when it is just you"
     },
-    "calling__lobby-summary--double": {
+    "calling__pre-call-info--2-people-in-call": {
         "message": "$first$ और $second$ इस कॉल में हैं",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1371,7 +1509,7 @@
             }
         }
     },
-    "calling__lobby-summary--triple": {
+    "calling__pre-call-info--3-people-in-call": {
         "message": "$first$, $second$, और $third$ इस कॉल में हैं",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
@@ -1389,11 +1527,131 @@
             }
         }
     },
-    "calling__lobby-summary--many": {
+    "calling__pre-call-info--many-people-in-call": {
         "message": "$first$, $second$, और $others$ अन्य लोग इस कॉल में हैं",
         "description": "Shown in the calling lobby to describe who is in the call",
         "placeholders": {
             "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "others": {
+                "content": "$3",
+                "example": "5"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-1": {
+        "message": "सिग्नल $person$ को रिंग करेगा",
+        "description": "Shown in the calling lobby to describe who will be rung",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-2": {
+        "message": "सिग्नल रिंग करेगा $first$ और $second$",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-3": {
+        "message": "सिग्नल रिंग करेगा $first$, $second$, और $third$",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "third": {
+                "content": "$3",
+                "example": "April"
+            }
+        }
+    },
+    "calling__pre-call-info--will-ring-many": {
+        "message": "सिग्नल $first$, $second$, और $others$ अन्य पर बजेगा",
+        "description": "Shown in the calling lobby to describe who will be rang",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "others": {
+                "content": "$3",
+                "example": "5"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-1": {
+        "message": "$person$ को सूचित किया जाएगा",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "person": {
+                "content": "$1",
+                "example": "Sam"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-2": {
+        "message": "$first$ और $second$ को सूचित किया जाएगा",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-3": {
+        "message": "$first$, $second$, और $third$ को सूचित किया जाएगा",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "first": {
+                "content": "$1",
+                "example": "Sam"
+            },
+            "second": {
+                "content": "$2",
+                "example": "Cayce"
+            },
+            "third": {
+                "content": "$3",
+                "example": "April"
+            }
+        }
+    },
+    "calling__pre-call-info--will-notify-many": {
+        "message": "$first$, $second$, और $others$ अन्य को सूचित किया जाएगा",
+        "description": "Shown in the calling lobby to describe who will be notified",
+        "placeholders": {
+            "person": {
                 "content": "$1",
                 "example": "Sam"
             },
@@ -1437,26 +1695,26 @@
     },
     "calling__block-info": {
         "message": "आपको उनके ऑडियो या वीडियो प्राप्त नहीं होंगे और उन्हें आपके नहीं।",
-        "description": "Shown in the modal dialog to describe how blocking works in a gorup call"
+        "description": "Shown in the modal dialog to describe how blocking works in a group call"
     },
     "calling__overflow__scroll-up": {
-        "message": "Scroll up",
+        "message": "ऊपर स्क्रॉल करें",
         "description": "Label for the \"scroll up\" button in a call's overflow area"
     },
     "calling__overflow__scroll-down": {
-        "message": "Scroll down",
+        "message": "नीचे स्क्रॉल करें",
         "description": "Label for the \"scroll down\" button in a call's overflow area"
     },
     "calling__presenting--notification-title": {
-        "message": "You're presenting to everyone.",
+        "message": "आप सबके सामने पेश कर रहे हैं।",
         "description": "Title for the share screen notification"
     },
     "calling__presenting--notification-body": {
-        "message": "Click here to return to the call when you're ready to stop presenting.",
+        "message": "जब आप प्रस्तुत करना बंद करने के लिए तैयार हों तो कॉल पर लौटने के लिए यहां क्लिक करें।",
         "description": "Body text for the share screen notification"
     },
     "calling__presenting--info": {
-        "message": "Signal is sharing $window$.",
+        "message": "Signal $window$ साझा कर रहा है।",
         "description": "Text that appears in the screen sharing controller to inform person that they are presenting",
         "placeholders": {
             "name": {
@@ -1466,7 +1724,7 @@
         }
     },
     "calling__presenting--stop": {
-        "message": "Stop sharing",
+        "message": "सांझा करना बंद करो",
         "description": "Button for stopping screen sharing"
     },
     "calling__presenting--you-stopped": {
@@ -1474,7 +1732,7 @@
         "description": "Toast that appears when someone stops presenting"
     },
     "calling__presenting--person-ongoing": {
-        "message": "$name$ is presenting",
+        "message": "$name$ प्रस्तुत कर रहा है",
         "description": "Title of call when someone is presenting",
         "placeholders": {
             "name": {
@@ -1484,7 +1742,7 @@
         }
     },
     "calling__presenting--person-stopped": {
-        "message": "$name$ stopped presenting",
+        "message": "$name$ ने प्रस्तुत करना बंद कर दिया",
         "description": "Toast that appears when someone stops presenting",
         "placeholders": {
             "name": {
@@ -1494,27 +1752,27 @@
         }
     },
     "calling__presenting--permission-title": {
-        "message": "Permission needed",
+        "message": "अनुमति की आवश्यकता",
         "description": "Shown as the title for the modal that requests screen recording permissions"
     },
     "calling__presenting--macos-permission-description": {
-        "message": "Signal needs permission to access your computer's screen recording.",
+        "message": "Signal को आपके कंप्यूटर की स्क्रीन रिकॉर्डिंग तक पहुँचने के लिए अनुमति की आवश्यकता है।",
         "description": "Shown as the description for the modal that requests screen recording permissions"
     },
     "calling__presenting--permission-instruction-step1": {
-        "message": "Go to System Preferences.",
+        "message": "सिस्टम प्रेफरेंसेज के लिए जाओ",
         "description": "Shown as the description for the modal that requests screen recording permissions"
     },
     "calling__presenting--permission-instruction-step2": {
-        "message": "Click on the lock icon on the bottom left and enter your computer’s password.",
+        "message": "नीचे बाईं ओर लॉक आइकन पर क्लिक करें और अपने कंप्यूटर का पासवर्ड दर्ज करें।",
         "description": "Shown as the description for the modal that requests screen recording permissions"
     },
     "calling__presenting--permission-instruction-step3": {
-        "message": "On the right, check the box next to Signal. If you don’t see Signal in the list, click the + to add it.",
+        "message": "दाईं ओर, Signal के आगे वाले बॉक्स को चेक करें। यदि आपको सूची में Signal नहीं दिखाई देता है, तो इसे जोड़ने के लिए + पर क्लिक करें।",
         "description": "Shown as the description for the modal that requests screen recording permissions"
     },
     "calling__presenting--permission-open": {
-        "message": "Open System Preferences",
+        "message": "ओपन सिस्टम प्राथमिकताएं",
         "description": "The button that opens your system preferences for the needs screen record permissions modal"
     },
     "calling__presenting--permission-cancel": {
@@ -1546,7 +1804,7 @@
         "description": "Header for general options on the settings screen"
     },
     "spellCheckDescription": {
-        "message": "Enable spell check",
+        "message": "मेसेज लिखने वाले बॉक्स में दर्ज वर्तनी जांच टेक्स्ट",
         "description": "Description of the spell check setting"
     },
     "spellCheckWillBeEnabled": {
@@ -1557,12 +1815,20 @@
         "message": "स्पेल चेक अगली बार Signal के शुरू होने पर डिसेबल किया जाएगा।",
         "description": "Shown when the user disables spellcheck to indicate that they must restart Signal."
     },
+    "SystemTraySetting__minimize-to-system-tray": {
+        "message": "सिस्टम ट्रे छोटा करें",
+        "description": "In the settings, shown next to the checkbox option for minimizing to the system tray"
+    },
+    "SystemTraySetting__minimize-to-and-start-in-system-tray": {
+        "message": "ट्रे में छोटा शुरू करें",
+        "description": "In the settings, shown next to the checkbox option for starting in the system tray"
+    },
     "autoLaunchDescription": {
-        "message": "Open at computer login",
+        "message": "कंप्यूटर लॉगिन पर खोलें",
         "description": "Description for the automatic launch setting"
     },
     "clearDataHeader": {
-        "message": "डाटा हटाएँ",
+        "message": "एप्लिकेशन डेटा क्लियर करें",
         "description": "Header in the settings dialog for the section dealing with data deletion"
     },
     "clearDataExplanation": {
@@ -1676,7 +1942,7 @@
         "description": "Shown on outgoing message if it fails to send"
     },
     "sendPaused": {
-        "message": "Send paused",
+        "message": "भेजें रोका गया",
         "description": "Shown on outgoing message if it cannot be sent immediately"
     },
     "partiallySent": {
@@ -1700,7 +1966,7 @@
         "description": "Warning notification that this version of the app has expired"
     },
     "upgrade": {
-        "message": "अपग्रेड",
+        "message": "signal.org/download पर जाने के लिए क्लिक करें",
         "description": "Label text for button to upgrade the app to the latest version"
     },
     "mediaMessage": {
@@ -1712,7 +1978,7 @@
         "description": "Error message displayed when sending to an unregistered user."
     },
     "sync": {
-        "message": "संपर्क",
+        "message": "कॉन्टैक्ट इम्पोर्ट करें",
         "description": "Label for contact and group sync settings"
     },
     "syncExplanation": {
@@ -1837,7 +2103,7 @@
     },
     "disappearingMessages": {
         "message": "गायब होने वाले मेसेज",
-        "description": "Conversation menu option to enable disappearing messages. Title of the settings section for Disappearing Messages"
+        "description": "Conversation menu option to enable disappearing messages. Title of the settings section for Disappearing Messages. Label of the disappearing timer select in group creation flow"
     },
     "disappearingMessagesDisabled": {
         "message": "मेसेज जो गायब हो जाते हैं अक्षम",
@@ -1872,7 +2138,7 @@
         }
     },
     "audioNotificationDescription": {
-        "message": "ऑडियो सूचना चलाएं",
+        "message": "नोटिफ़िकेशन साउंड प्ले करें",
         "description": "Description for audio notification setting"
     },
     "callRingtoneNotificationDescription": {
@@ -1918,6 +2184,10 @@
                 "example": "Bob Smith"
             }
         }
+    },
+    "SafetyNumberModal__title": {
+        "message": "सुरक्षा नंबर सत्यापित करें",
+        "description": "Title for the modal for safety number verification"
     },
     "safetyNumberChanged": {
         "message": "सुरक्षा नंबर बदल गया है।",
@@ -1992,19 +2262,19 @@
         "description": "Label for header when starting a new conversation"
     },
     "contactSearchPlaceholder": {
-        "message": "Search by name or phone number",
+        "message": "नाम या फोन नंबर से खोजें",
         "description": "Placeholder to use when searching for contacts in the composer"
     },
     "noContactsFound": {
-        "message": "No contacts found",
+        "message": "कोई संपर्क नहीं मिला",
         "description": "Label shown when there are no contacts to compose to"
     },
     "noConversationsFound": {
-        "message": "No conversations found",
+        "message": "कोई बातचीत नहीं मिली",
         "description": "Label shown when there are no conversations to compose to"
     },
     "chooseGroupMembers__title": {
-        "message": "Choose members",
+        "message": "सदस्य चुनें",
         "description": "The title for the 'choose group members' left pane screen"
     },
     "chooseGroupMembers__back-button": {
@@ -2024,7 +2294,7 @@
         "description": "Shown in the alert when you add the maximum number of group members"
     },
     "chooseGroupMembers__maximum-group-size__body": {
-        "message": "Signal groups can have a maximum of $max$ members.",
+        "message": "Signal समूहों में अधिकतम $max$ सदस्य हो सकते हैं।",
         "description": "Shown in the alert when you add the maximum number of group members",
         "placeholders": {
             "max": {
@@ -2038,7 +2308,7 @@
         "description": "Shown in the alert when you add the maximum recommended number of group members"
     },
     "chooseGroupMembers__maximum-recommended-group-size__body": {
-        "message": "Signal groups perform best with $max$ members or less. Adding more members will cause delays sending and receiving messages.",
+        "message": "Signal समूह $max$ या उससे कम सदस्यों के साथ सर्वश्रेष्ठ प्रदर्शन करते हैं। अधिक सदस्यों को जोड़ने से संदेश भेजने और प्राप्त करने में देरी होगी।",
         "description": "Shown in the alert when you add the maximum recommended number of group members",
         "placeholders": {
             "max": {
@@ -2048,11 +2318,11 @@
         }
     },
     "chooseGroupMembers__cant-add-member__title": {
-        "message": "Can’t add member",
+        "message": "सदस्य नहीं जोड़ सकते",
         "description": "Shown in the alert when you try to add someone who can't be added to a group"
     },
     "chooseGroupMembers__cant-add-member__body": {
-        "message": "\"$name$\" can’t be added to the group because they’re using an old version of Signal. You can add them to the group after they’ve updated Signal.",
+        "message": "\"$name$\" को समूह में नहीं जोड़ा जा सकता क्योंकि वे Signal के पुराने संस्करण का उपयोग कर रहे हैं। Signal अपडेट करने के बाद आप उन्हें समूह में जोड़ सकते हैं।",
         "description": "Shown in the alert when you try to add someone who can't be added to a group",
         "placeholders": {
             "max": {
@@ -2066,7 +2336,7 @@
         "description": "The title for the 'set group metadata' left pane screen"
     },
     "setGroupMetadata__back-button": {
-        "message": "Back to member selection",
+        "message": "सदस्य चयन पर वापस जाएं",
         "description": "Used as alt-text of the back button on the 'set group metadata' left pane screen"
     },
     "setGroupMetadata__group-name-placeholder": {
@@ -2074,7 +2344,7 @@
         "description": "The placeholder for the group name placeholder"
     },
     "setGroupMetadata__group-description-placeholder": {
-        "message": "Description",
+        "message": "विवरण",
         "description": "The placeholder for the group description"
     },
     "setGroupMetadata__create-group": {
@@ -2086,7 +2356,7 @@
         "description": "The header for the members list in the 'set group metadata' left pane screen"
     },
     "setGroupMetadata__error-message": {
-        "message": "This group couldn’t be created. Check your connection and try again.",
+        "message": "यह समूह नहीं बनाया जा सका. अपने कनेक्शन की जाँच करें और पुनः प्रयास करें।",
         "description": "Shown in the modal when we can't create a group"
     },
     "updateGroupAttributes__title": {
@@ -2094,7 +2364,7 @@
         "description": "Shown in the modal when we want to update a group"
     },
     "updateGroupAttributes__error-message": {
-        "message": "Failed to update the group. Check your connection and try again.",
+        "message": "समूह को अपडेट करने में विफल. अपने कनेक्शन की जाँच करें और पुनः प्रयास करें।",
         "description": "Shown in the modal when we can't update a group"
     },
     "notSupportedSMS": {
@@ -2110,7 +2380,7 @@
         "description": "When a person inputs a number that is invalid"
     },
     "unlinkedWarning": {
-        "message": "मेसेज जारी रखने के लिए Signal डेस्कटॉप को अपने मोबाइल डिवाइस पर लिंक करें।",
+        "message": "मेसेजिंग जारी रखने के लिए अपने मोबाइल डिवाइस को सिग्नल डेस्कटॉप से फिर से लिंक करने के लिए क्लिक करें.",
         "description": ""
     },
     "unlinked": {
@@ -2122,11 +2392,15 @@
         "description": ""
     },
     "autoUpdateNewVersionTitle": {
-        "message": "Signal अपडेट उपलब्ध है",
+        "message": "अपडेट उपलब्ध",
         "description": ""
     },
     "autoUpdateNewVersionMessage": {
-        "message": "Signal का नया वर्ज़न अब उपलब्ध है।",
+        "message": "सिग्नल को रीस्टार्ट करने के लिए क्लिक करें",
+        "description": ""
+    },
+    "downloadNewVersionMessage": {
+        "message": "अपडेट डाउनलोड करने के लिए क्लिक करें",
         "description": ""
     },
     "autoUpdateNewVersionInstructions": {
@@ -2139,6 +2413,10 @@
     },
     "autoUpdateLaterButtonLabel": {
         "message": "बाद में",
+        "description": ""
+    },
+    "autoUpdateIgnoreButtonLabel": {
+        "message": "अपडेट पर ध्यान न दें",
         "description": ""
     },
     "leftTheGroup": {
@@ -2210,6 +2488,38 @@
             "names": {
                 "content": "$1",
                 "example": "Alice, Bob"
+            }
+        }
+    },
+    "ConversationList__aria-label": {
+        "message": "$title$ के साथ बातचीत, $unreadCount$ नए मेसेज, आख़िरी मेसेज: $lastMessage$.",
+        "description": "Aria label for the conversation list item",
+        "placeholders": {
+            "title": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "unreadCount": {
+                "content": "$2",
+                "example": "23"
+            },
+            "lastMessage": {
+                "content": "$3",
+                "example": "How about Friday?"
+            }
+        }
+    },
+    "ConversationList__last-message-undefined": {
+        "message": "हो सकता है कि आख़िरी मेसेज डिलीट कर दिया गया हो.",
+        "description": "For aria-label within conversation list. Describes if last message is not defined."
+    },
+    "BaseConversationListItem__aria-label": {
+        "message": "$title$ के साथ बातचीत पर जाएं",
+        "description": "Aria label for the conversation list item button",
+        "placeholders": {
+            "title": {
+                "content": "$1",
+                "example": "Alice"
             }
         }
     },
@@ -2445,6 +2755,10 @@
         "message": "रद्द करें",
         "description": "Appears on the cancel button in confirmation dialogs."
     },
+    "MessageBody--read-more": {
+        "message": "ज़्यादा पढ़ें",
+        "description": "When a message is too long this is the affordance to expand the message"
+    },
     "Message--unsupported-message": {
         "message": "$contact$ ने एक मेसेज भेजा है जो याहाँ दिखाया नहीं जा सकता क्योंकि वह Signal का नया फ़ीचर इस्तेमाल करता है।",
         "description": "",
@@ -2542,7 +2856,7 @@
         "description": "Shown in the shortcuts guide"
     },
     "Keyboard--new-conversation": {
-        "message": "Start new conversation",
+        "message": "नया वार्तालाप शुरु करें...",
         "description": "Shown in the shortcuts guide"
     },
     "Keyboard--archive-conversation": {
@@ -2721,6 +3035,10 @@
         "message": "संवाद संग्रहीत कर दिया गया है",
         "description": "A toast that shows up when user archives a conversation"
     },
+    "conversationArchivedUndo": {
+        "message": "पूर्ववत",
+        "description": "Undo button for archiving a conversation"
+    },
     "conversationReturnedToInbox": {
         "message": "संवाद इनबॉक्स में वापस आ गया है",
         "description": "A toast that shows up when the user unarchives a conversation"
@@ -2780,6 +3098,14 @@
     "StickerCreator--DropStage--title": {
         "message": "अपने स्टिकर जोडे़ं",
         "description": "Title for the drop stage of the sticker creator"
+    },
+    "StickerCreator--DropStage--removeSticker": {
+        "message": "स्टिकर हटाएं",
+        "description": "Label for the X button used to remove a staged sticker"
+    },
+    "StickerCreator--DropStage--dragDrop": {
+        "message": "स्टिकर लगाने के लिए किसी फ़ाइल को क्लिक या ड्रैग/ड्रॉप करें",
+        "description": "Shown on the + section of the file addition stage of sticker pack creation"
     },
     "StickerCreator--DropStage--help": {
         "message": "स्टिकर PNG, APNG, या WebP फॉर्मैट में होने चाहिए और उनका बैकग्राउंड पारदर्शी होना चाहिए 512x512 पिक्सल के होने चाहिए। सिफारिश किया हुआ मार्जिन है 16px.",
@@ -2955,11 +3281,15 @@
         "message": "स्टिकर पैक क्रिएटर का उपयोग करने के लिए कृपया अपने फोन और डेस्कटॉप पर Signal को सेट अप करें",
         "description": "The error message which appears when the user has not linked their account and attempts to use the Sticker Creator"
     },
+    "Reactions--remove": {
+        "message": "प्रतिक्रिया को हटाएं",
+        "description": ""
+    },
     "Reactions--error": {
         "message": "प्रतिक्रिया भेजी नहीं जा सकी। कृपया फिर से प्रयास करें।",
         "description": "Shown when a reaction fails to send"
     },
-    "ReactionsViewer--more": {
+    "Reactions--more": {
         "message": "अधिक",
         "description": "Use in the reaction picker as the alt text for the 'more' button"
     },
@@ -2989,13 +3319,7 @@
     },
     "MessageRequests--message-group": {
         "message": "इस ग्रुप में जुड़ना है और इसके मेंबर्स के साथ अपना नाम और तस्वीर शेयर करनी है? उन्हें पता नहीं चलेगा कि आपने उनके मेसेज देख लिए हैं जब तक आप स्वीकार नहीं करते।",
-        "description": "Shown as the message for a message request in a group",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the message for a message request in a group"
     },
     "MessageRequests--message-group-blocked": {
         "message": "इस ग्रुप को अनब्लॉक करना है और इसके मेंबर्स के साथ अपना नाम और तस्वीर शेयर करनी है? आप कोई भी मेसेज प्राप्त नहीं करेंगे जब तक आप उन्हें अनब्लॉक नहीं करते।",
@@ -3021,30 +3345,18 @@
     },
     "MessageRequests--unblock-direct-confirm-body": {
         "message": "आप एक दूसरे को मेसेज और काॅल कर पाएंगे|",
-        "description": "Shown as the body in the confirmation modal for unblocking a private message request",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the body in the confirmation modal for unblocking a private message request"
     },
     "MessageRequests--unblock-group-confirm-body": {
         "message": "ग्रूप के सदस्य आपको इस ग्रूप में फ़िर शामिल कर पाएँगे।",
-        "description": "Shown as the body in the confirmation modal for unblocking a group message request",
-        "placeholders": {
-            "name": {
-                "content": "$1",
-                "example": "Cayce Pollard"
-            }
-        }
+        "description": "Shown as the body in the confirmation modal for unblocking a group message request"
     },
     "MessageRequests--block-and-report-spam": {
-        "message": "Report Spam and Block",
+        "message": "स्पैम और ब्लॉक की रिपोर्ट करें",
         "description": "Shown as a button to let the user block a message request and report spam"
     },
     "MessageRequests--block-and-report-spam-success-toast": {
-        "message": "Reported as spam and blocked.",
+        "message": "स्पैम के रूप में रिपोर्ट किया गया और अवरुद्ध कर दिया गया।",
         "description": "Shown in a toast when you successfully block a user and report them as spam"
     },
     "MessageRequests--block-direct-confirm-title": {
@@ -3177,7 +3489,7 @@
     },
     "member-of-2-groups": {
         "message": "$group1$ और $group2$के मेंबर।",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least two mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of two mutual groups",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3191,7 +3503,7 @@
     },
     "member-of-3-groups": {
         "message": "$group1$, $group2$, और $group3$ के मेंबर।",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least three mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of three mutual groups",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3207,9 +3519,27 @@
             }
         }
     },
-    "member-of-more-than-3-groups": {
+    "member-of-more-than-3-groups--one-more": {
+        "message": "$group1$, $group2$, $group3$ और एक अन्य के सदस्य",
+        "description": "Shown in the conversation hero to indicate this user is a member of four mutual groups",
+        "placeholders": {
+            "group1": {
+                "content": "$1",
+                "example": "NYC Rock Climbers"
+            },
+            "group2": {
+                "content": "$2",
+                "example": "Dinner Party"
+            },
+            "group3": {
+                "content": "$3",
+                "example": "Friends 🌿"
+            }
+        }
+    },
+    "member-of-more-than-3-groups--multiple-more": {
         "message": "$group1$, $group2$, $group3$ और  $remainingCount$ अधिक।",
-        "description": "Shown in the conversation hero to indicate this user is a member of at least three mutual groups",
+        "description": "Shown in the conversation hero to indicate this user is a member of 5+ mutual groups.",
         "placeholders": {
             "group1": {
                 "content": "$1",
@@ -3244,7 +3574,7 @@
         "description": "Shown to indicate this user is not a member of any groups"
     },
     "no-groups-in-common-warning": {
-        "message": "No groups in common. Review requests carefully.",
+        "message": "कोई समूह सामान्य नहीं है। अनुरोधों की सावधानीपूर्वक समीक्षा करें।",
         "description": "When a user has no common groups, show this warning"
     },
     "acceptCall": {
@@ -3307,9 +3637,87 @@
         "message": "वीडियो कॉल आ रही है...",
         "description": "Shown in both the incoming call bar and notification for an incoming video call"
     },
-    "outgoingCallPrering": {
-        "message": "कॉल की जा रही है...",
-        "description": "Shown in the call screen when placing an outgoing call that isn't ringing yet"
+    "incomingGroupCall__ringing-you": {
+        "message": "$ringer$ आपको कॉल कर रहे हैं",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-1-other": {
+        "message": "$ringer$ आपको कॉल कर रहे हैं और $otherMember$",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "otherMember": {
+                "content": "$2",
+                "example": "Bob"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-2-others": {
+        "message": "$ringer$ आपको कॉल कर रहे हैं, $first$, और $second$",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-3-others": {
+        "message": "$ringer$ आपको कॉल कर रहे हैं, $first$, $second$, और 1 अन्य",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            }
+        }
+    },
+    "incomingGroupCall__ringing-many": {
+        "message": "$ringer$ आपको कॉल कर रहे हैं, $first$, $second$, और $remaining$ अन्य",
+        "description": "Shown in the incoming call bar when someone is ringing you for a group call",
+        "placeholders": {
+            "ringer": {
+                "content": "$1",
+                "example": "Alice"
+            },
+            "first": {
+                "content": "$2",
+                "example": "Bob"
+            },
+            "second": {
+                "content": "$3",
+                "example": "Charlie"
+            },
+            "remaining": {
+                "content": "$4",
+                "example": "5"
+            }
+        }
     },
     "outgoingCallRinging": {
         "message": "रिंग बज रही है...",
@@ -3410,11 +3818,11 @@
         "description": "Title for picture-in-picture toggle"
     },
     "calling__switch-view--to-grid": {
-        "message": "Switch to grid view",
+        "message": "ग्रिड व्यू पर स्विच करें",
         "description": "Title for grid/speaker view toggle when on a call"
     },
     "calling__switch-view--to-speaker": {
-        "message": "Switch to speaker view",
+        "message": "स्पीकर व्यू पर स्विच करें",
         "description": "Title for grid/speaker view toggle when on a call"
     },
     "calling__hangup": {
@@ -3422,19 +3830,19 @@
         "description": "Title for hang up button"
     },
     "calling__SelectPresentingSourcesModal--title": {
-        "message": "Share your screen",
+        "message": "अपनी स्क्रीन साझा करें",
         "description": "Title for the select your screen sharing sources modal"
     },
     "calling__SelectPresentingSourcesModal--confirm": {
-        "message": "Share screen",
+        "message": "शेयर करना शुरू करें",
         "description": "Confirm button for sharing screen modal"
     },
     "calling__SelectPresentingSourcesModal--entireScreen": {
-        "message": "Entire screen",
+        "message": "पूरी स्क्रीन",
         "description": "Title for the select your screen sharing sources modal and 'Entire Screen' source"
     },
     "calling__SelectPresentingSourcesModal--screen": {
-        "message": "Screen $id$",
+        "message": "स्क्रीन $id$",
         "description": "Title for `Screen #N` source in screen sharing sources modal and overlay",
         "placeholders": {
             "id": {
@@ -3444,7 +3852,7 @@
         }
     },
     "calling__SelectPresentingSourcesModal--window": {
-        "message": "A window",
+        "message": "एक विंडो",
         "description": "Title for the select your screen sharing sources modal"
     },
     "callingDeviceSelection__label--video": {
@@ -3471,12 +3879,16 @@
         "message": "नोटिफिकेशन म्यूट करें",
         "description": "Label for the mute notifications drop-down selector"
     },
+    "notMuted": {
+        "message": "म्युट नहीं है",
+        "description": "Label when the conversation is not muted"
+    },
     "muteHour": {
         "message": "एक घंटे के लिये म्युट करें",
         "description": "Label for muting the conversation"
     },
     "muteEightHours": {
-        "message": "Mute for eight hours",
+        "message": "आठ घंटे के लिए म्यूट करें",
         "description": "Label for muting the conversation"
     },
     "muteDay": {
@@ -3488,7 +3900,7 @@
         "description": "Label for muting the conversation"
     },
     "muteAlways": {
-        "message": "Mute always",
+        "message": "हमेशा म्यूट करें",
         "description": "Label for muting the conversation"
     },
     "unmute": {
@@ -3496,7 +3908,7 @@
         "description": "Label for unmuting the conversation"
     },
     "muteExpirationLabelAlways": {
-        "message": "Muted always",
+        "message": "हमेशा म्यूट किया गया",
         "description": "Shown in the mute notifications submenu whenever a conversation has been muted"
     },
     "muteExpirationLabel": {
@@ -3515,19 +3927,31 @@
     },
     "ErrorModal--title": {
         "message": "कुछ गलत हो गया",
-        "description": "Title of pop-up dialog when user-initiated task has gone wrong"
+        "description": "Title of popup dialog when user-initiated task has gone wrong"
     },
     "ErrorModal--description": {
         "message": "कृपया फिर से प्रयास करें या समर्थन से संपर्क करें।",
-        "description": "Description text in pop-up dialog when user-initiated task has gone wrong"
+        "description": "Description text in popup dialog when user-initiated task has gone wrong"
     },
     "Confirmation--confirm": {
         "message": "ठीक है",
-        "description": "Button to dismiss pop-up dialog when user-initiated task has gone wrong"
+        "description": "Button to dismiss popup dialog when user-initiated task has gone wrong"
     },
     "unknown-sgnl-link": {
-        "message": "Sorry, that sgnl:// link didn't make sense!",
+        "message": "क्षमा करें, वह sgnl: // लिंक समझ में नहीं आया!",
         "description": "Shown if you click on a sgnl:// link not currently supported by Desktop"
+    },
+    "GroupV2--cannot-send": {
+        "message": "आप उस ग्रुप में संदेश नहीं भेज सकते।",
+        "description": "Shown in toast when you attempt to forward a message to an announcement only group"
+    },
+    "GroupV2--add--missing-capability": {
+        "message": "इन लोगों को तब तक ग्रुप में नहीं जोड़ा जा सकता जब तक कि वे Signal अपग्रेड नहीं करते।",
+        "description": "Shown in a confirmation dialog when members who cannot view announcement only group cannot be added"
+    },
+    "GroupV2--cannot-start-group-call": {
+        "message": "केवल ग्रुप के ऐडमिन ही कॉल शुरू कर सकते हैं।",
+        "description": "Shown in toast when a non-admin starts a group call in an announcements only group"
     },
     "GroupV2--join--invalid-link--title": {
         "message": "अवैध लिंक",
@@ -3542,23 +3966,23 @@
         "description": "Shown when you click on a group link to confirm"
     },
     "GroupV2--join--already-in-group": {
-        "message": "You're already in this group.",
+        "message": "आप पहले से ही इस समूह में हैं।",
         "description": "Shown if you click a group link for a group where you're already a member"
     },
     "GroupV2--join--already-awaiting-approval": {
-        "message": "You have already requested approval to join this group.",
+        "message": "आप पहले ही इस समूह में शामिल होने की स्वीकृति का अनुरोध कर चुके हैं।",
         "description": "Shown if you click a group link for a group where you've already requested approval'"
     },
     "GroupV2--join--unknown-link-version--title": {
-        "message": "Unknown link version",
+        "message": "अज्ञात लिंक संस्करण",
         "description": "This group link is no longer valid."
     },
     "GroupV2--join--unknown-link-version": {
-        "message": "This link is not supported by this version of Signal Desktop.",
+        "message": "यह लिंक Signal Desktop के इस संस्करण द्वारा समर्थित नहीं है।",
         "description": "Shown if you click a group link and we can't get information about it"
     },
     "GroupV2--join--link-revoked--title": {
-        "message": "Can’t Join Group",
+        "message": "समूह में शामिल नहीं हो सकते",
         "description": "Shown if you click a group link and we can't get information about it"
     },
     "GroupV2--join--link-revoked": {
@@ -3566,7 +3990,7 @@
         "description": "Shown if you click a group link and we can't get information about it"
     },
     "GroupV2--join--prompt-with-approval": {
-        "message": "An admin of this group must approve your request before you can join this group. If approved, your name and photo will be shared with its members.",
+        "message": "इससे पहले कि आप इस समूह में शामिल हो सकें, इस समूह के एक व्यवस्थापक को आपके अनुरोध को स्वीकार करना होगा। स्वीकृत होने पर, आपका नाम और फोटो इसके सदस्यों के साथ साझा किया जाएगा।",
         "description": "Shown when you click on a group link to confirm, if it requires admin approval"
     },
     "GroupV2--join--join-button": {
@@ -3574,7 +3998,7 @@
         "description": "The button to join the group"
     },
     "GroupV2--join--request-to-join-button": {
-        "message": "Request to Join",
+        "message": "शामिल होने का अनुरोध",
         "description": "The button to join the group, if approval is required"
     },
     "GroupV2--join--cancel-request-to-join": {
@@ -3608,7 +4032,7 @@
         }
     },
     "GroupV2--join--group-metadata": {
-        "message": "Group · $memberCount$",
+        "message": "समूह · $memberCount$",
         "description": "A holder for two pieces of information - the type of conversation, and the member count",
         "placeholders": {
             "memberCount": {
@@ -3622,11 +4046,11 @@
         "description": "Shown in composition area when you've requested to join a group"
     },
     "GroupV2--join--general-join-failure--title": {
-        "message": "Link Error",
+        "message": "लिंक त्रुटि",
         "description": "Shown if something went wrong when you try to join via a group link"
     },
     "GroupV2--join--general-join-failure": {
-        "message": "Joining via this link failed. Try joining again later.",
+        "message": "ग्रुप में शामिल नहीं हो सके। बाद में प्रयास करें।",
         "description": "Shown if something went wrong when you try to join via a group link"
     },
     "GroupV2--admin": {
@@ -3824,11 +4248,11 @@
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--access-invite-link--disabled--you": {
-        "message": "You disabled admin approval for the group link.",
+        "message": "आपने समूह लिंक के लिए व्यवस्थापकीय स्वीकृति अक्षम कर दी है.",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--access-invite-link--disabled--other": {
-        "message": "$adminName$ disabled admin approval for the group link.",
+        "message": "$adminName$ ने ग्रुप लिंक के लिए एडमिन अप्रूवल को डिसेबल कर दिया।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -3838,15 +4262,15 @@
         }
     },
     "GroupV2--access-invite-link--disabled--unknown": {
-        "message": "Admin approval for the group link has been disabled.",
+        "message": "समूह लिंक के लिए व्यवस्थापकीय स्वीकृति अक्षम कर दी गई है.",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--access-invite-link--enabled--you": {
-        "message": "You enabled admin approval for the group link.",
+        "message": "आपने समूह लिंक के लिए व्यवस्थापकीय स्वीकृति सक्षम की है.",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--access-invite-link--enabled--other": {
-        "message": "$adminName$ enabled admin approval for the group link.",
+        "message": "$adminName$ ने ग्रुप लिंक के लिए एडमिन अप्रूवल को सक्षम किया।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -3856,7 +4280,7 @@
         }
     },
     "GroupV2--access-invite-link--enabled--unknown": {
-        "message": "Admin approval for the group link has been enabled.",
+        "message": "समूह लिंक के लिए व्यवस्थापकीय स्वीकृति सक्षम कर दी गई है.",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--member-add--invited--you": {
@@ -3998,7 +4422,7 @@
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--member-add-from-link--other": {
-        "message": "$memberName$ joined the group via the group link.",
+        "message": "$memberName$ ग्रुप लिंक के माध्यम से शामिल हुए",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "memberName": {
@@ -4008,7 +4432,7 @@
         }
     },
     "GroupV2--member-add-from-admin-approval--you--other": {
-        "message": "$adminName$ approved your request to join the group.",
+        "message": "$adminName$ ने इस ग्रुप में शामिल होने के आपके अनुरोध को एप्रूव कर लिया है।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -4022,7 +4446,7 @@
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--member-add-from-admin-approval--other--you": {
-        "message": "You approved a request to join the group from $joinerName$.",
+        "message": "आपने $joinerName$ से  ग्रुप में जुड़ने का निवेदन स्वीकार किया।  ",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "joinerName": {
@@ -4032,7 +4456,7 @@
         }
     },
     "GroupV2--member-add-from-admin-approval--other--other": {
-        "message": "$adminName$ approved a request to join the group from $joinerName$.",
+        "message": "$adminName$ ने $joinerName$ से ग्रुप में जुड़ने के अनुरोध को स्वीकार किया।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -4046,7 +4470,7 @@
         }
     },
     "GroupV2--member-add-from-admin-approval--other--unknown": {
-        "message": "A request to join the group from $joinerName$ has been approved.",
+        "message": "$joinerName$ का  ग्रुप से जुड़ने का निवेदन स्वीकारा जा चूका है। ",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "joinerName": {
@@ -4191,7 +4615,13 @@
     },
     "GroupV2--member-privilege--demote--other--unknown": {
         "message": "एक एडमिन ने $memberName$के एडमिन अधिकार वापस ले लिए।",
-        "description": "Shown in timeline or conversation preview when v2 group changes"
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "memberName": {
+                "content": "$1",
+                "example": "Bob"
+            }
+        }
     },
     "GroupV2--member-privilege--demote--you--other": {
         "message": "$adminName$ ने आपके एडमिन अधिकार वापस ले लिए।",
@@ -4542,7 +4972,7 @@
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--admin-approval-add-one--other": {
-        "message": "$joinerName$ requested to join via the group link.",
+        "message": "$joinerName$ ने ग्रुप लिंक के माध्यम से जुड़ने का अनुरोध किया।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "joinerName": {
@@ -4560,7 +4990,7 @@
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--admin-approval-remove-one--other--you": {
-        "message": "You denied a request to join the group from $joinerName$.",
+        "message": "आपने $joinerName$ से  ग्रुप में जुड़ने के निवेदन से इनकार किया।  ",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "joinerName": {
@@ -4570,7 +5000,7 @@
         }
     },
     "GroupV2--admin-approval-remove-one--other--own": {
-        "message": "$joinerName$ canceled their request to join the group.",
+        "message": "$joinerName$ ने ग्रुप में जुड़ने के उनके अनुरोध को रद्द कर दिया।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "joinerName": {
@@ -4580,7 +5010,7 @@
         }
     },
     "GroupV2--admin-approval-remove-one--other--other": {
-        "message": "$adminName$ denied a request to join the group from $joinerName$.",
+        "message": "$adminName$ ने $joinerName$ के  ग्रुप से जुड़ने का निवेदन खरिज कर दिया है। ",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -4594,11 +5024,11 @@
         }
     },
     "GroupV2--group-link-add--disabled--you": {
-        "message": "You turned on the group link with admin approval disabled.",
+        "message": "आपने समूह लिंक चालू कर दिया है जिसमें व्यवस्थापकीय स्वीकृति अक्षम है.",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--group-link-add--disabled--other": {
-        "message": "$adminName$ turned on the group link with admin approval disabled.",
+        "message": "$adminName$ ने समूह लिंक चालू कर दिया है जिसमें व्यवस्थापकीय स्वीकृति अक्षम है.",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -4608,15 +5038,15 @@
         }
     },
     "GroupV2--group-link-add--disabled--unknown": {
-        "message": "The group link has been turned on with admin approval disabled.",
+        "message": "ग्रुप लिंक चालू कर दिया गया है और व्यवस्थापकीय स्वीकृति अक्षम है.",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--group-link-add--enabled--you": {
-        "message": "You turned on the group link with admin approval enabled.",
+        "message": "आपने समूह लिंक चालू किया है जिसमें व्यवस्थापकीय स्वीकृति सक्षम है.",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--group-link-add--enabled--other": {
-        "message": "$adminName$ turned on the group link with admin approval enabled.",
+        "message": "$adminName$ ने एडमिन अप्रूवल के साथ ग्रुप लिंक ऑन किया।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -4626,7 +5056,7 @@
         }
     },
     "GroupV2--group-link-add--enabled--unknown": {
-        "message": "The group link has been turned on with admin approval enabled.",
+        "message": "व्यवस्थापक अनुमोदन सक्षम होने के साथ समूह लिंक चालू कर दिया गया है।",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--group-link-remove--you": {
@@ -4634,7 +5064,7 @@
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--group-link-remove--other": {
-        "message": "$adminName$ turned off the group link.",
+        "message": "$adminName$ ने ग्रुप लिंक को बंद कर दिया।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -4652,7 +5082,7 @@
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--group-link-reset--other": {
-        "message": "$adminName$ reset the group link.",
+        "message": "$adminName$ ने ग्रुप लिंक को रीसेट कर दिया है।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -4666,11 +5096,11 @@
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--description--remove--you": {
-        "message": "You removed the group description.",
+        "message": "आपने समूह विवरण निकाल दिया है.",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--description--remove--other": {
-        "message": "$memberName$ removed the group description.",
+        "message": "$memberName$ ने समूह विवरण हटा दिया।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -4680,15 +5110,15 @@
         }
     },
     "GroupV2--description--remove--unknown": {
-        "message": "The group description was removed.",
+        "message": "समूह विवरण हटा दिया गया था।",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--description--change--you": {
-        "message": "You changed the group description.",
+        "message": "आपने समूह विवरण बदल दिया है।",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV2--description--change--other": {
-        "message": "$memberName$ changed the group description.",
+        "message": "$memberName$ ने समूह विवरण बदल दिया।",
         "description": "Shown in timeline or conversation preview when v2 group changes",
         "placeholders": {
             "adminName": {
@@ -4698,7 +5128,43 @@
         }
     },
     "GroupV2--description--change--unknown": {
-        "message": "The group description was changed.",
+        "message": "समूह विवरण बदल दिया गया था।",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--admin--you": {
+        "message": "आपने ग्रुप सेटिंग को केवल व्यवस्थापकों को संदेश भेजने की अनुमति देने के लिए बदल दिया है।",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--admin--other": {
+        "message": "$memberName$ ने ग्रुप सेटिंग्ज़ को केवल ऐडमिन को संदेश भेजने की अनुमति देने के लिए बदल दिया।",
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "adminName": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "GroupV2--announcements--admin--unknown": {
+        "message": "ग्रुप को केवल ऐडमिन को संदेश भेजने की अनुमति देने के लिए बदल दिया गया था।",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--member--you": {
+        "message": "आपने सभी सदस्यों को संदेश भेजने की अनुमति देने के लिए ग्रुप सेटिंग्स बदल दी हैं।",
+        "description": "Shown in timeline or conversation preview when v2 group changes"
+    },
+    "GroupV2--announcements--member--other": {
+        "message": "$memberName$ ने ग्रुप सेटिंग्ज़ को सभी सदस्यों को संदेश भेजने की अनुमति देने के लिए बदल दिया।",
+        "description": "Shown in timeline or conversation preview when v2 group changes",
+        "placeholders": {
+            "adminName": {
+                "content": "$1",
+                "example": "Alice"
+            }
+        }
+    },
+    "GroupV2--announcements--member--unknown": {
+        "message": "ग्रुप को सभी सदस्यों को संदेश भेजने की अनुमति देने के लिए बदल दिया था।",
         "description": "Shown in timeline or conversation preview when v2 group changes"
     },
     "GroupV1--Migration--disabled": {
@@ -4836,19 +5302,19 @@
         "description": "Aria label for file attachment button in composition area"
     },
     "CompositionArea--sms-only__title": {
-        "message": "This person isn’t using Signal",
+        "message": "यह व्यक्ति Signal का उपयोग नहीं कर रहा है",
         "description": "Title for the composition area for the SMS-only contact"
     },
     "CompositionArea--sms-only__body": {
-        "message": "Signal Desktop does not support messaging non-Signal contacts. Ask this person to install Signal for a more secure messaging experience.",
+        "message": "Signal Desktop गैर-Signal संपर्कों को संदेश भेजने का समर्थन नहीं करता है। अधिक सुरक्षित संदेश सेवा अनुभव के लिए इस व्यक्ति को Signal स्थापित करने के लिए कहें।",
         "description": "Body for the composition area for the SMS-only contact"
     },
     "CompositionArea--sms-only__spinner-label": {
-        "message": "Checking contact's registration status",
+        "message": "संपर्क की पंजीकरण स्थिति की जाँच करना",
         "description": "Displayed while checking if the contact is SMS-only"
     },
     "countMutedConversationsDescription": {
-        "message": "बैज काउंट में म्यूट किए हुए संवाद गिनें",
+        "message": "म्यूट की गई बातचीत को बैज गिनती में शामिल करें",
         "description": "Description for counting muted conversations in badge setting"
     },
     "ContactModal--message": {
@@ -4864,7 +5330,7 @@
         "description": "Button text for make admin button in Group Contact Details modal"
     },
     "ContactModal--make-admin-info": {
-        "message": "$contact$ will be able to edit this group and its members.",
+        "message": "$contact$  इस ग्रुप और इसके मेंबर्स में बदलाव कर पायेंगे।",
         "description": "Shown in a confirmation dialog when you are about to grant admin privileges to someone",
         "placeholders": {
             "contact": {
@@ -4874,7 +5340,7 @@
         }
     },
     "ContactModal--rm-admin-info": {
-        "message": "Remove $contact$ as group admin",
+        "message": "$contact$ को ग्रूप एडमिन के रूप में निकालें?",
         "description": "Shown in a confirmation dialog when you are about to remove admin privileges from someone",
         "placeholders": {
             "contact": {
@@ -4895,6 +5361,14 @@
         "message": "ग्रुप सेटिंग्स",
         "description": "This is a button in the conversation context menu to show group settings"
     },
+    "showConversationDetails--direct": {
+        "message": "चैट सेटिंग्स",
+        "description": "This is a button in the conversation context menu to show chat settings"
+    },
+    "ConversationDetails__unmute--title": {
+        "message": "इस चैट को अनम्यूट करें?",
+        "description": "Title for the modal to unmute a chat"
+    },
     "ConversationDetails--group-link": {
         "message": "समूह लिंक",
         "description": "This is the label for the group link management panel"
@@ -4904,27 +5378,39 @@
         "description": "This is the label for the disappearing messages setting panel"
     },
     "ConversationDetails--disappearing-messages-info": {
-        "message": "When enabled, messages sent and received in this group will disappear after they've been seen.",
+        "message": "अगर सक्षम किया जाए, तो इस संवाद में भेजे गए और प्राप्त किए गए मेसेज देखे जाने के बाद गायब हो जाएंगे।",
         "description": "This is the info about the disappearing messages setting"
     },
+    "ConversationDetails--notifications": {
+        "message": "अधिसूचनाएँ",
+        "description": "This is the label for notifications in the conversation details screen"
+    },
     "ConversationDetails--group-info-label": {
-        "message": "Who can edit group info",
+        "message": "ग्रुप जानकारी कौन बदल सकता है",
         "description": "This is the label for the 'who can edit the group' panel"
     },
     "ConversationDetails--group-info-info": {
-        "message": "Choose who can edit group name, photo, description, and disappearing messages timer.",
+        "message": "चुनें कि समूह का नाम, फ़ोटो, विवरण और गायब होने वाले संदेशों के टाइमर को कौन संपादित कर सकता है",
         "description": "This is the additional info for the 'who can edit the group' panel"
     },
     "ConversationDetails--add-members-label": {
-        "message": "Who can add members",
+        "message": "मेंबर्स को कौन शामिल कर सकता है",
         "description": "This is the label for the 'who can add members' panel"
     },
     "ConversationDetails--add-members-info": {
-        "message": "Choose who can add members to this group.",
+        "message": "चुनें कि कौन इस समूह में सदस्यों को जोड़ सकता है।",
         "description": "This is the additional info for the 'who can add members' panel"
     },
+    "ConversationDetails--announcement-label": {
+        "message": "संदेश कौन भेज सकता है",
+        "description": "This is the additional info for the 'who can send messages' panel"
+    },
+    "ConversationDetails--announcement-info": {
+        "message": "यह चुनें कि ग्रुप में संदेश कौन भेज सकता है।",
+        "description": "This is the additional info for the 'who can send messages' panel"
+    },
     "ConversationDetails--requests-and-invites": {
-        "message": "Requests & Invites",
+        "message": "अनुरोध और आमंत्रण",
         "description": "This is a button to display which members have been invited but have not joined yet"
     },
     "ConversationDetailsActions--leave-group": {
@@ -4952,7 +5438,7 @@
         "description": "This is the modal button to confirm leaving a group"
     },
     "ConversationDetailsActions--block-group-modal-title": {
-        "message": "Block and Leave the \"$groupName$\" Group?",
+        "message": "क्या आप \"$groupName$\" ग्रुप को ब्लॉक करके छोङना चाहते हैं?",
         "description": "This is the modal title for confirming blocking a group",
         "placeholders": {
             "groupName": {
@@ -4970,7 +5456,7 @@
         "description": "This is the modal button to confirm blocking a group"
     },
     "ConversationDetailsHeader--members": {
-        "message": "$number$ members",
+        "message": "$number$ मेंबर्स",
         "description": "This is the number of members in a group",
         "placeholders": {
             "number": {
@@ -4988,7 +5474,7 @@
         "description": "This is a button on the conversation details to show all media"
     },
     "ConversationDetailsMembershipList--title": {
-        "message": "$number$ members",
+        "message": "$number$ मेंबर्स",
         "description": "The title of the membership list panel",
         "placeholders": {
             "number": {
@@ -5005,12 +5491,28 @@
         "message": "सभी देखें",
         "description": "This is a button on the conversation details to show all members"
     },
+    "ConversationNotificationsSettings__mentions__label": {
+        "message": "मेंछन",
+        "description": "In the conversation notifications settings, this is the label for the mentions option"
+    },
+    "ConversationNotificationsSettings__mentions__info": {
+        "message": "म्यूट की गई चैट में आपको मेंशन किए जाने पर अधिसूचना प्राप्त करें",
+        "description": "In the conversation notifications settings, this is the sub-label for the mentions option"
+    },
+    "ConversationNotificationsSettings__mentions__select__always-notify": {
+        "message": "हमेशा सूचित करें",
+        "description": "In the conversation notifications settings, this is the option that always notifies you for @mentions"
+    },
+    "ConversationNotificationsSettings__mentions__select__dont-notify-for-mentions-if-muted": {
+        "message": "यदि म्यूट किया गया है तो सूचित न करें",
+        "description": "In the conversation notifications settings, this is the option that doesn't notify you for @mentions if the conversation is muted"
+    },
     "GroupLinkManagement--clipboard": {
-        "message": "Group link copied.",
+        "message": "समूह लिंक कॉपी किया गया।",
         "description": "Shown in a toast when a user selects to copy group link"
     },
     "GroupLinkManagement--share": {
-        "message": "Copy link",
+        "message": "लिंक कॉपी करें",
         "description": "This lets users share their group link"
     },
     "GroupLinkManagement--confirm-reset": {
@@ -5026,11 +5528,11 @@
         "description": "Title for the approve new members select area"
     },
     "GroupLinkManagement--approve-info": {
-        "message": "Require an admin to approve new members joining via the group link",
+        "message": "समूह लिंक के माध्यम से शामिल होने वाले नए सदस्यों को स्वीकृति देने के लिए एक व्यवस्थापक की आवश्यकता है",
         "description": "Description for the approve new members select area"
     },
     "PendingInvites--tab-requests": {
-        "message": "Requests ($count$)",
+        "message": "अनुरोध ($count$)",
         "description": "Label for the tab to view pending requests",
         "placeholders": {
             "name": {
@@ -5040,7 +5542,7 @@
         }
     },
     "PendingInvites--tab-invites": {
-        "message": "Invites ($count$)",
+        "message": "आमंत्रण ($count$)",
         "description": "Label for the tab to view pending invites",
         "placeholders": {
             "name": {
@@ -5050,7 +5552,7 @@
         }
     },
     "PendingRequests--approve-for": {
-        "message": "Approve request from \"$name$\"?",
+        "message": "\"$name$\" से अनुरोध स्वीकार करें?",
         "description": "This is the modal content when confirming approving a group request to join",
         "placeholders": {
             "name": {
@@ -5060,7 +5562,7 @@
         }
     },
     "PendingRequests--deny-for": {
-        "message": "Deny request from \"$name$\"?",
+        "message": "\"$name$\" से अनुरोध अस्वीकार करें?",
         "description": "This is the modal content when confirming denying a group request to join",
         "placeholders": {
             "name": {
@@ -5070,19 +5572,19 @@
         }
     },
     "PendingInvites--invites": {
-        "message": "Invited by you",
+        "message": "आपके द्वारा आमंत्रित",
         "description": "This is the title list of all invites"
     },
     "PendingInvites--invited-by-you": {
-        "message": "Invited by you",
+        "message": "आपके द्वारा आमंत्रित",
         "description": "This is the title for the list of members you have invited"
     },
     "PendingInvites--invited-by-others": {
-        "message": "Invited by others",
+        "message": "दूसरों द्वारा आमंत्रित",
         "description": "This is the title for the list of members who have invited other people"
     },
     "PendingInvites--invited-count": {
-        "message": "Invited $number$",
+        "message": "आमंत्रित $number$",
         "description": "This is the label for the number of members someone has invited",
         "placeholders": {
             "number": {
@@ -5092,11 +5594,11 @@
         }
     },
     "PendingInvites--revoke-for-label": {
-        "message": "Revoke group invite",
+        "message": "समूह आमंत्रण निरस्त करें",
         "description": "This is aria label for revoking a group invite icon"
     },
     "PendingInvites--revoke-for": {
-        "message": "Revoke group invite for \"$name$\"?",
+        "message": "\"$name$\" का आमंत्रण वापस लें?",
         "description": "This is the modal content when confirming revoking a single invite",
         "placeholders": {
             "number": {
@@ -5110,7 +5612,7 @@
         }
     },
     "PendingInvites--revoke-from-singular": {
-        "message": "Revoke 1 invite sent by \"$name$\"?",
+        "message": "“$name$” द्वारा भेजे गए 1 आमंत्रणों को वापस लें?",
         "description": "This is the modal content when confirming revoking a single invite",
         "placeholders": {
             "name": {
@@ -5120,7 +5622,7 @@
         }
     },
     "PendingInvites--revoke-from-plural": {
-        "message": "Revoke $number$ invites sent by \"$name$\"",
+        "message": "\"$name$\" द्वारा भेजे गए $number$ आमंत्रण वापस लें?",
         "description": "This is the modal content when confirming revoking multiple invites",
         "placeholders": {
             "number": {
@@ -5134,11 +5636,11 @@
         }
     },
     "PendingInvites--revoke": {
-        "message": "Revoke",
+        "message": "वापस लेना",
         "description": "This is the modal button to confirm revoking invites"
     },
     "PendingRequests--approve": {
-        "message": "Approve Request",
+        "message": "अनुरोध स्वीकार करें",
         "description": "This is the modal button to approve group request to join"
     },
     "PendingRequests--deny": {
@@ -5146,8 +5648,8 @@
         "description": "This is the modal button to deny group request to join"
     },
     "PendingRequests--info": {
-        "message": "People on this list are attempting to join \"$name$\" via the group link.",
-        "description": "Inforamtion shown below the pending admin approval list",
+        "message": "इस सूची के लोग ग्रुप लिंक के माध्यम से \"$name$\" में शामिल होने का प्रयास कर रहे हैं।",
+        "description": "Information shown below the pending admin approval list",
         "placeholders": {
             "name": {
                 "content": "$1",
@@ -5156,19 +5658,23 @@
         }
     },
     "PendingInvites--info": {
-        "message": "Details about people invited to this group aren’t shown until they join. Invitees will only see messages after they join the group.",
+        "message": "इस समूह में आमंत्रित लोगों के विवरण तब तक नहीं दिखाए जाते जब तक वे शामिल नहीं हो जाते। समूह में शामिल होने के बाद ही आमंत्रित लोगों को संदेश दिखाई देंगे।",
         "description": "Information shown below the invite list"
     },
     "AvatarInput--no-photo-label--group": {
-        "message": "Add a group photo",
+        "message": "एक समूह फ़ोटो जोड़ें",
         "description": "The label for the avatar uploader when no group photo is selected"
     },
+    "AvatarInput--no-photo-label--profile": {
+        "message": "फ़ोटो जोड़ें",
+        "description": "The label for the avatar uploader when no profile photo is selected"
+    },
     "AvatarInput--change-photo-label": {
-        "message": "Change photo",
+        "message": "तस्वीर बदलिये",
         "description": "The label for the avatar uploader when a photo is selected"
     },
     "AvatarInput--upload-photo-choice": {
-        "message": "Upload photo",
+        "message": "फोटो अपलोड करें",
         "description": "The button text when you click on an uploaded avatar and want to upload a new one"
     },
     "AvatarInput--remove-photo-choice": {
@@ -5176,7 +5682,7 @@
         "description": "The button text when you click on an uploaded avatar and want to remove it"
     },
     "ContactPill--remove": {
-        "message": "Remove contact",
+        "message": "नाम हटाना",
         "description": "The label for the 'remove' button on the contact pill"
     },
     "ComposeErrorDialog--close": {
@@ -5184,11 +5690,11 @@
         "description": "The text on the button when there's an error in the composer"
     },
     "NewlyCreatedGroupInvitedContactsDialog--title--one": {
-        "message": "Invitation sent",
+        "message": "आमंत्रण भेज दिया गया है",
         "description": "When creating a new group and inviting users, this is shown in the dialog"
     },
     "NewlyCreatedGroupInvitedContactsDialog--title--many": {
-        "message": "$count$ invitations sent",
+        "message": "$count$ आमंत्रण भेजे गए हैं",
         "description": "When creating a new group and inviting users, this is shown in the dialog",
         "placeholders": {
             "count": {
@@ -5198,7 +5704,7 @@
         }
     },
     "NewlyCreatedGroupInvitedContactsDialog--body--user-paragraph--one": {
-        "message": "$name$ can’t be automatically added to this group by you.",
+        "message": "आपके द्वारा $name$ को इस समूह में स्वचालित रूप से नहीं जोड़ा जा सकता है।",
         "description": "When creating a new group and inviting users, this is shown in the dialog",
         "placeholders": {
             "name": {
@@ -5208,11 +5714,11 @@
         }
     },
     "NewlyCreatedGroupInvitedContactsDialog--body--user-paragraph--many": {
-        "message": "These users can’t be automatically added to this group by you.",
+        "message": "आपके द्वारा इन उपयोगकर्ताओं को इस समूह में स्वतः नहीं जोड़ा जा सकता है।",
         "description": "When creating a new group and inviting users, this is shown in the dialog"
     },
     "NewlyCreatedGroupInvitedContactsDialog--body--info-paragraph": {
-        "message": "They’ve been invited to join, and won’t see any group messages until they accept.",
+        "message": "उन्हें शामिल होने के लिए आमंत्रित किया गया है, और जब तक वे स्वीकार नहीं करते तब तक कोई समूह संदेश नहीं देखेंगे।",
         "description": "When creating a new group and inviting users, this is shown in the dialog"
     },
     "NewlyCreatedGroupInvitedContactsDialog--body--learn-more": {
@@ -5228,7 +5734,7 @@
         "description": "When adding new members to an existing group, this is shown in the dialog"
     },
     "AddGroupMembersModal--confirm-title--one": {
-        "message": "Add $person$ to \"$group$\"?",
+        "message": "$person$ को \"$group$\" में जोड़ें?",
         "description": "When adding new members to an existing group, this is shown in the confirmation dialog",
         "placeholders": {
             "person": {
@@ -5242,7 +5748,7 @@
         }
     },
     "AddGroupMembersModal--confirm-title--many": {
-        "message": "Add $count$ members to \"$group$\"?",
+        "message": "$count$ सदस्यों को $group$ में जोड़ें?",
         "description": "When adding new members to an existing group, this is shown in the confirmation dialog",
         "placeholders": {
             "count": {
@@ -5256,7 +5762,7 @@
         }
     },
     "AddGroupMembersModal--confirm-button--one": {
-        "message": "Add member",
+        "message": "सदस्य जोड़ें",
         "description": "When adding new members to an existing group, this is shown on the confirmation dialog button"
     },
     "AddGroupMembersModal--confirm-button--many": {
@@ -5268,43 +5774,61 @@
         "description": "The text of the button to create new groups"
     },
     "selectContact": {
-        "message": "Select contact",
-        "description": "The label for contact checkboxes that are non-selected (clicking them should select the contact)"
+        "message": "संपर्क $name$ चुनें",
+        "description": "The label for contact checkboxes that are non-selected (clicking them should select the contact)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "deselectContact": {
-        "message": "De-select contact",
-        "description": "The label for contact checkboxes that are selected (clicking them should de-select the contact)"
+        "message": "कॉन्टैक्ट $name$ का चुनाव रद्द करें",
+        "description": "The label for contact checkboxes that are selected (clicking them should de-select the contact)",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "cannotSelectContact": {
-        "message": "Cannot select contact",
-        "description": "The label for contact checkboxes that are disabled"
+        "message": "संपर्क $name$ को चुन नहीं सकता",
+        "description": "The label for contact checkboxes that are disabled",
+        "placeholders": {
+            "name": {
+                "content": "$1",
+                "example": "John"
+            }
+        }
     },
     "alreadyAMember": {
-        "message": "Already a member",
+        "message": "पहले से सदस्य हैं",
         "description": "The label for contact checkboxes that are disabled because they're already a member"
     },
     "MessageAudio--play": {
-        "message": "Play audio attachment",
+        "message": "ऑडियो अटैचमेंट चलाएं",
         "description": "Aria label for audio attachment's Play button"
     },
     "MessageAudio--pause": {
-        "message": "Pause audio attachment",
+        "message": "ऑडियो अटैचमेंट रोकें",
         "description": "Aria label for audio attachment's Pause button"
     },
     "MessageAudio--download": {
-        "message": "Download audio attachment",
+        "message": "ऑडियो अटैचमेंट डाउनलोड करें",
         "description": "Aria label for audio attachment's Download button"
     },
     "MessageAudio--pending": {
-        "message": "Downloading audio attachment...",
+        "message": "ऑडियो अटैचमेंट डाउनलोड हो रहा है...",
         "description": "Aria label for pending audio attachment spinner"
     },
     "MessageAudio--slider": {
-        "message": "Playback time of audio attachment",
+        "message": "ऑडियो अटैचमेंट का प्लेबैक समय",
         "description": "Aria label for audio attachment's playback time slider"
     },
     "emptyInboxMessage": {
-        "message": "Click the $composeIcon$ above and search for your contacts or groups to message.",
+        "message": "ऊपर दिए गए $composeIcon$ पर क्लिक करें और संदेश भेजने के लिए अपने संपर्कों या समूहों को खोजें।",
         "description": "Shown in the left-pane when the inbox is empty",
         "placeholders": {
             "composeIcon": {
@@ -5314,7 +5838,7 @@
         }
     },
     "composeIcon": {
-        "message": "compose button",
+        "message": "लिखें बटन",
         "description": "Shown in the left-pane when the inbox is empty. Describes the button that composes a new message."
     },
     "ForwardMessageModal--continue": {
@@ -5326,15 +5850,15 @@
         "description": "Shown on the message request warning. Clicking this button will open a dialog with more information"
     },
     "MessageRequestWarning__dialog__details": {
-        "message": "You have no groups in common with this person. Review requests carefully before accepting to avoid unwanted messages.",
+        "message": "इस व्यक्ति के साथ आपका कोई समूह समान नहीं है। अवांछित संदेशों से बचने के लिए स्वीकार करने से पहले अनुरोधों की सावधानीपूर्वक समीक्षा करें।",
         "description": "Shown in the message request warning dialog. Gives more information about message requests"
     },
     "MessageRequestWarning__dialog__learn-even-more": {
-        "message": "About Message Requests",
+        "message": "संदेश रिक्वेस्ट के बारे में",
         "description": "Shown in the message request warning dialog. Clicking this button will open a page on Signal's support site"
     },
     "ContactSpoofing__same-name": {
-        "message": "Review requests carefully. Signal found another contact with the same name. $link$",
+        "message": "निवेदनों की ध्यानपूर्वक समीक्षा करें। Signal को एक ही नाम वाला एक और संपर्क मिला। $link$",
         "description": "Shown in the timeline warning when you have a message request from someone with the same name as someone else",
         "placeholders": {
             "link": {
@@ -5344,7 +5868,7 @@
         }
     },
     "ContactSpoofing__same-name-in-group": {
-        "message": "$count$ group members have the same name. $link$",
+        "message": "$count$ ग्रुप के सदस्य का एक ही नाम है। $link$",
         "description": "Shown in the timeline warning when you multiple group members have the same name",
         "placeholders": {
             "count": {
@@ -5358,15 +5882,15 @@
         }
     },
     "ContactSpoofing__same-name__link": {
-        "message": "Review request",
+        "message": "निवेदन की समीक्षा करें ",
         "description": "Shown in the timeline warning when you have a message request from someone with the same name as someone else"
     },
     "ContactSpoofing__same-name-in-group__link": {
-        "message": "Click to review",
+        "message": "समीक्षा करने के लिए क्लिक करें",
         "description": "Shown in the timeline warning when you multiple group members have the same name"
     },
     "ContactSpoofingReviewDialog__title": {
-        "message": "Review request",
+        "message": "निवेदन की समीक्षा करें ",
         "description": "Title for the contact name spoofing review dialog"
     },
     "ContactSpoofingReviewDialog__description": {
@@ -5382,11 +5906,11 @@
         "description": "Header in the contact spoofing review dialog, shown above the \"safe\" user"
     },
     "ContactSpoofingReviewDialog__group__title": {
-        "message": "Review members",
+        "message": "सदस्यों की समीक्षा करें ",
         "description": "Title for the contact name spoofing review dialog in groups"
     },
     "ContactSpoofingReviewDialog__group__description": {
-        "message": "$count$ group members have similar names. Review the members below or choose to take action.",
+        "message": "$count$ समूह सदस्यों के एक ही नाम हैं | नीचे दिए गए सदस्यों की समीक्षा करें और कार्रवाई का चुनाव करें। ",
         "description": "Description for the group contact spoofing review dialog"
     },
     "ContactSpoofingReviewDialog__group__members-header": {
@@ -5394,7 +5918,7 @@
         "description": "Header in the group contact spoofing review dialog. After this header, there will be a list of members"
     },
     "ContactSpoofingReviewDialog__group__name-change-info": {
-        "message": "Recently changed their profile name from $oldName$ to $newName$",
+        "message": "हाल ही में अपना प्रोफ़ाइल नाम $oldName$ से $newName$ में बदला है",
         "description": "In the group contact spoofing review dialog, this text is shown when someone has changed their name recently",
         "placeholders": {
             "oldName": {
@@ -5412,7 +5936,7 @@
         "description": "When confirming the removal of a group member, show this text in the button"
     },
     "RemoveGroupMemberConfirmation__description": {
-        "message": "Remove \"$name$\" from the group?",
+        "message": "\"$name$\" को समूह से हटाया जाए? ",
         "description": "When confirming the removal of a group member, show this text in the dialog",
         "placeholders": {
             "name": {
@@ -5422,47 +5946,47 @@
         }
     },
     "CaptchaDialog__title": {
-        "message": "Verify to continue messaging",
+        "message": "संदेश भेजना जारी रखने के लिए सत्यापित करें",
         "description": "Header in the captcha dialog"
     },
     "CaptchaDialog__first-paragraph": {
-        "message": "To help prevent spam on Signal, please complete verification.",
+        "message": "Signal पर स्पैम रोकने में मदद करने के लिए, कृपया सत्यापन पूर्ण करें।",
         "description": "First paragraph in the captcha dialog"
     },
     "CaptchaDialog__second-paragraph": {
-        "message": "After verifying, you can continue messaging. Any paused messages will automatically be sent.",
+        "message": "सत्यापित करने के बाद, आप संदेश भेजना जारी रख सकते हैं। कोई भी रोके गए संदेश स्वचालित रूप से भेजे जाएंगे।",
         "description": "First paragraph in the captcha dialog"
     },
     "CaptchaDialog--can-close__title": {
-        "message": "Continue Without Verifying?",
+        "message": "सत्यापित किए बिना जारी रखें?",
         "description": "Header in the captcha dialog that can be closed"
     },
     "CaptchaDialog--can-close__body": {
-        "message": "If you choose to skip verification, you may miss messages from other people and your messages may fail to send.",
+        "message": "यदि आप सत्यापन को छोड़ना चुनते हैं, तो आप अन्य लोगों के संदेशों विफल हो सकते हैं और आपके संदेश भेजने में विफल हो सकते हैं।",
         "description": "Body of the captcha dialog that can be closed"
     },
     "CaptchaDialog--can_close__skip-verification": {
-        "message": "Skip verification",
+        "message": "सत्यापन छोड़ें",
         "description": "Skip button of the captcha dialog that can be closed"
     },
     "verificationComplete": {
-        "message": "Verification complete.",
+        "message": "सत्यापन पूर्ण।",
         "description": "Displayed after successful captcha"
     },
     "verificationFailed": {
-        "message": "Verification failed. Please retry later.",
+        "message": "सत्यापन असफल। कृपया बाद में पुनः प्रयास करें।",
         "description": "Displayed after unsuccessful captcha"
     },
     "deleteForEveryoneFailed": {
-        "message": "Failed to delete message for everyone. Please retry later.",
-        "description": "Displayed when delete-for-everyone has failed to send to all recepients"
+        "message": "सभी के लिए संदेश हटाने में विफल. कृपया बाद में पुनः प्रयास करें।",
+        "description": "Displayed when delete-for-everyone has failed to send to all recipients"
     },
     "ChatColorPicker__delete--title": {
-        "message": "Delete color",
+        "message": "रंग हटाएं",
         "description": "Confirm title for deleting custom color"
     },
     "ChatColorPicker__delete--message": {
-        "message": "This custom color is used in $num$ chats. Do you want to delete it for all chats?",
+        "message": "यह कस्टम रंग $num$ चैट में उपयोग किया जाता है। क्या आप इसे सभी चैट के लिए हटाना चाहते हैं?",
         "description": "Confirm message for deleting custom color",
         "placeholders": {
             "num": {
@@ -5472,7 +5996,7 @@
         }
     },
     "ChatColorPicker__global-chat-color": {
-        "message": "Global Chat Color",
+        "message": "वैश्विक चैट रंग",
         "description": "Modal title for the chat color picker and editor for all conversations"
     },
     "ChatColorPicker__menu-title": {
@@ -5480,19 +6004,19 @@
         "description": "View title for the chat color picker and editor"
     },
     "ChatColorPicker__reset": {
-        "message": "Reset chat color",
+        "message": "चैट रंग रीसेट करें",
         "description": "Button label for resetting chat colors"
     },
     "ChatColorPicker__resetDefault": {
-        "message": "Reset Chat Colors",
+        "message": "चैट रंग रीसेट करें",
         "description": "Confirmation dialog title for resetting all chat colors or only the global default one"
     },
     "ChatColorPicker__resetAll": {
-        "message": "Reset all chat colors",
+        "message": "सभी चैट रंग रीसेट करें",
         "description": "Button label for resetting all chat colors"
     },
     "ChatColorPicker__confirm-reset-default": {
-        "message": "Reset default",
+        "message": "डिफॉल्ट रिसेट करें",
         "description": "Button label for resetting only global chat color"
     },
     "ChatColorPicker__confirm-reset": {
@@ -5500,31 +6024,31 @@
         "description": "Confirm button label for resetting chat colors"
     },
     "ChatColorPicker__confirm-reset-message": {
-        "message": "Would you like to override all chat colors?",
+        "message": "क्या आप सभी चैट रंगों को ओवरराइड करना चाहेंगे?",
         "description": "Modal message text for confirming resetting of chat colors"
     },
     "ChatColorPicker__custom-color--label": {
-        "message": "Show custom color editor",
+        "message": "कस्टम रंग संपादक दिखाएं",
         "description": "aria-label for custom color editor button"
     },
     "ChatColorPicker__sampleBubble1": {
-        "message": "Here's a preview of the chat color.",
+        "message": "यहां चैट रंग का पूर्वावलोकन दिया गया है।",
         "description": "An example message bubble for selecting the chat color"
     },
     "ChatColorPicker__sampleBubble2": {
-        "message": "Another bubble.",
+        "message": "एक और बुलबुला।",
         "description": "An example message bubble for selecting the chat color"
     },
     "ChatColorPicker__sampleBubble3": {
-        "message": "The color is visible to only you.",
+        "message": "रंग केवल आपको दिखाई देता है।",
         "description": "An example message bubble for selecting the chat color"
     },
     "ChatColorPicker__context--edit": {
-        "message": "Edit color",
+        "message": "रंग संपादित करें",
         "description": "Option in the custom color bubble context menu"
     },
     "ChatColorPicker__context--duplicate": {
-        "message": "Duplicate",
+        "message": "नक़ल",
         "description": "Option in the custom color bubble context menu"
     },
     "ChatColorPicker__context--delete": {
@@ -5532,75 +6056,75 @@
         "description": "Option in the custom color bubble context menu"
     },
     "CustomColorEditor__solid": {
-        "message": "Solid",
+        "message": "ठोस",
         "description": "Tab label for selecting solid colors"
     },
     "CustomColorEditor__gradient": {
-        "message": "Gradient",
+        "message": "ढाल",
         "description": "Tab label for selecting a gradient"
     },
     "CustomColorEditor__hue": {
-        "message": "Hue",
+        "message": "वर्ण",
         "description": "Label for the hue slider"
     },
     "CustomColorEditor__saturation": {
-        "message": "Saturation",
+        "message": "परिपूर्णता",
         "description": "Label for the saturation slider"
     },
     "CustomColorEditor__title": {
-        "message": "Custom Color",
+        "message": "कस्टम रंग",
         "description": "Modal title for the custom color editor"
     },
     "customDisappearingTimeOption": {
-        "message": "Custom time...",
+        "message": "कस्टम समय...",
         "description": "Text for an option in Disappearing Messages menu and Conversation Details Disappearing Messages setting when no user value is available"
     },
     "selectedCustomDisappearingTimeOption": {
-        "message": "Custom time",
+        "message": "कस्टम समय",
         "description": "Text for an option in Conversation Details Disappearing Messages setting when user previously selected custom time"
     },
     "DisappearingTimeDialog__title": {
-        "message": "Custom Time",
+        "message": "कस्टम समय",
         "description": "Title for the custom disappearing message timeout dialog"
     },
     "DisappearingTimeDialog__body": {
-        "message": "Choose a custom time for disappearing messages.",
+        "message": "संदेशों को गायब करने के लिए एक कस्टम समय चुनें।",
         "description": "Body for the custom disappearing message timeout dialog"
     },
     "DisappearingTimeDialog__set": {
-        "message": "Set",
+        "message": "सेट",
         "description": "Text for the dialog button confirming the custom disappearing message timeout"
     },
     "DisappearingTimeDialog__seconds": {
-        "message": "Seconds",
+        "message": "सेकंड",
         "description": "Name of the 'seconds' unit select for the custom disappearing message timeout dialog"
     },
     "DisappearingTimeDialog__minutes": {
-        "message": "Minutes",
+        "message": "मिनट",
         "description": "Name of the 'minutes' unit select for the custom disappearing message timeout dialog"
     },
     "DisappearingTimeDialog__hours": {
-        "message": "Hours",
+        "message": "घंटे",
         "description": "Name of the 'hours' unit select for the custom disappearing message timeout dialog"
     },
     "DisappearingTimeDialog__days": {
-        "message": "Days",
+        "message": "दिन",
         "description": "Name of the 'days' unit select for the custom disappearing message timeout dialog"
     },
     "DisappearingTimeDialog__weeks": {
-        "message": "Weeks",
+        "message": "हफ्तों",
         "description": "Name of the 'weeks' unit select for the custom disappearing message timeout dialog"
     },
     "settings__DisappearingMessages__footer": {
-        "message": "Set a default disappearing message timer for all new chats started by you.",
+        "message": "आपके द्वारा शुरू की गई सभी नई चैट के लिए एक ग़ायब होने वाले संदेशों का समय सेट करें।",
         "description": "Footer for the Disappearing Messages settings section"
     },
     "settings__DisappearingMessages__timer__label": {
-        "message": "Default timer for new chats",
-        "description": "Label for the Disapearring Messages default timer setting"
+        "message": "नई चैट के लिए डिफ़ॉल्ट टाइमर",
+        "description": "Label for the Disappearing Messages default timer setting"
     },
     "UniversalTimerNotification__text": {
-        "message": "The disappearing message time will be set to $timeValue$ when you message them.",
+        "message": "जब आप उन्हें संदेश भेजेंगे तो गायब होने वाले संदेश का समय $timeValue$ पर सेट हो जाएगा।",
         "description": "A message displayed when default disappearing message timeout is about to be applied",
         "placeholders": {
             "timeValue": {
@@ -5609,16 +6133,380 @@
             }
         }
     },
+    "ErrorBoundaryNotification__text": {
+        "message": "यह संदेश दिखाया नहीं जा सका। डीबग लॉग सबमिट करने के लिए क्लिक करें।",
+        "description": "An error notification displayed when message fails to render due to an internal error"
+    },
     "GroupDescription__read-more": {
-        "message": "read more",
+        "message": "और पढ़ें",
         "description": "Button text when the group description is too long"
     },
     "EditConversationAttributesModal__description-warning": {
-        "message": "Group descriptions will be visible to members of this group and people who have been invited.",
+        "message": "समूह विवरण इस समूह के सदस्यों और आमंत्रित किए गए लोगों के लिए दृश्यमान होंगे।",
         "description": "Label text shown when editing group description"
     },
     "ConversationDetailsHeader--add-group-description": {
-        "message": "Add group description...",
+        "message": "समूह विवरण जोड़ें...",
         "description": "Placeholder text in the details header for those that can edit the group description"
+    },
+    "MediaQualitySelector--button": {
+        "message": "मीडिया गुणवत्ता का चयन करें",
+        "description": "aria-label for the media quality selector button"
+    },
+    "MediaQualitySelector--title": {
+        "message": "मीडिया गुणवत्ता",
+        "description": "Popup selector title"
+    },
+    "MediaQualitySelector--standard-quality-title": {
+        "message": "मानक",
+        "description": "Title for option for standard quality"
+    },
+    "MediaQualitySelector--standard-quality-description": {
+        "message": "तेज़, कम डेटा",
+        "description": "Description of standard quality selector"
+    },
+    "MediaQualitySelector--high-quality-title": {
+        "message": "उच्च",
+        "description": "Title for option for high quality"
+    },
+    "MediaQualitySelector--high-quality-description": {
+        "message": "धीमा, अधिक डेटा",
+        "description": "Description of high quality selector"
+    },
+    "MessageDetailsHeader--Failed": {
+        "message": "भेजा नहीं गया",
+        "description": "In the message details screen, shown above contacts where the message failed to deliver"
+    },
+    "MessageDetailsHeader--Pending": {
+        "message": "लंबित",
+        "description": "In the message details screen, shown above contacts where the message is still sending"
+    },
+    "MessageDetailsHeader--Sent": {
+        "message": "इनको भेजा गया",
+        "description": "In the message details screen, shown above contacts where the message has been sent (but not delivered, read, or viewed)"
+    },
+    "MessageDetailsHeader--Delivered": {
+        "message": "इनको डिलिवर किया गया",
+        "description": "In the message details screen, shown above contacts who have received your message"
+    },
+    "MessageDetailsHeader--Read": {
+        "message": "इनके द्वारा पढ़ा गया",
+        "description": "In the message details screen, shown above contacts who have read this message"
+    },
+    "MessageDetailsHeader--Viewed": {
+        "message": "के द्वारा देखा गया",
+        "description": "In the message details screen, shown above contacts who have viewed this message"
+    },
+    "ProfileEditor--about": {
+        "message": "हमारे बारे में",
+        "description": "Default text for about field"
+    },
+    "ProfileEditor--about-placeholder": {
+        "message": "अपने बारे में कुछ लिखें...",
+        "description": "Placeholder text for about input field"
+    },
+    "ProfileEditor--first-name": {
+        "message": "प्रथम नाम (आवश्यक)",
+        "description": "Placeholder text for first name field"
+    },
+    "ProfileEditor--last-name": {
+        "message": "अंतिम नाम (वैकल्पिक)",
+        "description": "Placeholder text for last name field"
+    },
+    "ConfirmDiscardDialog--discard": {
+        "message": "क्या आप इन बदलावों को छोङना चाहते हैं?",
+        "description": "ConfirmationDialog text for discarding changes"
+    },
+    "ProfileEditor--info": {
+        "message": "आपकी प्रोफ़ाइल एन्क्रिप्टेड है। जब आप नई चैट शुरू या स्वीकार करते हैं तो आपकी प्रोफ़ाइल और उसके परिवर्तन आपके संपर्कों को दिखाई देंगे। $learnMore$",
+        "description": "Information shown at the bottom of the profile editor section",
+        "placeholders": {
+            "learnMore": {
+                "content": "$1",
+                "example": "Learn More."
+            }
+        }
+    },
+    "ProfileEditor--learnMore": {
+        "message": "और जानें",
+        "description": "Text that links to a support article"
+    },
+    "Bio--speak-freely": {
+        "message": "खुल कर बोलें",
+        "description": "A default bio option"
+    },
+    "Bio--encrypted": {
+        "message": "एन्क्रिप्टेड",
+        "description": "A default bio option"
+    },
+    "Bio--free-to-chat": {
+        "message": "चैट करने के लिए हाज़िर",
+        "description": "A default bio option"
+    },
+    "Bio--coffee-lover": {
+        "message": "कॉफी प्रेमी",
+        "description": "A default bio option"
+    },
+    "Bio--taking-break": {
+        "message": "ब्रेक पर हैं",
+        "description": "A default bio option"
+    },
+    "ProfileEditorModal--profile": {
+        "message": "प्रोफ़ाइल",
+        "description": "Title for profile editing"
+    },
+    "ProfileEditorModal--name": {
+        "message": "आपका नाम",
+        "description": "Title for editing your name"
+    },
+    "ProfileEditorModal--about": {
+        "message": "हमारे बारे में",
+        "description": "Title for about editing"
+    },
+    "ProfileEditorModal--error": {
+        "message": "आपकी प्रोफ़ाइल को अपडेट नहीं किया जा सका। कृपया दोबारा प्रयास करें।",
+        "description": "Error message when something goes wrong updating your profile."
+    },
+    "AnnouncementsOnlyGroupBanner--modal": {
+        "message": "व्यवस्थापक को संदेश भेजें",
+        "description": "Modal title for the list of admins in a group"
+    },
+    "AnnouncementsOnlyGroupBanner--announcements-only": {
+        "message": "केवल $admins$ संदेश भेज सकते हैं",
+        "description": "Displayed if sending of messages is disabled to non-admins",
+        "placeholders": {
+            "admins": {
+                "content": "$1",
+                "example": "admins"
+            }
+        }
+    },
+    "AnnouncementsOnlyGroupBanner--admins": {
+        "message": "व्यवस्थापक",
+        "description": "Clickable text describing administrators of a group, used in the message an admin label"
+    },
+    "AvatarEditor--choose": {
+        "message": "कोई अवतार चुनें",
+        "description": "Label for the avatar selector"
+    },
+    "AvatarColorPicker--choose": {
+        "message": "कोई रंग चुनें",
+        "description": "Label for when you need to choose your fighter, err color"
+    },
+    "LeftPaneSetGroupMetadataHelper__avatar-modal-title": {
+        "message": "ग्रुप अवतार",
+        "description": "Title for the avatar picker in the group creation flow"
+    },
+    "Preferences__button--general": {
+        "message": "सामान्य",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--appearance": {
+        "message": "दिखावट",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--chats": {
+        "message": "चैट",
+        "description": "Button to switch the settings view (and a title of pane)"
+    },
+    "Preferences__button--calls": {
+        "message": "कॉल",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--notifications": {
+        "message": "अधिसूचनाएँ",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences__button--privacy": {
+        "message": "गोपनियता ",
+        "description": "Button to switch the settings view"
+    },
+    "Preferences--lastSynced": {
+        "message": "$date$ $time$ पर आख़िरी एक्सपोर्ट",
+        "description": "Label for date and time of last sync operation",
+        "placeholders": {
+            "date": {
+                "content": "$1",
+                "example": "6/9/2020"
+            },
+            "time": {
+                "content": "$2",
+                "example": "7:37:25 PM"
+            }
+        }
+    },
+    "Preferences--system": {
+        "message": "सिस्टम",
+        "description": "Title for system type settings"
+    },
+    "Preferences--zoom": {
+        "message": "ज़ूम लेवल",
+        "description": "Label for changing the zoom level"
+    },
+    "Preferences__link-previews--title": {
+        "message": "लिंक प्रिव्यु बनाएँ",
+        "description": "Title for the generate link previews setting"
+    },
+    "Preferences__link-previews--description": {
+        "message": "इस सेटिंग को बदलने के लिए, अपने मोबाइल डिवाइस पर Signal ऐप को खोलें और सेटिंग > चैट पर नैविगेट करें",
+        "description": "Description for the generate link previews setting"
+    },
+    "Preferences--advanced": {
+        "message": "अधिक",
+        "description": "Title for advanced settings"
+    },
+    "Preferences--notification-content": {
+        "message": "नोटिफ़िकेशन का कंटेंट",
+        "description": "Label for the notification content setting select box"
+    },
+    "Preferences--blocked": {
+        "message": "ब्लॉक",
+        "description": "Label for blocked contacts setting"
+    },
+    "Preferences--blocked-count-singular": {
+        "message": "$num$ कॉन्टैक्ट",
+        "description": "Number of contacts blocked singular",
+        "placeholders": {
+            "num": {
+                "content": "$1",
+                "example": "1"
+            }
+        }
+    },
+    "Preferences--blocked-count-plural": {
+        "message": "$num$ कॉन्टैक्ट",
+        "description": "Number of contacts blocked plural",
+        "placeholders": {
+            "num": {
+                "content": "$1",
+                "example": "20"
+            }
+        }
+    },
+    "Preferences__who-can--title": {
+        "message": "कौन कर सकता है...",
+        "description": "Title for the 'who can do X' setting"
+    },
+    "Preferences__privacy--description": {
+        "message": "इन सेटिंग को बदलने के लिए, अपने मोबाइल डिवाइस पर Signal ऐप खोलें और सेटिंग > गोपनीयता पर नैविगेट करें",
+        "description": "Description for the 'who can do X' setting"
+    },
+    "Preferences__who-can--everybody": {
+        "message": "हर कोई",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences__who-can--contacts": {
+        "message": "मेरे संपर्क",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences__who-can--nobody": {
+        "message": "कोई नहीं ",
+        "description": "Option for who can see my X select"
+    },
+    "Preferences--messaging": {
+        "message": "संदेश संवाद",
+        "description": "Title for the messaging settings"
+    },
+    "Preferences--see-me": {
+        "message": "मेरा फ़ोन नंबर देखना ",
+        "description": "Label for the see my phone number setting"
+    },
+    "Preferences--find-me": {
+        "message": "मुझे मेरे फ़ोन नंबर से खोजें",
+        "description": "Label for the find me by my phone number setting"
+    },
+    "Preferences--read-receipts": {
+        "message": "पढ़ने की रसीदें",
+        "description": "Label for the read receipts setting"
+    },
+    "Preferences--typing-indicators": {
+        "message": "टाइपिंग सूचक",
+        "description": "Label for the typing indicators setting"
+    },
+    "Preferences--updates": {
+        "message": "अपडेट",
+        "description": "Header for settings having to do with updates"
+    },
+    "Preferences__download-update": {
+        "message": "स्वचालित रूप से अपडेट डाउनलोड करें",
+        "description": "Label for checkbox for the auto download updates setting"
+    },
+    "Preferences__enable-notifications": {
+        "message": "नोटिफ़िकेशन एनेबल करें",
+        "description": "Label for checkbox for the notifications setting"
+    },
+    "Preferences__devices": {
+        "message": "डिवाइस",
+        "description": "Label for Device list in call settings pane"
+    },
+    "DialogUpdate--version-available": {
+        "message": "$version$ में अपडेट करने का वर्शन उपलब्ध",
+        "description": "Tooltip for new update available",
+        "placeholders": {
+            "status": {
+                "content": "$1",
+                "example": "v7.7.7"
+            }
+        }
+    },
+    "NSIS__retry-dialog--first-line": {
+        "message": "सिग्नल बंद नहीं किया जा सकता.",
+        "description": "First line of the dialog displayed when Windows installer can't close application automatically and needs user intervention to complete the installation."
+    },
+    "NSIS__retry-dialog--second-line": {
+        "message": "कृपया इसे मैन्युअल रूप से बंद करें और जारी रखने के लिए रिट्राई पर क्लिक करें.",
+        "description": "Second line of the dialog displayed when Windows installer can't close application automatically and needs user intervention to complete the installation."
+    },
+    "CustomizingPreferredReactions__title": {
+        "message": "प्रतिक्रियाएँ कस्टमाइज़ करें",
+        "description": "Shown in the header of the modal for customizing the preferred reactions. Also shown in the tooltip for the button that opens this modal."
+    },
+    "CustomizingPreferredReactions__subtitle": {
+        "message": "इमोजी बदलने के लिए क्लिक करें",
+        "description": "Instructions in the modal for customizing the preferred reactions."
+    },
+    "CustomizingPreferredReactions__had-save-error": {
+        "message": "आपकी सेटिंग सेव करते वक़्त एक एरर हुआ. कृपया फिर से कोशिश करें.",
+        "description": "Shown if there is an error when saving your preferred reaction settings. Should be very rare to see this message."
+    },
+    "WhatsNew__modal-title": {
+        "message": "नया क्या है",
+        "description": "Title for the whats new modal"
+    },
+    "WhatsNew__v5.19--1": {
+        "message": "एक सांस लें और डायलाग और पॉपअप के लिए नए एनिमेशन के साथ आराम करें. आराम से. आराम करें. आराम से. आराम करें.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--2": {
+        "message": "कीबोर्ड लेआउट स्विच करना हमेशा थोड़ा मुश्किल होता है, लेकिन कीबोर्ड शॉर्टकट अब आपके साथ सही ट्रैक पर हैं, आपके इरादे को जानते हुए दबाए गए विशिष्ट अक्षर से आगे तक पहुंचते हैं.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--3": {
+        "message": "जब कोई ग्रूप कॉल शुरू होती है, तो अब आपको एक सूचना मिलती है. आपको फिर कभी देर नहीं होगी, अगर आप करना नहीं चाहें.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.19--4": {
+        "message": "यह फ़ीचर उन सभी के लिए है जो से ज़्यादा के साथ प्रतिक्रिया 💅 करते हैं💅: अब आप किसी मेसेज पर प्रतिक्रिया करने के लिए डिफ़ॉल्ट रूप से दिखाई देने वाले इमोजी को कस्टमाइज़ कर सकते हैं.",
+        "description": "Release notes for v5.19"
+    },
+    "WhatsNew__v5.20": {
+        "message": "सिग्नल को सही रूप से चलाने के लिए इस वर्शन में कई छोटे बदलाव और बग फ़िक्स शामिल हैं.",
+        "description": "Release notes for v5.20"
+    },
+    "WhatsNew__v5.21--1": {
+        "message": "एक नज़र में ज़्यादा जानकारी पाएं 👀. बाएं पेन को एक बिलकुल नया रूप और स्टाइल दिया गया है 😎.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__v5.21--2": {
+        "message": "जानिए कब से लेकर क्या तक. टाइमस्टैम्प, अगर उपलब्ध हो, तो डिलीवर किए गए, पढ़े गए, भेजे गए, और अन्य स्टेटस मेसेज से संबद्ध में अब मेसेज के विवरण स्क्रीन में डिस्प्ले होते हैं.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__v5.21--3": {
+        "message": "स्क्रीन रीडर यूज़र को अब बाएं पेन पर बातचीत की लिस्ट के ज़रिए नैविगेट करना आसान लगेगा.",
+        "description": "Release notes for v5.21"
+    },
+    "WhatsNew__bugfixes": {
+        "message": "सिग्नल को सही रूप से चलाने के लिए इस वर्शन में कई छोटे बदलाव और बग फ़िक्स शामिल हैं.",
+        "description": "Release notes for releases that only include bug fixes"
     }
 }

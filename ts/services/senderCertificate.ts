@@ -1,19 +1,22 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import type { SerializedCertificateType } from '../textsecure/OutgoingMessage';
 import {
   SenderCertificateMode,
   serializedCertificateSchema,
-  SerializedCertificateType,
 } from '../textsecure/OutgoingMessage';
-import { SenderCertificateClass } from '../textsecure';
-import { base64ToArrayBuffer } from '../Crypto';
+import * as Bytes from '../Bytes';
 import { assert } from '../util/assert';
 import { missingCaseError } from '../util/missingCaseError';
+import { normalizeNumber } from '../util/normalizeNumber';
 import { waitForOnline } from '../util/waitForOnline';
 import * as log from '../logging/log';
-import { connectToServerWithStoredCredentials } from '../util/connectToServerWithStoredCredentials';
-import { StorageInterface } from '../types/Storage.d';
+import type { StorageInterface } from '../types/Storage.d';
+import type { WebAPIType } from '../textsecure/WebAPI';
+import { SignalService as Proto } from '../protobuf';
+
+import SenderCertificate = Proto.SenderCertificate;
 
 function isWellFormed(data: unknown): data is SerializedCertificateType {
   return serializedCertificateSchema.safeParse(data).success;
@@ -24,9 +27,7 @@ const CLOCK_SKEW_THRESHOLD = 15 * 60 * 1000;
 
 // This is exported for testing.
 export class SenderCertificateService {
-  private WebAPI?: typeof window.WebAPI;
-
-  private SenderCertificate?: typeof SenderCertificateClass;
+  private server?: WebAPIType;
 
   private fetchPromises: Map<
     SenderCertificateMode,
@@ -40,22 +41,19 @@ export class SenderCertificateService {
   private storage?: StorageInterface;
 
   initialize({
-    SenderCertificate,
-    WebAPI,
+    server,
     navigator,
     onlineEventTarget,
     storage,
   }: {
-    WebAPI: typeof window.WebAPI;
+    server: WebAPIType;
     navigator: Readonly<{ onLine: boolean }>;
     onlineEventTarget: EventTarget;
-    SenderCertificate: typeof SenderCertificateClass;
     storage: StorageInterface;
   }): void {
     log.info('Sender certificate service initialized');
 
-    this.SenderCertificate = SenderCertificate;
-    this.WebAPI = WebAPI;
+    this.server = server;
     this.navigator = navigator;
     this.onlineEventTarget = onlineEventTarget;
     this.storage = storage;
@@ -75,6 +73,24 @@ export class SenderCertificateService {
     }
 
     return this.fetchCertificate(mode);
+  }
+
+  // This is intended to be called when our credentials have been deleted, so any fetches
+  //   made until this function is complete would fail anyway.
+  async clear(): Promise<void> {
+    log.info(
+      'Sender certificate service: Clearing in-progress fetches and ' +
+        'deleting cached certificates'
+    );
+    await Promise.all(this.fetchPromises.values());
+
+    const { storage } = this;
+    assert(
+      storage,
+      'Sender certificate service method was called before it was initialized'
+    );
+    await storage.remove('senderCertificate');
+    await storage.remove('senderCertificateNoE164');
   }
 
   private getStoredCertificate(
@@ -134,9 +150,9 @@ export class SenderCertificateService {
   private async fetchAndSaveCertificate(
     mode: SenderCertificateMode
   ): Promise<undefined | SerializedCertificateType> {
-    const { SenderCertificate, storage, navigator, onlineEventTarget } = this;
+    const { storage, navigator, onlineEventTarget } = this;
     assert(
-      SenderCertificate && storage && navigator && onlineEventTarget,
+      storage && navigator && onlineEventTarget,
       'Sender certificate service method was called before it was initialized'
     );
 
@@ -160,12 +176,12 @@ export class SenderCertificateService {
       );
       return undefined;
     }
-    const certificate = base64ToArrayBuffer(certificateString);
+    const certificate = Bytes.fromBase64(certificateString);
     const decodedContainer = SenderCertificate.decode(certificate);
     const decodedCert = decodedContainer.certificate
       ? SenderCertificate.Certificate.decode(decodedContainer.certificate)
       : undefined;
-    const expires = decodedCert?.expires?.toNumber();
+    const expires = normalizeNumber(decodedCert?.expires);
 
     if (!isExpirationValid(expires)) {
       log.warn(
@@ -189,13 +205,12 @@ export class SenderCertificateService {
   private async requestSenderCertificate(
     mode: SenderCertificateMode
   ): Promise<string> {
-    const { storage, WebAPI } = this;
+    const { server } = this;
     assert(
-      storage && WebAPI,
+      server,
       'Sender certificate service method was called before it was initialized'
     );
 
-    const server = connectToServerWithStoredCredentials(WebAPI, storage);
     const omitE164 = mode === SenderCertificateMode.WithoutE164;
     const { certificate } = await server.getSenderCertificate(omitE164);
     return certificate;

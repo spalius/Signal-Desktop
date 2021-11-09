@@ -3,21 +3,22 @@
 
 import React, { useMemo, useEffect } from 'react';
 import { maxBy } from 'lodash';
+import type { VideoFrameSource } from 'ringrtc';
 import { Avatar } from './Avatar';
 import { CallBackgroundBlur } from './CallBackgroundBlur';
 import { DirectCallRemoteParticipant } from './DirectCallRemoteParticipant';
 import { GroupCallRemoteParticipant } from './GroupCallRemoteParticipant';
-import { LocalizerType } from '../types/Util';
-import {
+import type { LocalizerType } from '../types/Util';
+import type {
   ActiveCallType,
-  CallMode,
   GroupCallRemoteParticipantType,
   GroupCallVideoRequest,
-  VideoFrameSource,
 } from '../types/Calling';
-import { SetRendererCanvasType } from '../state/ducks/calling';
+import { CallMode } from '../types/Calling';
+import { AvatarColors } from '../types/Colors';
+import type { SetRendererCanvasType } from '../state/ducks/calling';
 import { useGetCallingFrameBuffer } from '../calling/useGetCallingFrameBuffer';
-import { usePageVisibility } from '../util/hooks';
+import { usePageVisibility } from '../hooks/usePageVisibility';
 import { missingCaseError } from '../util/missingCaseError';
 import { nonRenderedRemoteParticipant } from '../util/ringrtc/nonRenderedRemoteParticipant';
 
@@ -50,7 +51,7 @@ const NoVideo = ({
           <Avatar
             acceptedMessageRequest={acceptedMessageRequest}
             avatarPath={avatarPath}
-            color={color || 'ultramarine'}
+            color={color || AvatarColors[0]}
             noteToSelf={false}
             conversationType="direct"
             i18n={i18n}

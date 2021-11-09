@@ -3,7 +3,12 @@
 
 import { parentPort } from 'worker_threads';
 
-import { WrappedWorkerRequest, WrappedWorkerResponse } from './main';
+import type { LoggerType } from '../types/Logging';
+import type {
+  WrappedWorkerRequest,
+  WrappedWorkerResponse,
+  WrappedWorkerLogEntry,
+} from './main';
 import db from './Server';
 
 if (!parentPort) {
@@ -14,18 +19,62 @@ const port = parentPort;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function respond(seq: number, error: Error | undefined, response?: any) {
+  const corruptionLog = db.getCorruptionLog();
+
+  const errorMessage = [
+    ...(error ? [error.stack] : []),
+    ...(corruptionLog ? [corruptionLog] : []),
+  ].join('\n');
+
   const wrappedResponse: WrappedWorkerResponse = {
+    type: 'response',
     seq,
-    error: error ? error.stack : undefined,
+    error: errorMessage,
     response,
   };
   port.postMessage(wrappedResponse);
 }
 
+const log = (
+  level: WrappedWorkerLogEntry['level'],
+  args: Array<unknown>
+): void => {
+  const wrappedResponse: WrappedWorkerResponse = {
+    type: 'log',
+    level,
+    args,
+  };
+  port.postMessage(wrappedResponse);
+};
+
+const logger: LoggerType = {
+  fatal(...args: Array<unknown>) {
+    log('fatal', args);
+  },
+  error(...args: Array<unknown>) {
+    log('error', args);
+  },
+  warn(...args: Array<unknown>) {
+    log('warn', args);
+  },
+  info(...args: Array<unknown>) {
+    log('info', args);
+  },
+  debug(...args: Array<unknown>) {
+    log('debug', args);
+  },
+  trace(...args: Array<unknown>) {
+    log('trace', args);
+  },
+};
+
 port.on('message', async ({ seq, request }: WrappedWorkerRequest) => {
   try {
     if (request.type === 'init') {
-      await db.initialize(request.options);
+      await db.initialize({
+        ...request.options,
+        logger,
+      });
 
       respond(seq, undefined, undefined);
       return;
@@ -36,6 +85,13 @@ port.on('message', async ({ seq, request }: WrappedWorkerRequest) => {
 
       respond(seq, undefined, undefined);
       process.exit(0);
+      return;
+    }
+
+    if (request.type === 'removeDB') {
+      await db.removeDB();
+
+      respond(seq, undefined, undefined);
       return;
     }
 

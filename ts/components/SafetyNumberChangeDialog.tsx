@@ -9,8 +9,8 @@ import { ConfirmationDialog } from './ConfirmationDialog';
 import { InContactsIcon } from './InContactsIcon';
 import { Modal } from './Modal';
 
-import { ConversationType } from '../state/ducks/conversations';
-import { LocalizerType } from '../types/Util';
+import type { ConversationType } from '../state/ducks/conversations';
+import type { LocalizerType } from '../types/Util';
 import { isInSystemContacts } from '../util/isInSystemContacts';
 
 export type SafetyNumberProps = {
@@ -54,7 +54,7 @@ export const SafetyNumberChangeDialog = ({
 
   if (selectedContact) {
     return (
-      <Modal i18n={i18n}>
+      <Modal i18n={i18n} onClose={onClose}>
         {renderSafetyNumber({ contactID: selectedContact.id, onClose })}
       </Modal>
     );

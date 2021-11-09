@@ -1,26 +1,27 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { useRef, useEffect, useCallback, CSSProperties } from 'react';
-import { List, ListRowRenderer } from 'react-virtualized';
+import type { ReactNode } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
+import type { ListRowRenderer } from 'react-virtualized';
+import { List } from 'react-virtualized';
 import classNames from 'classnames';
+import { get, pick } from 'lodash';
 
+import { getOwn } from '../util/getOwn';
 import { missingCaseError } from '../util/missingCaseError';
 import { assert } from '../util/assert';
-import { LocalizerType, ScrollBehavior } from '../types/Util';
+import type { LocalizerType, ThemeType } from '../types/Util';
+import { ScrollBehavior } from '../types/Util';
+import { getConversationListWidthBreakpoint } from './_util';
+import type { BadgeType } from '../badges/types';
 
-import {
-  ConversationListItem,
-  PropsData as ConversationListItemPropsType,
-} from './conversationList/ConversationListItem';
-import {
-  ContactListItem,
-  PropsDataType as ContactListItemPropsType,
-} from './conversationList/ContactListItem';
-import {
-  ContactCheckbox as ContactCheckboxComponent,
-  ContactCheckboxDisabledReason,
-} from './conversationList/ContactCheckbox';
+import type { PropsData as ConversationListItemPropsType } from './conversationList/ConversationListItem';
+import { ConversationListItem } from './conversationList/ConversationListItem';
+import type { PropsDataType as ContactListItemPropsType } from './conversationList/ContactListItem';
+import { ContactListItem } from './conversationList/ContactListItem';
+import type { ContactCheckboxDisabledReason } from './conversationList/ContactCheckbox';
+import { ContactCheckbox as ContactCheckboxComponent } from './conversationList/ContactCheckbox';
 import { CreateNewGroupButton } from './conversationList/CreateNewGroupButton';
 import { StartNewConversation as StartNewConversationComponent } from './conversationList/StartNewConversation';
 import { SearchResultsLoadingFakeHeader as SearchResultsLoadingFakeHeaderComponent } from './conversationList/SearchResultsLoadingFakeHeader';
@@ -106,6 +107,7 @@ export type Row =
   | StartNewConversationRowType;
 
 export type PropsType = {
+  badgesById?: Record<string, BadgeType>;
   dimensions?: {
     width: number;
     height: number;
@@ -121,6 +123,7 @@ export type PropsType = {
   scrollable?: boolean;
 
   i18n: LocalizerType;
+  theme: ThemeType;
 
   onClickArchiveButton: () => void;
   onClickContactCheckbox: (
@@ -128,15 +131,16 @@ export type PropsType = {
     disabledReason: undefined | ContactCheckboxDisabledReason
   ) => void;
   onSelectConversation: (conversationId: string, messageId?: string) => void;
-  renderMessageSearchResult: (id: string, style: CSSProperties) => JSX.Element;
+  renderMessageSearchResult: (id: string) => JSX.Element;
   showChooseGroupMembers: () => void;
   startNewConversationFromPhoneNumber: (e164: string) => void;
 };
 
-const NORMAL_ROW_HEIGHT = 68;
+const NORMAL_ROW_HEIGHT = 76;
 const HEADER_ROW_HEIGHT = 40;
 
 export const ConversationList: React.FC<PropsType> = ({
+  badgesById,
   dimensions,
   getRow,
   i18n,
@@ -151,6 +155,7 @@ export const ConversationList: React.FC<PropsType> = ({
   shouldRecomputeRowHeights,
   showChooseGroupMembers,
   startNewConversationFromPhoneNumber,
+  theme,
 }) => {
   const listRef = useRef<null | List>(null);
 
@@ -159,7 +164,7 @@ export const ConversationList: React.FC<PropsType> = ({
     if (shouldRecomputeRowHeights && list) {
       list.recomputeRowHeights();
     }
-  }, [shouldRecomputeRowHeights]);
+  });
 
   const calculateRowHeight = useCallback(
     ({ index }: { index: number }): number => {
@@ -187,108 +192,155 @@ export const ConversationList: React.FC<PropsType> = ({
         return <div key={key} style={style} />;
       }
 
+      let result: ReactNode;
       switch (row.type) {
         case RowType.ArchiveButton:
-          return (
+          result = (
             <button
-              key={key}
+              aria-label={i18n('archivedConversations')}
               className="module-conversation-list__item--archive-button"
-              style={style}
               onClick={onClickArchiveButton}
               type="button"
             >
-              {i18n('archivedConversations')}{' '}
+              <div className="module-conversation-list__item--archive-button__icon" />
+              <span className="module-conversation-list__item--archive-button__text">
+                {i18n('archivedConversations')}
+              </span>
               <span className="module-conversation-list__item--archive-button__archived-count">
                 {row.archivedConversationsCount}
               </span>
             </button>
           );
+          break;
         case RowType.Blank:
-          return <div key={key} style={style} />;
+          result = <></>;
+          break;
         case RowType.Contact: {
           const { isClickable = true } = row;
-          return (
+          result = (
             <ContactListItem
               {...row.contact}
-              key={key}
-              style={style}
               onClick={isClickable ? onSelectConversation : undefined}
               i18n={i18n}
             />
           );
+          break;
         }
         case RowType.ContactCheckbox:
-          return (
+          result = (
             <ContactCheckboxComponent
               {...row.contact}
               isChecked={row.isChecked}
               disabledReason={row.disabledReason}
-              key={key}
-              style={style}
               onClick={onClickContactCheckbox}
               i18n={i18n}
             />
           );
-        case RowType.Conversation:
-          return (
-            <ConversationListItem
-              {...row.conversation}
-              key={key}
-              style={style}
-              onClick={onSelectConversation}
-              i18n={i18n}
-            />
+          break;
+        case RowType.Conversation: {
+          const itemProps = pick(row.conversation, [
+            'acceptedMessageRequest',
+            'avatarPath',
+            'badges',
+            'color',
+            'draftPreview',
+            'id',
+            'isMe',
+            'isSelected',
+            'lastMessage',
+            'lastUpdated',
+            'markedUnread',
+            'muteExpiresAt',
+            'name',
+            'phoneNumber',
+            'profileName',
+            'sharedGroupNames',
+            'shouldShowDraft',
+            'title',
+            'type',
+            'typingContact',
+            'unblurredAvatarPath',
+            'unreadCount',
+          ]);
+          const { badges, title, unreadCount, lastMessage } = itemProps;
+
+          let badge: undefined | BadgeType;
+          if (badgesById && badges[0]) {
+            badge = getOwn(badgesById, badges[0].id);
+          }
+
+          result = (
+            <div
+              aria-label={i18n('ConversationList__aria-label', {
+                lastMessage:
+                  get(lastMessage, 'text') ||
+                  i18n('ConversationList__last-message-undefined'),
+                title,
+                unreadCount: String(unreadCount),
+              })}
+            >
+              <ConversationListItem
+                {...itemProps}
+                key={key}
+                badge={badge}
+                onClick={onSelectConversation}
+                i18n={i18n}
+                theme={theme}
+              />
+            </div>
           );
+          break;
+        }
         case RowType.CreateNewGroup:
-          return (
+          result = (
             <CreateNewGroupButton
               i18n={i18n}
-              key={key}
               onClick={showChooseGroupMembers}
-              style={style}
             />
           );
+          break;
         case RowType.Header:
-          return (
+          result = (
             <div
               className="module-conversation-list__item--header"
-              key={key}
-              style={style}
+              aria-label={i18n(row.i18nKey)}
             >
               {i18n(row.i18nKey)}
             </div>
           );
+          break;
         case RowType.MessageSearchResult:
-          return (
-            <React.Fragment key={key}>
-              {renderMessageSearchResult(row.messageId, style)}
-            </React.Fragment>
-          );
+          result = <>{renderMessageSearchResult(row.messageId)}</>;
+          break;
         case RowType.SearchResultsLoadingFakeHeader:
-          return (
-            <SearchResultsLoadingFakeHeaderComponent key={key} style={style} />
-          );
+          result = <SearchResultsLoadingFakeHeaderComponent />;
+          break;
         case RowType.SearchResultsLoadingFakeRow:
-          return (
-            <SearchResultsLoadingFakeRowComponent key={key} style={style} />
-          );
+          result = <SearchResultsLoadingFakeRowComponent />;
+          break;
         case RowType.StartNewConversation:
-          return (
+          result = (
             <StartNewConversationComponent
               i18n={i18n}
-              key={key}
               phoneNumber={row.phoneNumber}
-              onClick={() => {
-                startNewConversationFromPhoneNumber(row.phoneNumber);
-              }}
-              style={style}
+              onClick={startNewConversationFromPhoneNumber}
             />
           );
+          break;
         default:
           throw missingCaseError(row);
       }
+
+      return (
+        <span aria-rowindex={index + 1} role="row" style={style} key={key}>
+          <span role="gridcell" aria-colindex={1}>
+            {result}
+          </span>
+        </span>
+      );
     },
     [
+      badgesById,
       getRow,
       i18n,
       onClickArchiveButton,
@@ -297,6 +349,7 @@ export const ConversationList: React.FC<PropsType> = ({
       renderMessageSearchResult,
       showChooseGroupMembers,
       startNewConversationFromPhoneNumber,
+      theme,
     ]
   );
 
@@ -307,11 +360,14 @@ export const ConversationList: React.FC<PropsType> = ({
     return null;
   }
 
+  const widthBreakpoint = getConversationListWidthBreakpoint(width);
+
   return (
     <List
       className={classNames(
         'module-conversation-list',
-        `module-conversation-list--scroll-behavior-${scrollBehavior}`
+        `module-conversation-list--scroll-behavior-${scrollBehavior}`,
+        `module-conversation-list--width-${widthBreakpoint}`
       )}
       height={height}
       ref={listRef}
@@ -319,7 +375,11 @@ export const ConversationList: React.FC<PropsType> = ({
       rowHeight={calculateRowHeight}
       rowRenderer={renderRow}
       scrollToIndex={scrollToRowIndex}
-      style={{ overflow: scrollable ? 'auto' : 'hidden' }}
+      style={{
+        // See `<Timeline>` for an explanation of this `any` cast.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        overflowY: scrollable ? ('overlay' as any) : 'hidden',
+      }}
       tabIndex={-1}
       width={width}
     />

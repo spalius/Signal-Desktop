@@ -3,12 +3,15 @@
 
 import React from 'react';
 
-import { LocalizerType } from '../../../types/Util';
+import type { LocalizerType, ThemeType } from '../../../types/Util';
+import { getOwn } from '../../../util/getOwn';
+
+import type { BadgeType } from '../../../badges/types';
 import { Avatar } from '../../Avatar';
 import { Emojify } from '../Emojify';
 
-import { ConversationDetailsIcon } from './ConversationDetailsIcon';
-import { ConversationType } from '../../../state/ducks/conversations';
+import { ConversationDetailsIcon, IconType } from './ConversationDetailsIcon';
+import type { ConversationType } from '../../../state/ducks/conversations';
 import { PanelRow } from './PanelRow';
 import { PanelSection } from './PanelSection';
 
@@ -19,11 +22,14 @@ export type GroupV2Membership = {
 
 export type Props = {
   canAddNewMembers: boolean;
+  conversationId: string;
   i18n: LocalizerType;
   maxShownMemberCount?: number;
   memberships: Array<GroupV2Membership>;
-  showContactModal: (conversationId: string) => void;
+  preferredBadgeByConversation: Record<string, BadgeType>;
+  showContactModal: (contactId: string, conversationId: string) => void;
   startAddingNewMembers?: () => void;
+  theme: ThemeType;
 };
 
 const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
@@ -67,11 +73,14 @@ function sortMemberships(
 
 export const ConversationDetailsMembershipList: React.ComponentType<Props> = ({
   canAddNewMembers,
+  conversationId,
   i18n,
   maxShownMemberCount = 5,
   memberships,
+  preferredBadgeByConversation,
   showContactModal,
   startAddingNewMembers,
+  theme,
 }) => {
   const [showAllMembers, setShowAllMembers] = React.useState<boolean>(false);
   const sortedMemberships = sortMemberships(memberships);
@@ -92,7 +101,7 @@ export const ConversationDetailsMembershipList: React.ComponentType<Props> = ({
       {canAddNewMembers && (
         <PanelRow
           icon={
-            <div className="module-conversation-details-membership-list__add-members-icon" />
+            <div className="ConversationDetails-membership-list__add-members-icon" />
           }
           label={i18n('ConversationDetailsMembershipList--add-members')}
           onClick={() => startAddingNewMembers?.()}
@@ -101,12 +110,14 @@ export const ConversationDetailsMembershipList: React.ComponentType<Props> = ({
       {sortedMemberships.slice(0, membersToShow).map(({ isAdmin, member }) => (
         <PanelRow
           key={member.id}
-          onClick={() => showContactModal(member.id)}
+          onClick={() => showContactModal(member.id, conversationId)}
           icon={
             <Avatar
               conversationType="direct"
+              badge={getOwn(preferredBadgeByConversation, member.id)}
               i18n={i18n}
               size={32}
+              theme={theme}
               {...member}
             />
           }
@@ -116,11 +127,11 @@ export const ConversationDetailsMembershipList: React.ComponentType<Props> = ({
       ))}
       {showAllMembers === false && shouldHideRestMembers && (
         <PanelRow
-          className="module-conversation-details-membership-list--show-all"
+          className="ConversationDetails-membership-list--show-all"
           icon={
             <ConversationDetailsIcon
               ariaLabel={i18n('ConversationDetailsMembershipList--show-all')}
-              icon="down"
+              icon={IconType.down}
             />
           }
           onClick={() => setShowAllMembers(true)}

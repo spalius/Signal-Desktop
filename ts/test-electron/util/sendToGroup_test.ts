@@ -5,7 +5,7 @@ import { assert } from 'chai';
 
 import { _analyzeSenderKeyDevices, _waitForAll } from '../../util/sendToGroup';
 
-import { DeviceType } from '../../textsecure/Types.d';
+import type { DeviceType } from '../../textsecure/Types.d';
 
 describe('sendToGroup', () => {
   describe('#_analyzeSenderKeyDevices', () => {
@@ -14,14 +14,17 @@ describe('sendToGroup', () => {
         {
           identifier: 'ident-guid-one',
           id: 1,
+          registrationId: 11,
         },
         {
           identifier: 'ident-guid-one',
           id: 2,
+          registrationId: 22,
         },
         {
           identifier: 'ident-guid-two',
           id: 2,
+          registrationId: 33,
         },
       ];
     }
@@ -60,10 +63,12 @@ describe('sendToGroup', () => {
         {
           identifier: 'ident-guid-one',
           id: 2,
+          registrationId: 22,
         },
         {
           identifier: 'ident-guid-two',
           id: 2,
+          registrationId: 33,
         },
       ]);
       assert.deepEqual(newToMemberUuids, ['ident-guid-one', 'ident-guid-two']);
@@ -90,10 +95,12 @@ describe('sendToGroup', () => {
         {
           identifier: 'ident-guid-one',
           id: 2,
+          registrationId: 22,
         },
         {
           identifier: 'ident-guid-two',
           id: 2,
+          registrationId: 33,
         },
       ]);
       assert.deepEqual(removedFromMemberUuids, [

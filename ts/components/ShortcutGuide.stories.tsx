@@ -6,9 +6,10 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import { boolean, select } from '@storybook/addon-knobs';
 
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
-import { Props, ShortcutGuide } from './ShortcutGuide';
+import type { Props } from './ShortcutGuide';
+import { ShortcutGuide } from './ShortcutGuide';
 
 const i18n = setupI18n('en', enMessages);
 const story = storiesOf('Components/ShortcutGuide', module);

@@ -1,21 +1,22 @@
 // Copyright 2019-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { isFunction, isNumber, omit } from 'lodash';
+import { isNumber, omit } from 'lodash';
 import { v4 as getGuid } from 'uuid';
 
 import dataInterface from '../sql/Client';
+import * as durations from '../util/durations';
 import { downloadAttachment } from '../util/downloadAttachment';
-import { stringFromBytes } from '../Crypto';
-import MessageReceiver from '../textsecure/MessageReceiver';
-import {
+import * as Bytes from '../Bytes';
+import type {
   AttachmentDownloadJobType,
   AttachmentDownloadJobTypeType,
 } from '../sql/Interface';
 
-import { MessageModel } from '../models/messages';
-import { AttachmentType } from '../types/Attachment';
-import { LoggerType } from '../window.d';
+import type { MessageModel } from '../models/messages';
+import type { AttachmentType } from '../types/Attachment';
+import type { LoggerType } from '../types/Logging';
+import * as log from '../logging/log';
 
 const {
   getMessageById,
@@ -29,20 +30,16 @@ const {
 
 const MAX_ATTACHMENT_JOB_PARALLELISM = 3;
 
-const SECOND = 1000;
-const MINUTE = 60 * SECOND;
-const HOUR = 60 * MINUTE;
-const TICK_INTERVAL = MINUTE;
+const TICK_INTERVAL = durations.MINUTE;
 
 const RETRY_BACKOFF: Record<number, number> = {
-  1: 30 * SECOND,
-  2: 30 * MINUTE,
-  3: 6 * HOUR,
+  1: 30 * durations.SECOND,
+  2: 30 * durations.MINUTE,
+  3: 6 * durations.HOUR,
 };
 
 let enabled = false;
 let timeout: NodeJS.Timeout | null;
-let getMessageReceiver: () => MessageReceiver | undefined;
 let logger: LoggerType;
 const _activeAttachmentDownloadJobs: Record<
   string,
@@ -50,17 +47,11 @@ const _activeAttachmentDownloadJobs: Record<
 > = {};
 
 type StartOptionsType = {
-  getMessageReceiver: () => MessageReceiver | undefined;
   logger: LoggerType;
 };
 
 export async function start(options: StartOptionsType): Promise<void> {
-  ({ getMessageReceiver, logger } = options);
-  if (!isFunction(getMessageReceiver)) {
-    throw new Error(
-      'attachment_downloads/start: getMessageReceiver must be a function'
-    );
-  }
+  ({ logger } = options);
   if (!logger) {
     throw new Error('attachment_downloads/start: logger must be provided!');
   }
@@ -189,7 +180,7 @@ async function _maybeStartJob(): Promise<void> {
 
 async function _runJob(job?: AttachmentDownloadJobType): Promise<void> {
   if (!job) {
-    window.log.warn('_runJob: Job was missing!');
+    log.warn('_runJob: Job was missing!');
     return;
   }
 
@@ -219,11 +210,6 @@ async function _runJob(job?: AttachmentDownloadJobType): Promise<void> {
 
     const pending = true;
     await setAttachmentDownloadJobPending(id, pending);
-
-    const messageReceiver = getMessageReceiver();
-    if (!messageReceiver) {
-      throw new Error('_runJob: messageReceiver not found');
-    }
 
     const downloaded = await downloadAttachment(attachment);
 
@@ -258,7 +244,7 @@ async function _runJob(job?: AttachmentDownloadJobType): Promise<void> {
 
     if (currentAttempt >= 3) {
       logger.error(
-        `_runJob: ${currentAttempt} failed attempts, marking attachment ${id} from message ${logId} as permament error:`,
+        `_runJob: ${currentAttempt} failed attempts, marking attachment ${id} from message ${logId} as permanent error:`,
         error && error.stack ? error.stack : error
       );
 
@@ -297,9 +283,7 @@ async function _finishJob(
 ): Promise<void> {
   if (message) {
     logger.info(`attachment_downloads/_finishJob for job id: ${id}`);
-    await saveMessage(message.attributes, {
-      Message: window.Whisper.Message,
-    });
+    await saveMessage(message.attributes);
   }
 
   await removeAttachmentDownloadJob(id);
@@ -335,7 +319,7 @@ async function _addAttachmentToMessage(
         attachment
       );
       message.set({
-        body: attachment.error ? message.get('body') : stringFromBytes(data),
+        body: attachment.error ? message.get('body') : Bytes.toString(data),
         bodyPending: false,
       });
     } finally {

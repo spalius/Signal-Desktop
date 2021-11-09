@@ -8,8 +8,9 @@ import { action } from '@storybook/addon-actions';
 import { boolean } from '@storybook/addon-knobs';
 
 import enMessages from '../../_locales/en/messages.json';
-import { MediaQualitySelector, PropsType } from './MediaQualitySelector';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import type { PropsType } from './MediaQualitySelector';
+import { MediaQualitySelector } from './MediaQualitySelector';
+import { setupI18n } from '../util/setupI18n';
 
 const story = storiesOf('Components/MediaQualitySelector', module);
 

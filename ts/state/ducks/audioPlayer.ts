@@ -1,9 +1,9 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useBoundActions } from '../../util/hooks';
+import { useBoundActions } from '../../hooks/useBoundActions';
 
-import {
+import type {
   SwitchToAssociatedViewActionType,
   MessageDeletedActionType,
   MessageChangedActionType,

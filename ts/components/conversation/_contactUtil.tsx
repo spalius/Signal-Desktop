@@ -7,8 +7,10 @@ import classNames from 'classnames';
 import { Avatar, AvatarBlur } from '../Avatar';
 import { Spinner } from '../Spinner';
 
-import { LocalizerType } from '../../types/Util';
-import { ContactType, getName } from '../../types/Contact';
+import type { LocalizerType } from '../../types/Util';
+import { AvatarColors } from '../../types/Colors';
+import type { EmbeddedContactType } from '../../types/EmbeddedContact';
+import { getName } from '../../types/EmbeddedContact';
 
 // This file starts with _ to keep it from showing up in the StyleGuide.
 
@@ -18,7 +20,7 @@ export function renderAvatar({
   size,
   direction,
 }: {
-  contact: ContactType;
+  contact: EmbeddedContactType;
   i18n: LocalizerType;
   size: 28 | 52 | 80;
   direction?: 'outgoing' | 'incoming';
@@ -48,7 +50,7 @@ export function renderAvatar({
       acceptedMessageRequest={false}
       avatarPath={avatarPath}
       blur={AvatarBlur.NoBlur}
-      color="steel"
+      color={AvatarColors[0]}
       conversationType="direct"
       i18n={i18n}
       isMe
@@ -64,7 +66,7 @@ export function renderName({
   isIncoming,
   module,
 }: {
-  contact: ContactType;
+  contact: EmbeddedContactType;
   isIncoming: boolean;
   module: string;
 }): JSX.Element {
@@ -85,7 +87,7 @@ export function renderContactShorthand({
   isIncoming,
   module,
 }: {
-  contact: ContactType;
+  contact: EmbeddedContactType;
   isIncoming: boolean;
   module: string;
 }): JSX.Element {

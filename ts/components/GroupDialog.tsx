@@ -1,10 +1,11 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, { ReactChild, ReactNode } from 'react';
+import type { ReactChild, ReactNode } from 'react';
+import React from 'react';
 
-import { LocalizerType } from '../types/Util';
-import { ConversationType } from '../state/ducks/conversations';
+import type { LocalizerType } from '../types/Util';
+import type { ConversationType } from '../state/ducks/conversations';
 import { ModalHost } from './ModalHost';
 import { Button, ButtonVariant } from './Button';
 import { Avatar, AvatarSize } from './Avatar';
@@ -112,7 +113,6 @@ GroupDialog.Contacts = ({ contacts, i18n }: Readonly<ContactsPropsType>) => (
           i18n={i18n}
         />
         <ContactName
-          i18n={i18n}
           module="module-GroupDialog__contacts__contact__name"
           title={contact.title}
         />

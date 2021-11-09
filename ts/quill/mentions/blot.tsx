@@ -8,7 +8,7 @@ import Parchment from 'parchment';
 import Quill from 'quill';
 import { render } from 'react-dom';
 import { Emojify } from '../../components/conversation/Emojify';
-import { MentionBlotValue } from '../util';
+import type { MentionBlotValue } from '../util';
 
 declare class QuillEmbed extends Parchment.Embed {
   contentNode: HTMLElement;
@@ -48,6 +48,7 @@ export class MentionBlot extends Embed {
   static buildSpan(mention: MentionBlotValue, node: HTMLElement): void {
     node.setAttribute('data-uuid', mention.uuid || '');
     node.setAttribute('data-title', mention.title || '');
+    node.setAttribute('contenteditable', 'false');
 
     const mentionSpan = document.createElement('span');
 
@@ -62,11 +63,5 @@ export class MentionBlot extends Embed {
     );
 
     node.appendChild(mentionSpan);
-  }
-
-  constructor(node: Node) {
-    super(node);
-
-    this.contentNode.setAttribute('contenteditable', 'false');
   }
 }

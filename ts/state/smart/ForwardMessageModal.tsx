@@ -2,23 +2,22 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { connect } from 'react-redux';
-import { get } from 'lodash';
 import { mapDispatchToProps } from '../actions';
-import {
-  ForwardMessageModal,
-  DataPropsType,
-} from '../../components/ForwardMessageModal';
-import { StateType } from '../reducer';
-import { BodyRangeType } from '../../types/Util';
-import { LinkPreviewType } from '../../types/message/LinkPreviews';
+import type { DataPropsType } from '../../components/ForwardMessageModal';
+import { ForwardMessageModal } from '../../components/ForwardMessageModal';
+import type { StateType } from '../reducer';
+import type { BodyRangeType } from '../../types/Util';
+import type { LinkPreviewType } from '../../types/message/LinkPreviews';
 import { getAllComposableConversations } from '../selectors/conversations';
 import { getLinkPreview } from '../selectors/linkPreviews';
-import { getIntl } from '../selectors/user';
+import { getIntl, getTheme } from '../selectors/user';
+import { getEmojiSkinTone } from '../selectors/items';
 import { selectRecentEmojis } from '../selectors/emojis';
-import { AttachmentType } from '../../types/Attachment';
+import type { AttachmentType } from '../../types/Attachment';
 
 export type SmartForwardMessageModalProps = {
   attachments?: Array<AttachmentType>;
+  conversationId: string;
   doForwardMessage: (
     selectedContacts: Array<string>,
     messageBody?: string,
@@ -42,6 +41,7 @@ const mapStateToProps = (
 ): DataPropsType => {
   const {
     attachments,
+    conversationId,
     doForwardMessage,
     isSticker,
     messageBody,
@@ -52,12 +52,13 @@ const mapStateToProps = (
 
   const candidateConversations = getAllComposableConversations(state);
   const recentEmojis = selectRecentEmojis(state);
-  const skinTone = get(state, ['items', 'skinTone'], 0);
+  const skinTone = getEmojiSkinTone(state);
   const linkPreview = getLinkPreview(state);
 
   return {
     attachments,
     candidateConversations,
+    conversationId,
     doForwardMessage,
     i18n: getIntl(state),
     isSticker,
@@ -68,6 +69,7 @@ const mapStateToProps = (
     recentEmojis,
     skinTone,
     onTextTooLong,
+    theme: getTheme(state),
   };
 };
 

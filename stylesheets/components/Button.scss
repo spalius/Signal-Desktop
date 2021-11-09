@@ -134,4 +134,165 @@
       @include hover-and-active-states($background-color, $color-white);
     }
   }
+
+  &--calling {
+    $color: $color-white;
+    $background-color: $color-accent-green;
+
+    @include rounded-corners;
+    color: $color;
+    background: $background-color;
+
+    &:disabled {
+      color: fade-out($color, 0.4);
+      background: fade-out($background-color, 0.6);
+    }
+
+    @include light-theme {
+      @include hover-and-active-states($background-color, $color-black);
+    }
+
+    @include dark-theme {
+      @include hover-and-active-states($background-color, $color-white);
+    }
+  }
+
+  &--system-message {
+    @include rounded-corners;
+
+    &.module-Button--small {
+      padding: {
+        top: 5px;
+        bottom: 5px;
+      }
+      font-weight: 500;
+    }
+
+    @include light-theme {
+      $color: $color-ultramarine;
+      $background-color: $color-gray-02;
+
+      color: $color;
+      background: $background-color;
+
+      &:disabled {
+        color: fade-out($color, 0.4);
+        background: fade-out($background-color, 0.6);
+      }
+      @include hover-and-active-states($background-color, $color-black);
+    }
+
+    @include dark-theme {
+      $color: $color-white;
+      $background-color: $color-gray-65;
+
+      color: $color;
+      background: $background-color;
+
+      &:disabled {
+        color: fade-out($color, 0.4);
+        background: fade-out($background-color, 0.6);
+      }
+      @include hover-and-active-states($background-color, $color-white);
+    }
+  }
+
+  &--details {
+    align-items: center;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    justify-content: center;
+    line-height: 10px;
+    min-height: 44px;
+    min-width: 68px;
+    padding: 8px;
+
+    @include light-theme {
+      background-color: $color-gray-05;
+      color: $color-black;
+    }
+
+    @include dark-theme {
+      background-color: $color-gray-65;
+      color: $color-gray-05;
+    }
+
+    &:focus {
+      @include keyboard-mode {
+        box-shadow: 0 0 0 2px $color-ultramarine;
+      }
+    }
+
+    &::before {
+      margin-bottom: 6px;
+    }
+  }
+
+  &--icon {
+    @mixin button-icon($icon) {
+      content: '';
+      display: block;
+      height: 18px;
+      width: 18px;
+
+      @include light-theme {
+        @include color-svg($icon, $color-black);
+      }
+      @include dark-theme {
+        @include color-svg($icon, $color-gray-05);
+      }
+    }
+
+    &--audio::before {
+      @include light-theme {
+        @include button-icon('../images/icons/v2/phone-outline-24.svg');
+      }
+
+      @include dark-theme {
+        @include button-icon('../images/icons/v2/phone-solid-24.svg');
+      }
+    }
+
+    &--muted::before {
+      @include light-theme {
+        @include button-icon('../images/icons/v2/bell-disabled-outline-24.svg');
+      }
+      @include dark-theme {
+        @include button-icon('../images/icons/v2/bell-disabled-solid-24.svg');
+      }
+    }
+
+    &--photo::before {
+      @include button-icon('../images/icons/v2/photo-album-outline-24.svg');
+    }
+
+    &--search::before {
+      @include button-icon('../images/icons/v2/search-16.svg');
+    }
+
+    &--text::before {
+      @include button-icon('../images/icons/v2/text-24.svg');
+    }
+
+    &--unmuted::before {
+      @include light-theme {
+        @include button-icon('../images/icons/v2/bell-outline-24.svg');
+      }
+      @include dark-theme {
+        @include button-icon('../images/icons/v2/bell-solid-24.svg');
+      }
+    }
+
+    &--video::before {
+      @include light-theme {
+        @include button-icon('../images/icons/v2/video-outline-24.svg');
+      }
+
+      @include dark-theme {
+        @include button-icon('../images/icons/v2/video-solid-24.svg');
+      }
+    }
+  }
 }

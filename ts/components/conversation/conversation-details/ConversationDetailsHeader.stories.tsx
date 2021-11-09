@@ -8,11 +8,14 @@ import { action } from '@storybook/addon-actions';
 import { number, text } from '@storybook/addon-knobs';
 
 import { getDefaultConversation } from '../../../test-both/helpers/getDefaultConversation';
-import { setup as setupI18n } from '../../../../js/modules/i18n';
+import { getFakeBadges } from '../../../test-both/helpers/getFakeBadge';
+import { setupI18n } from '../../../util/setupI18n';
 import enMessages from '../../../../_locales/en/messages.json';
-import { ConversationType } from '../../../state/ducks/conversations';
+import { StorybookThemeContext } from '../../../../.storybook/StorybookThemeContext';
+import type { ConversationType } from '../../../state/ducks/conversations';
 
-import { ConversationDetailsHeader, Props } from './ConversationDetailsHeader';
+import type { Props } from './ConversationDetailsHeader';
+import { ConversationDetailsHeader } from './ConversationDetailsHeader';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -27,25 +30,52 @@ const createConversation = (): ConversationType =>
     type: 'group',
     lastUpdated: 0,
     title: text('conversation title', 'Some Conversation'),
+    groupDescription: text(
+      'description',
+      'This is a group description. https://www.signal.org'
+    ),
   });
 
-const createProps = (overrideProps: Partial<Props> = {}): Props => ({
-  conversation: createConversation(),
-  i18n,
-  canEdit: false,
-  startEditing: action('startEditing'),
-  memberships: new Array(number('conversation members length', 0)),
-  ...overrideProps,
-});
+const Wrapper = (overrideProps: Partial<Props>) => {
+  const theme = React.useContext(StorybookThemeContext);
 
-story.add('Basic', () => {
-  const props = createProps();
+  return (
+    <ConversationDetailsHeader
+      conversation={createConversation()}
+      i18n={i18n}
+      canEdit={false}
+      startEditing={action('startEditing')}
+      memberships={new Array(number('conversation members length', 0))}
+      isGroup
+      isMe={false}
+      theme={theme}
+      {...overrideProps}
+    />
+  );
+};
 
-  return <ConversationDetailsHeader {...props} />;
-});
+story.add('Basic', () => <Wrapper />);
 
-story.add('Editable', () => {
-  const props = createProps({ canEdit: true });
+story.add('Editable', () => <Wrapper canEdit />);
 
-  return <ConversationDetailsHeader {...props} />;
-});
+story.add('Basic no-description', () => (
+  <Wrapper
+    conversation={getDefaultConversation({
+      title: 'My Group',
+      type: 'group',
+    })}
+  />
+));
+
+story.add('Editable no-description', () => (
+  <Wrapper
+    conversation={getDefaultConversation({
+      title: 'My Group',
+      type: 'group',
+    })}
+  />
+));
+
+story.add('1:1', () => <Wrapper isGroup={false} badges={getFakeBadges(3)} />);
+
+story.add('Note to self', () => <Wrapper isMe />);

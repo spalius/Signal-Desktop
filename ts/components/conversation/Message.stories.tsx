@@ -11,23 +11,41 @@ import { storiesOf } from '@storybook/react';
 import { SignalService } from '../../protobuf';
 import { ConversationColors } from '../../types/Colors';
 import { EmojiPicker } from '../emoji/EmojiPicker';
-import { Message, Props, AudioAttachmentProps } from './Message';
+import type { Props, AudioAttachmentProps } from './Message';
+import { Message } from './Message';
 import {
   AUDIO_MP3,
   IMAGE_JPEG,
   IMAGE_PNG,
   IMAGE_WEBP,
-  MIMEType,
   VIDEO_MP4,
+  stringToMIMEType,
 } from '../../types/MIME';
+import { ReadStatus } from '../../messages/MessageReadStatus';
 import { MessageAudio } from './MessageAudio';
 import { computePeaks } from '../GlobalAudioContext';
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
 import { pngUrl } from '../../storybook/Fixtures';
 import { getDefaultConversation } from '../../test-both/helpers/getDefaultConversation';
+import { WidthBreakpoint } from '../_util';
+
+import { fakeAttachment } from '../../test-both/helpers/fakeAttachment';
 
 const i18n = setupI18n('en', enMessages);
+
+function getJoyReaction() {
+  return {
+    emoji: '😂',
+    from: getDefaultConversation({
+      id: '+14155552674',
+      phoneNumber: '+14155552674',
+      name: 'Amelia Briggs',
+      title: 'Amelia',
+    }),
+    timestamp: Date.now() - 10,
+  };
+}
 
 const story = storiesOf('Components/Conversation/Message', module);
 
@@ -46,6 +64,8 @@ const renderEmojiPicker: Props['renderEmojiPicker'] = ({
   />
 );
 
+const renderReactionPicker: Props['renderReactionPicker'] = () => <div />;
+
 const MessageAudioContainer: React.FC<AudioAttachmentProps> = props => {
   const [active, setActive] = React.useState<{
     id?: string;
@@ -61,6 +81,7 @@ const MessageAudioContainer: React.FC<AudioAttachmentProps> = props => {
       audio={audio}
       computePeaks={computePeaks}
       setActiveAudioID={(id, context) => setActive({ id, context })}
+      onFirstPlayed={action('onFirstPlayed')}
       activeAudioID={active.id}
       activeAudioContext={active.context}
     />
@@ -82,6 +103,8 @@ const createProps = (overrideProps: Partial<Props> = {}): Props => ({
   checkForAccount: action('checkForAccount'),
   clearSelectedMessage: action('clearSelectedMessage'),
   collapseMetadata: overrideProps.collapseMetadata,
+  containerElementRef: React.createRef<HTMLElement>(),
+  containerWidthBreakpoint: WidthBreakpoint.Wide,
   conversationColor:
     overrideProps.conversationColor ||
     select('conversationColor', ConversationColors, ConversationColors[0]),
@@ -120,13 +143,19 @@ const createProps = (overrideProps: Partial<Props> = {}): Props => ({
   isTapToViewExpired: overrideProps.isTapToViewExpired,
   kickOffAttachmentDownload: action('kickOffAttachmentDownload'),
   markAttachmentAsCorrupted: action('markAttachmentAsCorrupted'),
+  markViewed: action('markViewed'),
   onHeightChange: action('onHeightChange'),
   openConversation: action('openConversation'),
   openLink: action('openLink'),
   previews: overrideProps.previews || [],
   reactions: overrideProps.reactions,
   reactToMessage: action('reactToMessage'),
+  readStatus:
+    overrideProps.readStatus === undefined
+      ? ReadStatus.Read
+      : overrideProps.readStatus,
   renderEmojiPicker,
+  renderReactionPicker,
   renderAudioAttachment,
   replyToMessage: action('replyToMessage'),
   retrySend: action('retrySend'),
@@ -165,6 +194,103 @@ story.add('Plain Message', () => {
 
   return renderBothDirections(props);
 });
+
+story.add('Emoji Messages', () => (
+  <>
+    <Message {...createProps({ text: '😀' })} />
+    <br />
+    <Message {...createProps({ text: '😀😀' })} />
+    <br />
+    <Message {...createProps({ text: '😀😀😀' })} />
+    <br />
+    <Message {...createProps({ text: '😀😀😀😀' })} />
+    <br />
+    <Message {...createProps({ text: '😀😀😀😀😀' })} />
+    <br />
+    <Message {...createProps({ text: '😀😀😀😀😀😀😀' })} />
+    <br />
+    <Message
+      {...createProps({
+        previews: [
+          {
+            domain: 'signal.org',
+            image: fakeAttachment({
+              contentType: IMAGE_PNG,
+              fileName: 'the-sax.png',
+              height: 240,
+              url: pngUrl,
+              width: 320,
+            }),
+            isStickerPack: false,
+            title: 'Signal',
+            description:
+              'Say "hello" to a different messaging experience. An unexpected focus on privacy, combined with all of the features you expect.',
+            url: 'https://www.signal.org',
+            date: new Date(2020, 2, 10).valueOf(),
+          },
+        ],
+        text: '😀',
+      })}
+    />
+    <br />
+    <Message
+      {...createProps({
+        attachments: [
+          fakeAttachment({
+            url: '/fixtures/tina-rolf-269345-unsplash.jpg',
+            fileName: 'tina-rolf-269345-unsplash.jpg',
+            contentType: IMAGE_JPEG,
+            width: 128,
+            height: 128,
+          }),
+        ],
+        text: '😀',
+      })}
+    />
+    <br />
+    <Message
+      {...createProps({
+        attachments: [
+          fakeAttachment({
+            contentType: AUDIO_MP3,
+            fileName: 'incompetech-com-Agnus-Dei-X.mp3',
+            url: '/fixtures/incompetech-com-Agnus-Dei-X.mp3',
+          }),
+        ],
+        text: '😀',
+      })}
+    />
+    <br />
+    <Message
+      {...createProps({
+        attachments: [
+          fakeAttachment({
+            contentType: stringToMIMEType('text/plain'),
+            fileName: 'my-resume.txt',
+            url: 'my-resume.txt',
+          }),
+        ],
+        text: '😀',
+      })}
+    />
+    <br />
+    <Message
+      {...createProps({
+        attachments: [
+          fakeAttachment({
+            contentType: VIDEO_MP4,
+            flags: SignalService.AttachmentPointer.Flags.GIF,
+            fileName: 'cat-gif.mp4',
+            url: '/fixtures/cat-gif.mp4',
+            width: 400,
+            height: 332,
+          }),
+        ],
+        text: '😀',
+      })}
+    />
+  </>
+));
 
 story.add('Delivered', () => {
   const props = createProps({
@@ -296,16 +422,6 @@ story.add('Reactions (wider message)', () => {
         timestamp: Date.now() - 10,
       },
       {
-        emoji: '😂',
-        from: getDefaultConversation({
-          id: '+14155552676',
-          phoneNumber: '+14155552676',
-          name: 'Amelia Briggs',
-          title: 'Amelia',
-        }),
-        timestamp: Date.now() - 10,
-      },
-      {
         emoji: '😡',
         from: getDefaultConversation({
           id: '+14155552677',
@@ -341,11 +457,14 @@ story.add('Reactions (wider message)', () => {
   return renderBothDirections(props);
 });
 
+const joyReactions = Array.from({ length: 52 }, () => getJoyReaction());
+
 story.add('Reactions (short message)', () => {
   const props = createProps({
     text: 'h',
     timestamp: Date.now(),
     reactions: [
+      ...joyReactions,
       {
         emoji: '👍',
         from: getDefaultConversation({
@@ -372,26 +491,6 @@ story.add('Reactions (short message)', () => {
         from: getDefaultConversation({
           id: '+14155552673',
           phoneNumber: '+14155552673',
-          name: 'Amelia Briggs',
-          title: 'Amelia',
-        }),
-        timestamp: Date.now(),
-      },
-      {
-        emoji: '😂',
-        from: getDefaultConversation({
-          id: '+14155552674',
-          phoneNumber: '+14155552674',
-          name: 'Amelia Briggs',
-          title: 'Amelia',
-        }),
-        timestamp: Date.now(),
-      },
-      {
-        emoji: '😂',
-        from: getDefaultConversation({
-          id: '+14155552676',
-          phoneNumber: '+14155552676',
           name: 'Amelia Briggs',
           title: 'Amelia',
         }),
@@ -447,13 +546,13 @@ story.add('Avatar in Group', () => {
 story.add('Sticker', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         url: '/fixtures/512x515-thumbs-up-lincoln.webp',
         fileName: '512x515-thumbs-up-lincoln.webp',
         contentType: IMAGE_WEBP,
         width: 128,
         height: 128,
-      },
+      }),
     ],
     isSticker: true,
     status: 'sent',
@@ -466,6 +565,19 @@ story.add('Deleted', () => {
   const props = createProps({
     conversationType: 'group',
     deletedForEveryone: true,
+    status: 'sent',
+  });
+
+  return renderBothDirections(props);
+});
+
+story.add('Deleted with expireTimer', () => {
+  const props = createProps({
+    timestamp: Date.now() - 60 * 1000,
+    conversationType: 'group',
+    deletedForEveryone: true,
+    expirationLength: 5 * 60 * 1000,
+    expirationTimestamp: Date.now() + 3 * 60 * 1000,
     status: 'sent',
   });
 
@@ -514,13 +626,13 @@ story.add('Link Preview', () => {
     previews: [
       {
         domain: 'signal.org',
-        image: {
+        image: fakeAttachment({
           contentType: IMAGE_PNG,
           fileName: 'the-sax.png',
           height: 240,
           url: pngUrl,
           width: 320,
-        },
+        }),
         isStickerPack: false,
         title: 'Signal',
         description:
@@ -541,13 +653,13 @@ story.add('Link Preview with Small Image', () => {
     previews: [
       {
         domain: 'signal.org',
-        image: {
+        image: fakeAttachment({
           contentType: IMAGE_PNG,
           fileName: 'the-sax.png',
           height: 50,
           url: pngUrl,
           width: 50,
-        },
+        }),
         isStickerPack: false,
         title: 'Signal',
         description:
@@ -629,13 +741,13 @@ story.add('Link Preview with small image, long description', () => {
     previews: [
       {
         domain: 'signal.org',
-        image: {
+        image: fakeAttachment({
           contentType: IMAGE_PNG,
           fileName: 'the-sax.png',
           height: 50,
           url: pngUrl,
           width: 50,
-        },
+        }),
         isStickerPack: false,
         title: 'Signal',
         description: Array(10)
@@ -659,13 +771,13 @@ story.add('Link Preview with no date', () => {
     previews: [
       {
         domain: 'signal.org',
-        image: {
+        image: fakeAttachment({
           contentType: IMAGE_PNG,
           fileName: 'the-sax.png',
           height: 240,
           url: pngUrl,
           width: 320,
-        },
+        }),
         isStickerPack: false,
         title: 'Signal',
         description:
@@ -685,13 +797,13 @@ story.add('Link Preview with too new a date', () => {
     previews: [
       {
         domain: 'signal.org',
-        image: {
+        image: fakeAttachment({
           contentType: IMAGE_PNG,
           fileName: 'the-sax.png',
           height: 240,
           url: pngUrl,
           width: 320,
-        },
+        }),
         isStickerPack: false,
         title: 'Signal',
         description:
@@ -710,13 +822,13 @@ story.add('Link Preview with too new a date', () => {
 story.add('Image', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         url: '/fixtures/tina-rolf-269345-unsplash.jpg',
         fileName: 'tina-rolf-269345-unsplash.jpg',
         contentType: IMAGE_JPEG,
         width: 128,
         height: 128,
-      },
+      }),
     ],
     status: 'sent',
   });
@@ -728,41 +840,41 @@ for (let i = 2; i <= 5; i += 1) {
   story.add(`Multiple Images x${i}`, () => {
     const props = createProps({
       attachments: [
-        {
+        fakeAttachment({
           url: '/fixtures/tina-rolf-269345-unsplash.jpg',
           fileName: 'tina-rolf-269345-unsplash.jpg',
           contentType: IMAGE_JPEG,
           width: 128,
           height: 128,
-        },
-        {
+        }),
+        fakeAttachment({
           url: '/fixtures/tina-rolf-269345-unsplash.jpg',
           fileName: 'tina-rolf-269345-unsplash.jpg',
           contentType: IMAGE_JPEG,
           width: 128,
           height: 128,
-        },
-        {
+        }),
+        fakeAttachment({
           url: '/fixtures/tina-rolf-269345-unsplash.jpg',
           fileName: 'tina-rolf-269345-unsplash.jpg',
           contentType: IMAGE_JPEG,
           width: 128,
           height: 128,
-        },
-        {
+        }),
+        fakeAttachment({
           url: '/fixtures/tina-rolf-269345-unsplash.jpg',
           fileName: 'tina-rolf-269345-unsplash.jpg',
           contentType: IMAGE_JPEG,
           width: 128,
           height: 128,
-        },
-        {
+        }),
+        fakeAttachment({
           url: '/fixtures/tina-rolf-269345-unsplash.jpg',
           fileName: 'tina-rolf-269345-unsplash.jpg',
           contentType: IMAGE_JPEG,
           width: 128,
           height: 128,
-        },
+        }),
       ].slice(0, i),
       status: 'sent',
     });
@@ -774,13 +886,13 @@ for (let i = 2; i <= 5; i += 1) {
 story.add('Image with Caption', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         url: '/fixtures/tina-rolf-269345-unsplash.jpg',
         fileName: 'tina-rolf-269345-unsplash.jpg',
         contentType: IMAGE_JPEG,
         width: 128,
         height: 128,
-      },
+      }),
     ],
     status: 'sent',
     text: 'This is my home.',
@@ -792,14 +904,14 @@ story.add('Image with Caption', () => {
 story.add('GIF', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         contentType: VIDEO_MP4,
         flags: SignalService.AttachmentPointer.Flags.GIF,
         fileName: 'cat-gif.mp4',
         url: '/fixtures/cat-gif.mp4',
         width: 400,
         height: 332,
-      },
+      }),
     ],
     status: 'sent',
   });
@@ -810,14 +922,14 @@ story.add('GIF', () => {
 story.add('GIF in a group', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         contentType: VIDEO_MP4,
         flags: SignalService.AttachmentPointer.Flags.GIF,
         fileName: 'cat-gif.mp4',
         url: '/fixtures/cat-gif.mp4',
         width: 400,
         height: 332,
-      },
+      }),
     ],
     conversationType: 'group',
     status: 'sent',
@@ -829,7 +941,7 @@ story.add('GIF in a group', () => {
 story.add('Not Downloaded GIF', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         contentType: VIDEO_MP4,
         flags: SignalService.AttachmentPointer.Flags.GIF,
         fileName: 'cat-gif.mp4',
@@ -837,7 +949,7 @@ story.add('Not Downloaded GIF', () => {
         blurHash: 'LDA,FDBnm+I=p{tkIUI;~UkpELV]',
         width: 400,
         height: 332,
-      },
+      }),
     ],
     status: 'sent',
   });
@@ -848,7 +960,7 @@ story.add('Not Downloaded GIF', () => {
 story.add('Pending GIF', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         pending: true,
         contentType: VIDEO_MP4,
         flags: SignalService.AttachmentPointer.Flags.GIF,
@@ -857,7 +969,7 @@ story.add('Pending GIF', () => {
         blurHash: 'LDA,FDBnm+I=p{tkIUI;~UkpELV]',
         width: 400,
         height: 332,
-      },
+      }),
     ],
     status: 'sent',
   });
@@ -866,28 +978,58 @@ story.add('Pending GIF', () => {
 });
 
 story.add('Audio', () => {
-  const props = createProps({
-    attachments: [
-      {
-        contentType: AUDIO_MP3,
-        fileName: 'incompetech-com-Agnus-Dei-X.mp3',
-        url: '/fixtures/incompetech-com-Agnus-Dei-X.mp3',
-      },
-    ],
-    status: 'sent',
-  });
+  const Wrapper = () => {
+    const [isPlayed, setIsPlayed] = React.useState(false);
 
-  return renderBothDirections(props);
+    const messageProps = createProps({
+      attachments: [
+        fakeAttachment({
+          contentType: AUDIO_MP3,
+          fileName: 'incompetech-com-Agnus-Dei-X.mp3',
+          url: '/fixtures/incompetech-com-Agnus-Dei-X.mp3',
+        }),
+      ],
+      ...(isPlayed
+        ? {
+            status: 'viewed',
+            readStatus: ReadStatus.Viewed,
+          }
+        : {
+            status: 'read',
+            readStatus: ReadStatus.Read,
+          }),
+    });
+
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => {
+            setIsPlayed(old => !old);
+          }}
+          style={{
+            display: 'block',
+            marginBottom: '2em',
+          }}
+        >
+          Toggle played
+        </button>
+        {renderBothDirections(messageProps)}
+      </>
+    );
+  };
+
+  return <Wrapper />;
 });
 
 story.add('Long Audio', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         contentType: AUDIO_MP3,
         fileName: 'long-audio.mp3',
         url: '/fixtures/long-audio.mp3',
-      },
+      }),
     ],
     status: 'sent',
   });
@@ -898,11 +1040,11 @@ story.add('Long Audio', () => {
 story.add('Audio with Caption', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         contentType: AUDIO_MP3,
         fileName: 'incompetech-com-Agnus-Dei-X.mp3',
         url: '/fixtures/incompetech-com-Agnus-Dei-X.mp3',
-      },
+      }),
     ],
     status: 'sent',
     text: 'This is what I sound like.',
@@ -914,10 +1056,10 @@ story.add('Audio with Caption', () => {
 story.add('Audio with Not Downloaded Attachment', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         contentType: AUDIO_MP3,
         fileName: 'incompetech-com-Agnus-Dei-X.mp3',
-      },
+      }),
     ],
     status: 'sent',
   });
@@ -928,11 +1070,11 @@ story.add('Audio with Not Downloaded Attachment', () => {
 story.add('Audio with Pending Attachment', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         contentType: AUDIO_MP3,
         fileName: 'incompetech-com-Agnus-Dei-X.mp3',
         pending: true,
-      },
+      }),
     ],
     status: 'sent',
   });
@@ -943,11 +1085,11 @@ story.add('Audio with Pending Attachment', () => {
 story.add('Other File Type', () => {
   const props = createProps({
     attachments: [
-      {
-        contentType: 'text/plain' as MIMEType,
+      fakeAttachment({
+        contentType: stringToMIMEType('text/plain'),
         fileName: 'my-resume.txt',
         url: 'my-resume.txt',
-      },
+      }),
     ],
     status: 'sent',
   });
@@ -958,11 +1100,11 @@ story.add('Other File Type', () => {
 story.add('Other File Type with Caption', () => {
   const props = createProps({
     attachments: [
-      {
-        contentType: 'text/plain' as MIMEType,
+      fakeAttachment({
+        contentType: stringToMIMEType('text/plain'),
         fileName: 'my-resume.txt',
         url: 'my-resume.txt',
-      },
+      }),
     ],
     status: 'sent',
     text: 'This is what I have done.',
@@ -974,12 +1116,12 @@ story.add('Other File Type with Caption', () => {
 story.add('Other File Type with Long Filename', () => {
   const props = createProps({
     attachments: [
-      {
-        contentType: 'text/plain' as MIMEType,
+      fakeAttachment({
+        contentType: stringToMIMEType('text/plain'),
         fileName:
           'INSERT-APP-NAME_INSERT-APP-APPLE-ID_AppStore_AppsGamesWatch.psd.zip',
         url: 'a2/a2334324darewer4234',
-      },
+      }),
     ],
     status: 'sent',
     text: 'This is what I have done.',
@@ -991,13 +1133,13 @@ story.add('Other File Type with Long Filename', () => {
 story.add('TapToView Image', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         url: '/fixtures/tina-rolf-269345-unsplash.jpg',
         fileName: 'tina-rolf-269345-unsplash.jpg',
         contentType: IMAGE_JPEG,
         width: 128,
         height: 128,
-      },
+      }),
     ],
     isTapToView: true,
     status: 'sent',
@@ -1009,13 +1151,32 @@ story.add('TapToView Image', () => {
 story.add('TapToView Video', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         contentType: VIDEO_MP4,
         fileName: 'pixabay-Soap-Bubble-7141.mp4',
         height: 128,
         url: '/fixtures/pixabay-Soap-Bubble-7141.mp4',
         width: 128,
-      },
+      }),
+    ],
+    isTapToView: true,
+    status: 'sent',
+  });
+
+  return renderBothDirections(props);
+});
+
+story.add('TapToView GIF', () => {
+  const props = createProps({
+    attachments: [
+      fakeAttachment({
+        contentType: VIDEO_MP4,
+        flags: SignalService.AttachmentPointer.Flags.GIF,
+        fileName: 'cat-gif.mp4',
+        url: '/fixtures/cat-gif.mp4',
+        width: 400,
+        height: 332,
+      }),
     ],
     isTapToView: true,
     status: 'sent',
@@ -1027,13 +1188,13 @@ story.add('TapToView Video', () => {
 story.add('TapToView Expired', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         url: '/fixtures/tina-rolf-269345-unsplash.jpg',
         fileName: 'tina-rolf-269345-unsplash.jpg',
         contentType: IMAGE_JPEG,
         width: 128,
         height: 128,
-      },
+      }),
     ],
     isTapToView: true,
     isTapToViewExpired: true,
@@ -1046,13 +1207,13 @@ story.add('TapToView Expired', () => {
 story.add('TapToView Error', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         url: '/fixtures/tina-rolf-269345-unsplash.jpg',
         fileName: 'tina-rolf-269345-unsplash.jpg',
         contentType: IMAGE_JPEG,
         width: 128,
         height: 128,
-      },
+      }),
     ],
     isTapToView: true,
     isTapToViewError: true,
@@ -1065,11 +1226,13 @@ story.add('TapToView Error', () => {
 story.add('Dangerous File Type', () => {
   const props = createProps({
     attachments: [
-      {
-        contentType: 'application/vnd.microsoft.portable-executable' as MIMEType,
+      fakeAttachment({
+        contentType: stringToMIMEType(
+          'application/vnd.microsoft.portable-executable'
+        ),
         fileName: 'terrible.exe',
         url: 'terrible.exe',
-      },
+      }),
     ],
     status: 'sent',
   });
@@ -1113,13 +1276,13 @@ story.add('@Mentions', () => {
 story.add('All the context menus', () => {
   const props = createProps({
     attachments: [
-      {
+      fakeAttachment({
         url: '/fixtures/tina-rolf-269345-unsplash.jpg',
         fileName: 'tina-rolf-269345-unsplash.jpg',
         contentType: IMAGE_JPEG,
         width: 128,
         height: 128,
-      },
+      }),
     ],
     status: 'partial-sent',
     canDeleteForEveryone: true,
@@ -1133,13 +1296,13 @@ story.add('Not approved, with link preview', () => {
     previews: [
       {
         domain: 'signal.org',
-        image: {
+        image: fakeAttachment({
           contentType: IMAGE_PNG,
           fileName: 'the-sax.png',
           height: 240,
           url: pngUrl,
           width: 320,
-        },
+        }),
         isStickerPack: false,
         title: 'Signal',
         description:

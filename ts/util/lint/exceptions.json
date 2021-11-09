@@ -107,1167 +107,6 @@
     "reasonDetail": "Very limited in what HTML can be injected - dark/light options specify colors for the light/dark parts of QRCode"
   },
   {
-    "rule": "jQuery-$(",
-    "path": "js/about_start.js",
-    "line": "$('.version').text(`v${window.getVersion()}`);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/about_start.js",
-    "line": "$('.environment').text(states.join(' - '));",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/about_start.js",
-    "line": "$(document).on('keydown', e => {",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/about_start.js",
-    "line": "$('.acknowledgments').text(window.i18n('softwareAcknowledgments'));",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-09-16T14:49:26.520Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/about_start.js",
-    "line": "$('.privacy').text(window.i18n('privacyPolicy'));",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-09-16T14:49:26.520Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/debug_log_start.js",
-    "line": "$(document).on('keydown', e => {",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/debug_log_start.js",
-    "line": "const $body = $(document.body);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-appendTo(",
-    "path": "js/debug_log_start.js",
-    "line": "window.view.$el.appendTo($body);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T18:13:29.628Z",
-    "reasonDetail": "Interacting with already-existing DOM nodes"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/loading_start.js",
-    "line": "$(() => {",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-03-25T15:45:04.024Z"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/loading_start.js",
-    "line": "  $('.message').text(window.i18n('optimizingApplication'));",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-03-25T15:45:04.024Z"
-  },
-  {
-    "rule": "jQuery-load(",
-    "path": "js/modules/emojis.js",
-    "line": "async function load() {",
-    "reasonCategory": "falseMatch",
-    "updated": "2019-10-31T17:28:08.684Z"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/modules/i18n.js",
-    "line": "    const FIND_REPLACEMENTS = /\\$([^$]+)\\$/g;",
-    "reasonCategory": "falseMatch",
-    "updated": "2020-07-21T18:34:59.251Z"
-  },
-  {
-    "rule": "jQuery-load(",
-    "path": "js/modules/stickers.js",
-    "line": "async function load() {",
-    "reasonCategory": "falseMatch",
-    "updated": "2019-04-26T17:48:30.675Z"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/permissions_popup_start.js",
-    "line": "$(document).on('keydown', e => {",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/permissions_popup_start.js",
-    "line": "const $body = $(document.body);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/settings_start.js",
-    "line": "$(document).on('keydown', e => {",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/settings_start.js",
-    "line": "const $body = $(document.body);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-appendTo(",
-    "path": "js/settings_start.js",
-    "line": "    window.view.$el.appendTo($body);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Interacting with already-existing DOM nodes"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/clear_data_view.js",
-    "line": "    template: () => $('#clear-data').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/clear_data_view.js",
-    "line": "    template: () => $('#clear-data').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "          el: this.$('.result'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Providing a reference to a local DOM node to a trusted view"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "      this.$('.buttons, .textarea').remove();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, DOM removal"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "        this.$('.result').text(i18n('debugLogError'));",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, adding plain text"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "      this.$('.result').addClass('loading');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, addition of a class"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "      this.$('.submit').attr('disabled', 'disabled');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, attribute change"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "      this.$('.submit').removeAttr('disabled');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, attribute change"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "    template: () => $('#debug-log-link').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "    template: () => $('#debug-log').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "      this.textarea = this.$('.textarea').get(0);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "        this.$('.loading').removeClass('loading');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, removal of a class"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "        this.$('.loading').removeClass('loading');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, removal of a class"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/debug_log_view.js",
-    "line": "        this.$('.link').focus().select();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, setting focus"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/debug_log_view.js",
-    "line": "    template: () => $('#debug-log-link').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/debug_log_view.js",
-    "line": "    template: () => $('#debug-log').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/identicon_svg_view.js",
-    "line": "    template: () => $('#identicon-svg').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/identicon_svg_view.js",
-    "line": "      const html = this.render().$el.html();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-15T00:38:04.183Z",
-    "reasonDetail": "Getting the value, not setting it"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/identicon_svg_view.js",
-    "line": "    template: () => $('#identicon-svg').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/inbox_view.js",
-    "line": "      this.$('.left-pane-placeholder').append(this.leftPaneView.el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Adding sub-view to DOM"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/inbox_view.js",
-    "line": "        el: this.$('.conversation-stack'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Providing reference to DOM for sub-view"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/inbox_view.js",
-    "line": "      this.$('.conversation-stack').removeClass('inactive');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, adding or removing classes"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/inbox_view.js",
-    "line": "        this.$('.message').text(message);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, adding plain text"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/inbox_view.js",
-    "line": "    template: () => $('#app-loading-screen').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/inbox_view.js",
-    "line": "    template: () => $('#two-column').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/inbox_view.js",
-    "line": "      if (e && this.$(e.target).closest('.placeholder').length) {",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/inbox_view.js",
-    "line": "      if (e && this.$(e.target).closest('.capture-audio').length > 0) {",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/inbox_view.js",
-    "line": "      this.$('.conversation:first .recorder').trigger('close');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, triggering DOM event"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/inbox_view.js",
-    "line": "      this.$('#header, .gutter').addClass('inactive');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-06-15T23:46:51.629Z"
-  },
-  {
-    "rule": "jQuery-append(",
-    "path": "js/views/inbox_view.js",
-    "line": "      this.$('.left-pane-placeholder').append(this.leftPaneView.el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Adding sub-view to DOM"
-  },
-  {
-    "rule": "jQuery-appendTo(",
-    "path": "js/views/inbox_view.js",
-    "line": "        toast.$el.appendTo(this.$el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Adding sub-view to DOM"
-  },
-  {
-    "rule": "jQuery-appendTo(",
-    "path": "js/views/inbox_view.js",
-    "line": "        view.$el.appendTo(this.el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, adding sub-view to DOM"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/inbox_view.js",
-    "line": "    template: () => $('#app-loading-screen').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/inbox_view.js",
-    "line": "    template: () => $('#two-column').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-prependTo(",
-    "path": "js/views/inbox_view.js",
-    "line": "        this.appLoadingScreen.$el.prependTo(this.el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Adding sub-view to DOM"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.$('#qr img').remove();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.$('#qr .container').show();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      if ($('#qr').length === 0) {",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.$('#qr .container').hide();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-03-24T19:03:04.861Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.qr = new QRCode(this.$('#qr')[0]).makeCode(url);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-03-24T19:03:04.861Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.$('#qr').addClass('ready');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-03-24T19:03:04.861Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.$(DEVICE_NAME_SELECTOR).val(deviceName || window.getHostName());",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-03-24T19:03:04.861Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.$('#link-phone').submit();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-03-24T19:03:04.861Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "        this.$('#link-phone').submit(e => {",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-03-24T19:03:04.861Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "          let name = this.$(DEVICE_NAME_SELECTOR).val();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-03-24T19:03:04.861Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "            this.$(DEVICE_NAME_SELECTOR).focus();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-03-24T19:03:04.861Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.$('#qr canvas').remove();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-09-11T17:24:56.124Z",
-    "reasonDetail": "Static selector argument"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.$('#qr').removeClass('ready');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-09-11T17:24:56.124Z",
-    "reasonDetail": "Static selector argument"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.$('#qr').removeAttr('title');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-09-11T17:24:56.124Z",
-    "reasonDetail": "Static selector argument"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "      this.$(DEVICE_NAME_SELECTOR).focus();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-09-11T17:24:56.124Z",
-    "reasonDetail": "Static selector argument"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/install_view.js",
-    "line": "    template: () => $('#link-flow-template').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/install_view.js",
-    "line": "    template: () => $('#link-flow-template').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/key_verification_view.js",
-    "line": "      this.$('.key-verification-wrapper').append(this.view.el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Adding sub-view to DOM"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/key_verification_view.js",
-    "line": "    template: () => $('#key-verification').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-append(",
-    "path": "js/views/key_verification_view.js",
-    "line": "      this.$('.key-verification-wrapper').append(this.view.el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Adding sub-view to DOM"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/key_verification_view.js",
-    "line": "    template: () => $('#key-verification').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/phone-input-view.js",
-    "line": "      this.$('input.number').intlTelInput();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/phone-input-view.js",
-    "line": "      const input = this.$('input.number');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/phone-input-view.js",
-    "line": "      const regionCode = this.$('li.active')",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/phone-input-view.js",
-    "line": "        this.$('.number-container').removeClass('invalid');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/phone-input-view.js",
-    "line": "        this.$('.number-container').removeClass('valid');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/phone-input-view.js",
-    "line": "        this.$('.number-container').addClass('valid');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-09-11T17:24:56.124Z",
-    "reasonDetail": "Static selector argument"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/phone-input-view.js",
-    "line": "    template: () => $('#phone-number').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/phone-input-view.js",
-    "line": "    template: () => $('#phone-number').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/recorder_view.js",
-    "line": "      this.$('.time').text(`${minutes}:${seconds}`);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/recorder_view.js",
-    "line": "      $(window).on('blur', this.onSwitchAwayBound);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-10-11T19:22:47.331Z",
-    "reasonDetail": "Operating on already-existing DOM elements"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/recorder_view.js",
-    "line": "      $(window).off('blur', this.onSwitchAwayBound);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-10-11T19:22:47.331Z",
-    "reasonDetail": "Operating on already-existing DOM elements"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/recorder_view.js",
-    "line": "    template: () => $('#recorder').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/recorder_view.js",
-    "line": "    template: () => $('#recorder').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('input').prop('checked', !!this.value);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('input').prop('checked', Boolean(this.value));",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-06-02T21:51:34.813Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      const value = this.$(e.target).val();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-06-02T21:51:34.813Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$(`#${this.name}-${this.value}`).attr('checked', 'checked');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-06-02T21:51:34.813Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.notification-settings'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-06-02T21:51:34.813Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.theme-settings'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-06-02T21:51:34.813Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "          $(document.body)",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-06-02T21:51:34.813Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('input').prop('checked', Boolean(this.value));",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-06-02T22:20:33.618Z"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "          el: this.$('.draw-attention-setting'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "          el: this.$('.audio-notification-setting'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.badge-count-muted-conversations-setting'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.spell-check-setting'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "          const $msg = this.$('.spell-check-setting-message');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "          el: this.$('.menu-bar-setting'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.always-relay-calls-setting'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.call-ringtone-notification-setting'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.call-system-notification-setting'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.incoming-call-notification-setting'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.media-permissions'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.media-camera-permissions'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        this.$('.sync-setting').append(syncView.el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('.sync').text(i18n('syncNow'));",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('.sync').attr('disabled', 'disabled');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('.synced_at').hide();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('.sync_failed').hide();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('.sync').removeAttr('disabled');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-09-11T17:24:56.124Z",
-    "reasonDetail": "Static selector argument"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('.sync').text(i18n('syncing'));",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-09-11T17:24:56.124Z",
-    "reasonDetail": "Static selector argument"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('.sync_failed').show();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-09-11T17:24:56.124Z",
-    "reasonDetail": "Static selector argument"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "    template: () => $('#settings').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "    template: () => $('#syncSettings').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "          el: this.$('.auto-launch-setting'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-05-11T20:38:03.542Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "    template: () => $('#disappearingMessagesSettings').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-05-27T01:33:06.541Z",
-    "reasonDetail": "Interacting with already-existing DOM nodes"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('.disappearing-messages-setting').append(",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-05-27T01:33:06.541Z",
-    "reasonDetail": "Interacting with already-existing DOM nodes"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/settings_view.js",
-    "line": "        el: this.$('.system-tray-setting-container'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-06-24T23:16:24.537Z",
-    "reasonDetail": "Interacting with already-existing DOM nodes"
-  },
-  {
-    "rule": "jQuery-append(",
-    "path": "js/views/settings_view.js",
-    "line": "        this.$('.sync-setting').append(syncView.el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-08-21T11:29:29.636Z",
-    "reasonDetail": "Interacting with already-existing DOM nodes"
-  },
-  {
-    "rule": "jQuery-append(",
-    "path": "js/views/settings_view.js",
-    "line": "      this.$('.disappearing-messages-setting').append(",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-05-27T01:33:06.541Z",
-    "reasonDetail": "Interacting with already-existing DOM nodes"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/settings_view.js",
-    "line": "    template: () => $('#settings').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/settings_view.js",
-    "line": "    template: () => $('#syncSettings').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/settings_view.js",
-    "line": "    template: () => $('#disappearingMessagesSettings').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-05-27T01:33:06.541Z",
-    "reasonDetail": "Interacting with already-existing DOM nodes"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "        this.$('input.number').val(number);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "        el: this.$('#phone-number-input'),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "      this.$('#error').hide();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2018-09-19T21:59:32.770Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "      const verificationCode = $('#code').val().replace(/\\D+/g, '');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "      this.$('#status').text(s);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "      const verificationCode = $('#code').val().replace(/\\D/g, '');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "      this.$('#error').hide().text(error).addClass('in').fadeIn();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "      if (this.$('#number-container').hasClass('valid')) {",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "        this.$('#request-sms, #request-voice').removeAttr('disabled');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "        this.$('#request-sms, #request-voice').prop('disabled', 'disabled');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "        this.$('#code').addClass('invalid');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "        this.$('#code').removeClass('invalid');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "      this.$('#error').hide();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "        this.$('#step2').addClass('in').fadeIn();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "        this.$('#number-container').addClass('invalid');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "      $('#error').hide();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "        this.$('#step2').addClass('in').fadeIn();",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "        this.$('#number-container').addClass('invalid');",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-18T03:39:29.033Z",
-    "reasonDetail": "Protected from arbitrary input"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "    template: () => $('#standalone').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "js/views/standalone_registration_view.js",
-    "line": "    template: () => $('#standalone').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
     "rule": "jQuery-wrap(",
     "path": "node_modules/@chanzuckerberg/axe-storybook-testing/node_modules/ansi-styles/index.js",
     "line": "\t\t\tstyles[name] = wrap(identity, offset);",
@@ -1278,48 +117,6 @@
     "rule": "jQuery-wrap(",
     "path": "node_modules/@chanzuckerberg/axe-storybook-testing/node_modules/ansi-styles/index.js",
     "line": "\t\t\tstyles[name] = wrap(suite[targetSpace], offset);",
-    "reasonCategory": "falseMatch",
-    "updated": "2021-04-06T04:01:59.934Z"
-  },
-  {
-    "rule": "jQuery-wrap(",
-    "path": "node_modules/@chanzuckerberg/axe-storybook-testing/node_modules/cliui/build/lib/index.js",
-    "line": "                wrapped = mixin.wrap(col.text, this.negatePadding(col), { hard: true }).split('\\n');",
-    "reasonCategory": "falseMatch",
-    "updated": "2021-04-06T04:01:59.934Z"
-  },
-  {
-    "rule": "jQuery-wrap(",
-    "path": "node_modules/@chanzuckerberg/axe-storybook-testing/node_modules/cliui/build/lib/string-utils.js",
-    "line": "export function wrap(str, width) {",
-    "reasonCategory": "falseMatch",
-    "updated": "2021-04-06T04:01:59.934Z"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "node_modules/@chanzuckerberg/axe-storybook-testing/node_modules/yargs/build/lib/completion-templates.js",
-    "line": "    type_list=$({{app_path}} --get-yargs-completions \"\\${args[@]}\")",
-    "reasonCategory": "falseMatch",
-    "updated": "2021-04-06T04:01:59.934Z"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "node_modules/@chanzuckerberg/axe-storybook-testing/node_modules/yargs/build/lib/completion-templates.js",
-    "line": "    COMPREPLY=( $(compgen -W \"\\${type_list}\" -- \\${cur_word}) )",
-    "reasonCategory": "falseMatch",
-    "updated": "2021-04-06T04:01:59.934Z"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "node_modules/@chanzuckerberg/axe-storybook-testing/node_modules/yargs/build/lib/completion-templates.js",
-    "line": "  IFS=$'\\n' reply=($(COMP_CWORD=\"$((CURRENT-1))\" COMP_LINE=\"$BUFFER\" COMP_POINT=\"$CURSOR\" {{app_path}} --get-yargs-completions \"\\${words[@]}\"))",
-    "reasonCategory": "falseMatch",
-    "updated": "2021-04-06T04:01:59.934Z"
-  },
-  {
-    "rule": "jQuery-wrap(",
-    "path": "node_modules/@chanzuckerberg/axe-storybook-testing/node_modules/yargs/build/lib/yargs-factory.js",
-    "line": "        usage.wrap(cols);",
     "reasonCategory": "falseMatch",
     "updated": "2021-04-06T04:01:59.934Z"
   },
@@ -1388,6 +185,153 @@
     "reasonDetail": "What's being eval'd is a static string"
   },
   {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/animated/dist/react-spring-animated.cjs.dev.js",
+    "line": "    const instanceRef = React.useRef(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/animated/dist/react-spring-animated.cjs.dev.js",
+    "line": "    const observerRef = React.useRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/animated/dist/react-spring-animated.cjs.prod.js",
+    "line": "    const instanceRef = React.useRef(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/animated/dist/react-spring-animated.cjs.prod.js",
+    "line": "    const observerRef = React.useRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/animated/dist/react-spring-animated.esm.js",
+    "line": "    const instanceRef = useRef(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/animated/dist/react-spring-animated.esm.js",
+    "line": "    const observerRef = useRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/core/dist/react-spring-core.cjs.dev.js",
+    "line": "  const layoutId = React.useRef(0);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/core/dist/react-spring-core.cjs.dev.js",
+    "line": "  const ctrls = React.useRef([...state.ctrls]);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/core/dist/react-spring-core.cjs.dev.js",
+    "line": "  const usedTransitions = React.useRef(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/core/dist/react-spring-core.cjs.prod.js",
+    "line": "  const layoutId = React.useRef(0);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/core/dist/react-spring-core.cjs.prod.js",
+    "line": "  const ctrls = React.useRef([...state.ctrls]);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/core/dist/react-spring-core.cjs.prod.js",
+    "line": "  const usedTransitions = React.useRef(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/core/dist/react-spring-core.esm.js",
+    "line": "  const layoutId = useRef(0);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/core/dist/react-spring-core.esm.js",
+    "line": "  const ctrls = useRef([...state.ctrls]);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/core/dist/react-spring-core.esm.js",
+    "line": "  const usedTransitions = useRef(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/shared/dist/react-spring-shared.cjs.dev.js",
+    "line": "  const committed = React.useRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/shared/dist/react-spring-shared.cjs.dev.js",
+    "line": "  const prevRef = React.useRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/shared/dist/react-spring-shared.cjs.prod.js",
+    "line": "  const committed = React.useRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/shared/dist/react-spring-shared.cjs.prod.js",
+    "line": "  const prevRef = React.useRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/shared/dist/react-spring-shared.esm.js",
+    "line": "  const committed = useRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "node_modules/@react-spring/shared/dist/react-spring-shared.esm.js",
+    "line": "  const prevRef = useRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-27T21:37:06.339Z"
+  },
+  {
     "rule": "DOM-innerHTML",
     "path": "node_modules/@sindresorhus/is/dist/index.js",
     "line": "        'innerHTML',",
@@ -1447,28 +391,6 @@
     "reasonCategory": "testCode",
     "updated": "2020-10-09T22:28:48.591Z",
     "reasonDetail": "Test code. Also a false match."
-  },
-  {
-    "rule": "eval",
-    "path": "node_modules/@sinonjs/fake-timers/fake-timers.js",
-    "line": "            eval(timer.func);",
-    "reasonCategory": "testCode",
-    "updated": "2020-10-09T22:28:48.591Z"
-  },
-  {
-    "rule": "jQuery-wrap(",
-    "path": "node_modules/@sinonjs/fake-timers/fake-timers.js",
-    "line": "// defaultMsg returns a string which can be supplied to `wrap()` to notify the user that a particular part of the",
-    "reasonCategory": "testCode",
-    "updated": "2020-10-09T22:28:48.591Z",
-    "reasonDetail": "Test code. Also a false match."
-  },
-  {
-    "rule": "eval",
-    "path": "node_modules/@sinonjs/fake-timers/src/fake-timers-src.js",
-    "line": "            eval(timer.func);",
-    "reasonCategory": "testCode",
-    "updated": "2020-10-09T22:28:48.591Z"
   },
   {
     "rule": "jQuery-prepend(",
@@ -1903,21 +825,28 @@
   },
   {
     "rule": "jQuery-append(",
-    "path": "node_modules/blob-util/dist/blob-util.js",
-    "line": "    bb.append(ary[i]);",
+    "path": "node_modules/blob-util/dist/blob-util.cjs.js",
+    "line": "            builder.append(parts[i]);",
     "reasonCategory": "falseMatch",
-    "updated": "2018-09-19T18:13:29.628Z"
+    "updated": "2021-07-14T23:12:47.258Z"
+  },
+  {
+    "rule": "jQuery-append(",
+    "path": "node_modules/blob-util/dist/blob-util.es.js",
+    "line": "            builder.append(parts[i]);",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-07-14T23:12:47.258Z"
+  },
+  {
+    "rule": "jQuery-append(",
+    "path": "node_modules/blob-util/dist/blob-util.js",
+    "line": "                builder.append(parts[i]);",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-07-14T23:12:47.258Z"
   },
   {
     "rule": "jQuery-append(",
     "path": "node_modules/blob-util/dist/blob-util.min.js",
-    "reasonCategory": "falseMatch",
-    "updated": "2018-09-19T18:13:29.628Z"
-  },
-  {
-    "rule": "jQuery-append(",
-    "path": "node_modules/blob/index.js",
-    "line": "    bb.append(ary[i]);",
     "reasonCategory": "falseMatch",
     "updated": "2018-09-19T18:13:29.628Z"
   },
@@ -1927,6 +856,13 @@
     "line": "        error = exports.wrap(data, statusCode, message);",
     "reasonCategory": "falseMatch",
     "updated": "2018-09-19T18:13:29.628Z"
+  },
+  {
+    "rule": "jQuery-wrap(",
+    "path": "node_modules/cacheable-lookup/source/index.js",
+    "line": "\t\t].map(promise => wrap(promise)));",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-10-06T15:40:12.124Z"
   },
   {
     "rule": "jQuery-wrap(",
@@ -2702,6 +1638,20 @@
     "line": "    obj.load( docId, cacheDir );",
     "reasonCategory": "falseMatch",
     "updated": "2018-09-15T00:38:04.183Z"
+  },
+  {
+    "rule": "React-findDOMNode",
+    "path": "node_modules/focus-trap-react/dist/focus-trap-react.js",
+    "line": "        var focusTrapElementDOMNodes = this.focusTrapElements.map( // NOTE: `findDOMNode()` does not support CSS selectors; it'll just return",
+    "reasonCategory": "exampleCode",
+    "updated": "2021-10-01T23:53:26.107Z"
+  },
+  {
+    "rule": "React-findDOMNode",
+    "path": "node_modules/focus-trap-react/src/focus-trap-react.js",
+    "line": "        // NOTE: `findDOMNode()` does not support CSS selectors; it'll just return",
+    "reasonCategory": "exampleCode",
+    "updated": "2021-10-01T23:53:26.107Z"
   },
   {
     "rule": "jQuery-load(",
@@ -4714,18 +3664,32 @@
     "reasonDetail": "Part of their google closure 'debug loader'"
   },
   {
-    "rule": "DOM-innerHTML",
-    "path": "node_modules/got/node_modules/@sindresorhus/is/dist/index.js",
-    "line": "        'innerHTML',",
+    "rule": "jQuery-append(",
+    "path": "node_modules/got/dist/source/core/index.js",
+    "line": "                            searchParameters.append(key, '');",
     "reasonCategory": "falseMatch",
-    "updated": "2018-09-15T00:38:04.183Z"
+    "updated": "2021-10-06T15:40:12.124Z"
+  },
+  {
+    "rule": "jQuery-append(",
+    "path": "node_modules/got/dist/source/core/index.js",
+    "line": "                            searchParameters.append(key, value);",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-10-06T15:40:12.124Z"
+  },
+  {
+    "rule": "jQuery-append(",
+    "path": "node_modules/got/dist/source/core/index.js",
+    "line": "                        searchParameters.append(key, value);",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-10-06T15:40:12.124Z"
   },
   {
     "rule": "DOM-innerHTML",
-    "path": "node_modules/got/node_modules/@sindresorhus/is/dist/source/index.js",
-    "line": "        'innerHTML',",
-    "reasonCategory": "falseMatch",
-    "updated": "2018-09-15T00:38:04.183Z"
+    "path": "node_modules/got/node_modules/@sindresorhus/is/dist/index.js",
+    "line": "    'innerHTML',",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-06T15:40:12.124Z"
   },
   {
     "rule": "jQuery-$(",
@@ -8429,6 +7393,12 @@
     "reasonDetail": "isn't jquery"
   },
   {
+    "rule": "jQuery-$(",
+    "path": "node_modules/libheif-js/libheif/libheif.js",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-07-16T22:15:43.772Z"
+  },
+  {
     "rule": "jQuery-append(",
     "path": "node_modules/liftup/node_modules/braces/lib/expand.js",
     "line": "        result.push(append(value, stash, enclose));",
@@ -8555,6 +7525,22 @@
     "updated": "2019-03-09T00:08:44.242Z"
   },
   {
+    "rule": "jQuery-wrap(",
+    "path": "node_modules/log-symbols/node_modules/ansi-styles/index.js",
+    "line": "\t\t\tstyles[name] = wrap(identity, offset);",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-09-16T20:26:31.296Z",
+    "reasonDetail": "Not jQuery."
+  },
+  {
+    "rule": "jQuery-wrap(",
+    "path": "node_modules/log-symbols/node_modules/ansi-styles/index.js",
+    "line": "\t\t\tstyles[name] = wrap(suite[targetSpace], offset);",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-09-16T20:26:31.296Z",
+    "reasonDetail": "Not jQuery."
+  },
+  {
     "rule": "jQuery-$(",
     "path": "node_modules/loose-envify/node_modules/js-tokens/index.js",
     "reasonCategory": "falseMatch",
@@ -8567,13 +7553,6 @@
     "line": "    load()",
     "reasonCategory": "falseMatch",
     "updated": "2021-05-20T20:01:50.505Z"
-  },
-  {
-    "rule": "thenify-multiArgs",
-    "path": "node_modules/make-dir/node_modules/pify/index.js",
-    "line": "\t\t\t\t} else if (opts.multiArgs) {",
-    "reasonCategory": "falseMatch",
-    "updated": "2018-09-19T18:06:35.446Z"
   },
   {
     "rule": "jQuery-html(",
@@ -13004,17 +11983,31 @@
   },
   {
     "rule": "jQuery-$(",
-    "path": "node_modules/update-notifier/index.js",
-    "line": "\t\t\t\t\tchalk().cyan(format(' sudo chown -R $USER:$(id -gn $USER) %s ', xdgBasedir().config));",
-    "reasonCategory": "falseMatch",
-    "updated": "2018-09-19T21:59:32.770Z"
-  },
-  {
-    "rule": "jQuery-$(",
     "path": "node_modules/uri-js/dist/es5/uri.all.min.js",
     "reasonCategory": "falseMatch",
     "updated": "2020-08-26T00:10:28.628Z",
     "reasonDetail": "isn't jquery"
+  },
+  {
+    "rule": "eval",
+    "path": "node_modules/vm2/lib/main.js",
+    "line": "\t * @param {boolean} [options.eval=true] - Allow the dynamic evaluation of code via eval(code) or Function(code)().<br>",
+    "reasonCategory": "exampleCode",
+    "updated": "2021-09-02T23:51:29.928Z"
+  },
+  {
+    "rule": "eval",
+    "path": "node_modules/vm2/lib/main.js",
+    "line": "\t * @param {boolean} [options.eval=true] - Allow the dynamic evaluation of code via eval(code) or Function(code)().<br>",
+    "reasonCategory": "exampleCode",
+    "updated": "2021-09-02T23:51:29.928Z"
+  },
+  {
+    "rule": "jQuery-wrap(",
+    "path": "node_modules/vm2/lib/main.js",
+    "line": "\twrap(prefix, suffix) {",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-09-02T23:51:29.928Z"
   },
   {
     "rule": "jQuery-wrap(",
@@ -13089,11 +12082,65 @@
     "updated": "2018-09-19T18:13:29.628Z"
   },
   {
-    "rule": "jQuery-$(",
-    "path": "node_modules/xregexp/xregexp-all.js",
-    "line": "        replacementToken = /\\$(?:{([\\w$]+)}|(\\d\\d?|[\\s\\S]))/g,",
-    "reasonCategory": "falseMatch",
-    "updated": "2018-09-19T21:59:32.770Z"
+    "rule": "eval",
+    "path": "node_modules/workerpool/dist/worker.js",
+    "line": "var requireFoolWebpack = eval('typeof require !== \\'undefined\\'' + ' ? require' + ' : function (module) { throw new Error(\\'Module \" + module + \" not found.\\') }');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-16T20:26:31.296Z",
+    "reasonDetail": "Dev-only dependency."
+  },
+  {
+    "rule": "eval",
+    "path": "node_modules/workerpool/dist/workerpool.js",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-16T20:26:31.296Z",
+    "reasonDetail": "Dev-only dependency."
+  },
+  {
+    "rule": "eval",
+    "path": "node_modules/workerpool/dist/workerpool.js",
+    "line": "var requireFoolWebpack = eval('typeof require !== \\'undefined\\' ' + '? require ' + ': function (module) { throw new Error(\\'Module \" + module + \" not found.\\') }');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-16T20:26:31.296Z",
+    "reasonDetail": "Dev-only dependency."
+  },
+  {
+    "rule": "eval",
+    "path": "node_modules/workerpool/dist/workerpool.js",
+    "line": "var requireFoolWebpack = eval('typeof require !== \\'undefined\\'' + ' ? require' + ' : function (module) { throw new Error(\\'Module \" + module + \" not found.\\') }');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-16T20:26:31.296Z",
+    "reasonDetail": "Dev-only dependency."
+  },
+  {
+    "rule": "eval",
+    "path": "node_modules/workerpool/dist/workerpool.min.js",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-16T20:26:31.296Z",
+    "reasonDetail": "Dev-only dependency."
+  },
+  {
+    "rule": "eval",
+    "path": "node_modules/workerpool/src/generated/embeddedWorker.js",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-16T20:26:31.296Z",
+    "reasonDetail": "Dev-only dependency."
+  },
+  {
+    "rule": "eval",
+    "path": "node_modules/workerpool/src/requireFoolWebpack.js",
+    "line": "var requireFoolWebpack = eval(",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-16T20:26:31.296Z",
+    "reasonDetail": "Dev-only dependency."
+  },
+  {
+    "rule": "eval",
+    "path": "node_modules/workerpool/src/worker.js",
+    "line": "var requireFoolWebpack = eval(",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-16T20:26:31.296Z",
+    "reasonDetail": "Dev-only dependency."
   },
   {
     "rule": "jQuery-$(",
@@ -13101,6 +12148,20 @@
     "line": "            endAnchor = /\\$(?:\\(\\?:\\))?$/; // Trailing `$` or `$(?:)` (handles /x cruft)",
     "reasonCategory": "falseMatch",
     "updated": "2018-09-19T21:59:32.770Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "node_modules/xregexp/xregexp-all.js",
+    "line": "        replacementToken = /\\$(?:{([\\w$]+)}|(\\d\\d?|[\\s\\S]))/g,",
+    "reasonCategory": "falseMatch",
+    "updated": "2018-09-19T21:59:32.770Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "sticker-creator/components/StickerFrame.tsx",
+    "line": "    const timerRef = React.useRef<number>();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "jQuery-$(",
@@ -13142,69 +12203,6 @@
     "reasonDetail": "Hard-coded value"
   },
   {
-    "rule": "jQuery-$(",
-    "path": "ts/backbone/views/toast_view.js",
-    "line": "    template: () => $('#toast').html(),",
-    "reasonCategory": "falseMatch",
-    "updated": "2021-02-26T19:21:25.912Z"
-  },
-  {
-    "rule": "jQuery-appendTo(",
-    "path": "ts/backbone/views/toast_view.js",
-    "line": "    toast.$el.appendTo(el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Add sub-view to DOM"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "ts/backbone/views/toast_view.js",
-    "line": "        this.$el.html(window.Mustache.render(window._.result(this, 'template', ''), window._.result(this, 'render_attributes', '')));",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Adding Mustache render to DOM"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "ts/backbone/views/toast_view.js",
-    "line": "    template: () => $('#toast').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T19:21:25.912Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-$(",
-    "path": "ts/backbone/views/toast_view.ts",
-    "line": "  template: () => $('#toast').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
-    "rule": "jQuery-appendTo(",
-    "path": "ts/backbone/views/toast_view.ts",
-    "line": "  toast.$el.appendTo(el);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Adding sub-view to DOM"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "ts/backbone/views/toast_view.ts",
-    "line": "    this.$el.html(",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T18:44:56.450Z",
-    "reasonDetail": "Rendering provided template"
-  },
-  {
-    "rule": "jQuery-html(",
-    "path": "ts/backbone/views/toast_view.ts",
-    "line": "  template: () => $('#toast').html(),",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-02-26T19:23:51.217Z",
-    "reasonDetail": "Static selector, read-only access"
-  },
-  {
     "rule": "jQuery-html(",
     "path": "ts/backbone/views/whisper_view.js",
     "line": "            this.$el.html(window.Mustache.render(template, attrs));",
@@ -13222,11 +12220,10 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/calling/useGetCallingFrameBuffer.js",
-    "line": "    const ref = react_1.useRef(null);",
+    "path": "ts/calling/useGetCallingFrameBuffer.ts",
+    "line": "  const ref = useRef<ArrayBuffer | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-01-06T00:47:54.313Z",
-    "reasonDetail": "Needed to render remote video elements. Doesn't interact with the DOM."
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "jQuery-load(",
@@ -13265,57 +12262,67 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/AvatarInput.js",
-    "line": "    const fileInputRef = react_1.useRef(null);",
+    "path": "ts/components/AvatarPreview.tsx",
+    "line": "  const startingAvatarPathRef = useRef<undefined | string>(",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-01T18:34:36.638Z",
-    "reasonDetail": "Needed to trigger a click on a 'file' input. Doesn't update the DOM."
+    "updated": "2021-08-03T21:17:38.615Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/AvatarInput.js",
-    "line": "    const menuTriggerRef = react_1.useRef(null);",
+    "path": "ts/components/AvatarTextEditor.tsx",
+    "line": "  const measureElRef = useRef<null | HTMLDivElement>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-01T18:34:36.638Z",
-    "reasonDetail": "Used to reference popup menu"
+    "updated": "2021-08-04T18:18:09.236Z",
+    "reasonDetail": "Only used for measurement. Doesn't modify the DOM."
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/AvatarPopup.js",
-    "line": "    const focusRef = React.useRef(null);",
+    "path": "ts/components/AvatarTextEditor.tsx",
+    "line": "  const inputRef = useRef<HTMLInputElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-10-26T19:12:24.410Z",
-    "reasonDetail": "Only used to focus the element."
+    "updated": "2021-08-04T22:02:17.074Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/BackboneHost.js",
-    "line": "    const hostRef = react_1.useRef(null);",
+    "path": "ts/components/AvatarTextEditor.tsx",
+    "line": "  const onDoneRef = useRef<DoneHandleType>(onDone);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-06-09T04:02:08.305Z"
+    "updated": "2021-08-05T23:40:55.699Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/BackboneHost.js",
-    "line": "    const viewRef = react_1.useRef(undefined);",
+    "path": "ts/components/AvatarUploadButton.tsx",
+    "line": "  const fileInputRef = useRef<null | HTMLInputElement>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-06-09T04:02:08.305Z"
+    "updated": "2021-08-03T21:17:38.615Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/CallNeedPermissionScreen.js",
-    "line": "    const autoCloseAtRef = react_1.useRef(Date.now() + AUTO_CLOSE_MS);",
-    "reasonCategory": "falseMatch",
-    "updated": "2020-10-26T19:12:24.410Z",
-    "reasonDetail": "Doesn't touch the DOM."
+    "path": "ts/components/BackboneHost.tsx",
+    "line": "  const hostRef = useRef<HTMLDivElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/CallScreen.js",
-    "line": "    const localVideoRef = react_1.useRef(null);",
+    "path": "ts/components/BackboneHost.tsx",
+    "line": "  const viewRef = useRef<Backbone.View | undefined>(undefined);",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-10-26T21:35:52.858Z",
-    "reasonDetail": "Used to get the local video element for rendering."
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/CallNeedPermissionScreen.tsx",
+    "line": "  const autoCloseAtRef = useRef<number>(Date.now() + AUTO_CLOSE_MS);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/CallScreen.tsx",
+    "line": "  const localVideoRef = useRef<HTMLVideoElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
@@ -13324,6 +12331,13 @@
     "reasonCategory": "usageTrusted",
     "updated": "2020-10-26T19:12:24.410Z",
     "reasonDetail": "Used to get the local video element for rendering."
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/CallingLobby.tsx",
+    "line": "  const localVideoRef = React.useRef<null | HTMLVideoElement>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
@@ -13351,18 +12365,24 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/CallingToastManager.js",
-    "line": "    const timeoutRef = react_1.useRef(null);",
+    "path": "ts/components/CallingPip.tsx",
+    "line": "  const videoContainerRef = React.useRef<null | HTMLDivElement>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-05-13T19:40:31.751Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/CaptchaDialog.js",
-    "line": "    const buttonRef = react_1.useRef(null);",
+    "path": "ts/components/CallingToastManager.tsx",
+    "line": "  const timeoutRef = useRef<NodeJS.Timeout | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-05-05T23:11:22.692Z",
-    "reasonDetail": "Used only to set focus"
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/CaptchaDialog.tsx",
+    "line": "  const buttonRef = useRef<HTMLButtonElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-createRef",
@@ -13382,42 +12402,24 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/ChatColorPicker.js",
-    "line": "    const menuRef = react_1.useRef(null);",
+    "path": "ts/components/ChatColorPicker.tsx",
+    "line": "  const menuRef = useRef<any | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-05-25T18:25:53.896Z"
-  },
-  {
-    "rule": "DOM-innerHTML",
-    "path": "ts/components/CompositionArea.js",
-    "line": "    el.innerHTML = '';",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-05-20T20:10:43.540Z",
-    "reasonDetail": "Our code, no user input, only clearing out the dom"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/CompositionArea.js",
-    "line": "    const inputApiRef = React.useRef();",
-    "reasonCategory": "falseMatch",
-    "updated": "2020-10-26T19:12:24.410Z",
-    "reasonDetail": "Doesn't refer to a DOM element."
-  },
-  {
-    "rule": "React-useRef",
-    "path": "ts/components/CompositionArea.js",
-    "line": "    const micCellRef = React.useRef(null);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-10-26T19:12:24.410Z",
-    "reasonDetail": "Needed for the composition area."
-  },
-  {
-    "rule": "DOM-innerHTML",
     "path": "ts/components/CompositionArea.tsx",
-    "line": "  el.innerHTML = '';",
+    "line": "  const inputApiRef = useRef<InputApi | undefined>();",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-06-03T19:23:21.195Z",
-    "reasonDetail": "Our code, no user input, only clearing out the dom"
+    "updated": "2021-09-23T00:07:11.885Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/CompositionArea.tsx",
+    "line": "  const fileInputRef = useRef<null | HTMLInputElement>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-23T00:07:11.885Z"
   },
   {
     "rule": "React-useRef",
@@ -13483,34 +12485,66 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/ContactPills.js",
-    "line": "    const elRef = react_1.useRef(null);",
+    "path": "ts/components/CompositionInput.tsx",
+    "line": "  const emojiCompletionRef = React.useRef<EmojiCompletion>();",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-01T18:34:36.638Z",
-    "reasonDetail": "Used for scrolling. Doesn't otherwise manipulate the DOM"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/ConversationList.js",
-    "line": "    const listRef = react_1.useRef(null);",
+    "path": "ts/components/CompositionInput.tsx",
+    "line": "  const mentionCompletionRef = React.useRef<MentionCompletion>();",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-02-12T16:25:08.285Z",
-    "reasonDetail": "Used for scroll calculations"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/DirectCallRemoteParticipant.js",
-    "line": "    const remoteVideoRef = react_1.useRef(null);",
+    "path": "ts/components/CompositionInput.tsx",
+    "line": "  const quillRef = React.useRef<Quill>();",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-11-11T21:56:04.179Z",
-    "reasonDetail": "Needed to render the remote video element."
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/ForwardMessageModal.js",
-    "line": "    const inputRef = react_1.useRef(null);",
+    "path": "ts/components/CompositionInput.tsx",
+    "line": "  const scrollerRef = React.useRef<HTMLDivElement>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-04-19T18:13:21.664Z"
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/CompositionInput.tsx",
+    "line": "  const propsRef = React.useRef<Props>(props);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/CompositionInput.tsx",
+    "line": "  const memberRepositoryRef = React.useRef<MemberRepository>(",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/ContactPills.tsx",
+    "line": "  const elRef = useRef<null | HTMLDivElement>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/ConversationList.tsx",
+    "line": "  const listRef = useRef<null | List>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/DirectCallRemoteParticipant.tsx",
+    "line": "  const remoteVideoRef = useRef<HTMLCanvasElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
@@ -13521,42 +12555,31 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/GradientDial.js",
-    "line": "    const containerRef = react_1.useRef(null);",
+    "path": "ts/components/ForwardMessageModal.tsx",
+    "line": "  const inputRef = useRef<null | HTMLInputElement>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-05-25T18:25:53.896Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/GroupCallOverflowArea.js",
-    "line": "    const overflowRef = react_1.useRef(null);",
+    "path": "ts/components/ForwardMessageModal.tsx",
+    "line": "  const inputApiRef = React.useRef<InputApi | undefined>();",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-01-08T15:48:46.313Z",
-    "reasonDetail": "Used to deal with scroll position."
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/GroupCallRemoteParticipant.js",
-    "line": "    const remoteVideoRef = react_1.useRef(null);",
+    "path": "ts/components/GradientDial.tsx",
+    "line": "  const containerRef = useRef<HTMLDivElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-11-11T21:56:04.179Z",
-    "reasonDetail": "Needed to render the remote video element."
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/GroupCallRemoteParticipant.js",
-    "line": "    const canvasContextRef = react_1.useRef(null);",
+    "path": "ts/components/GroupCallOverflowArea.tsx",
+    "line": "  const overflowRef = useRef<HTMLDivElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-11-17T23:29:38.698Z",
-    "reasonDetail": "Doesn't touch the DOM."
-  },
-  {
-    "rule": "React-useRef",
-    "path": "ts/components/GroupCallRemoteParticipant.js",
-    "line": "    const lastReceivedVideoAt = react_1.useRef(-Infinity);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-06-17T20:46:02.342Z",
-    "reasonDetail": "Doesn't reference the DOM."
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
@@ -13568,62 +12591,60 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/GroupDescriptionInput.js",
-    "line": "    const innerRef = react_1.useRef(null);",
+    "path": "ts/components/GroupCallRemoteParticipant.tsx",
+    "line": "    const remoteVideoRef = useRef<HTMLCanvasElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-05-29T02:15:39.186Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/GroupDescriptionInput.js",
-    "line": "    const valueOnKeydownRef = react_1.useRef(value);",
+    "path": "ts/components/GroupCallRemoteParticipant.tsx",
+    "line": "    const canvasContextRef = useRef<CanvasRenderingContext2D | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-05-29T02:15:39.186Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/GroupDescriptionInput.js",
-    "line": "    const selectionStartOnKeydownRef = react_1.useRef(value.length);",
+    "path": "ts/components/Inbox.tsx",
+    "line": "  const hostRef = useRef<HTMLDivElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-05-29T02:15:39.186Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/GroupTitleInput.js",
-    "line": "    const selectionStartOnKeydownRef = react_1.useRef(value.length);",
+    "path": "ts/components/Inbox.tsx",
+    "line": "  const viewRef = useRef<InboxViewType | undefined>(undefined);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-05T16:51:54.214Z",
-    "reasonDetail": "Only stores a number."
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/GroupTitleInput.js",
-    "line": "    const valueOnKeydownRef = react_1.useRef(value);",
+    "path": "ts/components/IncomingCallBar.tsx",
+    "line": "  const initialTitleRef = useRef<string>(title);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-05T16:51:54.214Z",
-    "reasonDetail": "Only stores a string."
+    "updated": "2021-08-16T20:52:11.043Z",
+    "reasonDetail": "Doesn't interact with the DOM."
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/GroupTitleInput.js",
-    "line": "    const innerRef = react_1.useRef(null);",
+    "path": "ts/components/Input.tsx",
+    "line": "    const innerRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-05T16:51:54.214Z",
-    "reasonDetail": "Used to handle an <input> element. Only updates the value and selection state."
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/Inbox.js",
-    "line": "    const hostRef = react_1.useRef(null);",
+    "path": "ts/components/Input.tsx",
+    "line": "    const valueOnKeydownRef = useRef<string>(value);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-06-08T02:49:25.154Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/Inbox.js",
-    "line": "    const viewRef = react_1.useRef(undefined);",
+    "path": "ts/components/Input.tsx",
+    "line": "    const selectionStartOnKeydownRef = useRef<number>(value.length);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-06-08T02:49:25.154Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "jQuery-$(",
@@ -13640,27 +12661,47 @@
     "updated": "2020-07-21T18:34:59.251Z"
   },
   {
-    "rule": "React-createRef",
-    "path": "ts/components/Lightbox.js",
-    "line": "        this.containerRef = react_1.default.createRef();",
+    "rule": "React-useRef",
+    "path": "ts/components/LeftPaneSearchInput.tsx",
+    "line": "    const inputRef = useRef<null | HTMLInputElement>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2019-11-06T19:56:38.557Z",
-    "reasonDetail": "Used to double-check outside clicks"
+    "updated": "2021-10-29T22:48:58.354Z",
+    "reasonDetail": "Only used to focus the input."
   },
   {
-    "rule": "React-createRef",
-    "path": "ts/components/Lightbox.js",
-    "line": "        this.focusRef = react_1.default.createRef();",
+    "rule": "React-useRef",
+    "path": "ts/components/Lightbox.tsx",
+    "line": "  const containerRef = useRef<HTMLDivElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2019-11-06T19:56:38.557Z",
-    "reasonDetail": "Used to manage focus"
+    "updated": "2021-08-23T18:39:37.081Z"
   },
   {
-    "rule": "React-createRef",
-    "path": "ts/components/Lightbox.js",
-    "line": "        this.videoRef = react_1.default.createRef();",
+    "rule": "React-useRef",
+    "path": "ts/components/Lightbox.tsx",
+    "line": "  const imageRef = useRef<HTMLImageElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-09-14T23:03:44.863Z"
+    "updated": "2021-09-24T00:03:36.061Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/Lightbox.tsx",
+    "line": "  const animateRef = useRef<HTMLDivElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-11T21:21:08.188Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/Lightbox.tsx",
+    "line": "  const dragCacheRef = useRef<",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-11T21:21:08.188Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/Lightbox.tsx",
+    "line": "  const zoomCacheRef = useRef<",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-11T21:21:08.188Z"
   },
   {
     "rule": "React-createRef",
@@ -13679,6 +12720,27 @@
     "reasonDetail": "Used only to set focus"
   },
   {
+    "rule": "React-useRef",
+    "path": "ts/components/Modal.tsx",
+    "line": "  const modalRef = useRef<HTMLDivElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-05T00:22:31.660Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/Modal.tsx",
+    "line": "  const bodyRef = useRef<HTMLDivElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-21T01:40:08.534Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/ProfileEditor.tsx",
+    "line": "  const focusInputRef = useRef<HTMLInputElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
     "rule": "React-createRef",
     "path": "ts/components/SafetyNumberChangeDialog.js",
     "line": "    const cancelButtonRef = React.createRef();",
@@ -13688,32 +12750,24 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/ShortcutGuide.js",
-    "line": "    const focusRef = React.useRef(null);",
+    "path": "ts/components/Slider.tsx",
+    "line": "  const diff = useRef<number>(0);",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-10-26T19:12:24.410Z",
-    "reasonDetail": "Only used to focus the element."
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/Slider.js",
-    "line": "    const diff = react_1.useRef(0);",
+    "path": "ts/components/Slider.tsx",
+    "line": "  const handleRef = useRef<HTMLDivElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-05-25T18:25:53.896Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/Slider.js",
-    "line": "    const handleRef = react_1.useRef(null);",
+    "path": "ts/components/Slider.tsx",
+    "line": "  const sliderRef = useRef<HTMLDivElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-05-25T18:25:53.896Z"
-  },
-  {
-    "rule": "React-useRef",
-    "path": "ts/components/Slider.js",
-    "line": "    const sliderRef = react_1.useRef(null);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2021-05-25T18:25:53.896Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
@@ -13725,17 +12779,10 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/conversation/ContactModal.js",
-    "line": "    const overlayRef = react_1.default.useRef(null);",
+    "path": "ts/components/Tooltip.tsx",
+    "line": "  const wrapperRef = React.useRef<HTMLSpanElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-11-09T17:48:12.173Z"
-  },
-  {
-    "rule": "React-useRef",
-    "path": "ts/components/conversation/ContactModal.js",
-    "line": "    const closeButtonRef = react_1.default.useRef(null);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-11-10T21:27:04.909Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-createRef",
@@ -13747,6 +12794,14 @@
   },
   {
     "rule": "React-createRef",
+    "path": "ts/components/conversation/ConversationHeader.js",
+    "line": "        this.headerRef = react_1.default.createRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-01-18T22:24:05.937Z",
+    "reasonDetail": "Used to reference popup menu boundaries element"
+  },
+  {
+    "rule": "React-createRef",
     "path": "ts/components/conversation/ConversationHeader.tsx",
     "line": "    this.menuTriggerRef = React.createRef();",
     "reasonCategory": "usageTrusted",
@@ -13754,20 +12809,12 @@
     "reasonDetail": "Used to reference popup menu"
   },
   {
-    "rule": "React-useRef",
-    "path": "ts/components/conversation/ConversationHero.js",
-    "line": "    const firstRenderRef = react_1.useRef(true);",
-    "reasonCategory": "falseMatch",
-    "updated": "2020-10-26T19:12:24.410Z",
-    "reasonDetail": "Doesn't refer to a DOM element."
-  },
-  {
-    "rule": "React-useRef",
-    "path": "ts/components/conversation/ConversationHero.js",
-    "line": "    const previousHeightRef = react_1.useRef();",
-    "reasonCategory": "falseMatch",
-    "updated": "2021-05-05T21:55:35.064Z",
-    "reasonDetail": "Doesn't refer to a DOM element."
+    "rule": "React-createRef",
+    "path": "ts/components/conversation/ConversationHeader.tsx",
+    "line": "    this.headerRef = React.createRef();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-01-18T22:24:05.937Z",
+    "reasonDetail": "Used to reference popup menu boundaries element"
   },
   {
     "rule": "React-useRef",
@@ -13779,18 +12826,17 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/conversation/GIF.js",
-    "line": "    const videoRef = react_1.useRef(null);",
+    "path": "ts/components/conversation/GIF.tsx",
+    "line": "  const videoRef = useRef<HTMLVideoElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-04-17T01:47:31.419Z",
-    "reasonDetail": "Used for managing playback of GIF video"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/conversation/GroupDescription.js",
-    "line": "    const textRef = react_1.useRef(null);",
+    "path": "ts/components/conversation/GroupDescription.tsx",
+    "line": "  const textRef = useRef<HTMLDivElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-05-29T02:15:39.186Z"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-createRef",
@@ -13858,11 +12904,10 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/conversation/MessageAudio.js",
-    "line": "    const waveformRef = react_1.useRef(null);",
+    "path": "ts/components/conversation/MessageAudio.tsx",
+    "line": "  const waveformRef = useRef<HTMLDivElement | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-09T01:19:04.057Z",
-    "reasonDetail": "Used for obtanining the bounding box for the container"
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-createRef",
@@ -13873,12 +12918,12 @@
     "reasonDetail": "Used for setting focus only"
   },
   {
-    "rule": "React-useRef",
-    "path": "ts/components/conversation/Quote.js",
-    "line": "    const imageRef = react_1.useRef(new Image());",
+    "rule": "React-createRef",
+    "path": "ts/components/conversation/MessageDetail.js",
+    "line": "        this.messageContainerRef = react_1.default.createRef();",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-01-20T21:30:08.430Z",
-    "reasonDetail": "Doesn't touch the DOM."
+    "updated": "2021-08-20T16:48:00.885Z",
+    "reasonDetail": "Needed to confine Poppers. We don't actually manipulate this DOM reference."
   },
   {
     "rule": "React-useRef",
@@ -13889,22 +12934,6 @@
     "reasonDetail": "Doesn't touch the DOM."
   },
   {
-    "rule": "React-useRef",
-    "path": "ts/components/conversation/ReactionPicker.js",
-    "line": "    const focusRef = React.useRef(null);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-10-26T19:12:24.410Z",
-    "reasonDetail": "Only used to focus the element."
-  },
-  {
-    "rule": "React-useRef",
-    "path": "ts/components/conversation/ReactionViewer.js",
-    "line": "    const focusRef = React.useRef(null);",
-    "reasonCategory": "usageTrusted",
-    "updated": "2020-10-26T19:12:24.410Z",
-    "reasonDetail": "Only used to focus the element."
-  },
-  {
     "rule": "React-createRef",
     "path": "ts/components/conversation/Timeline.js",
     "line": "        this.listRef = react_1.default.createRef();",
@@ -13913,36 +12942,40 @@
     "reasonDetail": "Timeline needs to interact with its child List directly"
   },
   {
-    "rule": "React-useRef",
-    "path": "ts/components/conversation/conversation-details/AddGroupMembersModal/ChooseGroupMembersModal.js",
-    "line": "    const inputRef = react_1.useRef(null);",
+    "rule": "React-createRef",
+    "path": "ts/components/conversation/Timeline.js",
+    "line": "        this.containerRef = react_1.default.createRef();",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-11T20:49:17.292Z",
-    "reasonDetail": "Used to focus an input."
+    "updated": "2021-08-20T16:48:00.885Z",
+    "reasonDetail": "Needed to confine Poppers. We don't actually manipulate this DOM reference."
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/conversation/conversation-details/EditConversationAttributesModal.js",
-    "line": "    const startingTitleRef = react_1.useRef(externalTitle);",
+    "path": "ts/components/conversation/conversation-details/AddGroupMembersModal/ChooseGroupMembersModal.tsx",
+    "line": "  const inputRef = useRef<null | HTMLInputElement>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-05T22:52:40.572Z",
-    "reasonDetail": "Doesn't interact with the DOM."
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/conversation/conversation-details/EditConversationAttributesModal.js",
-    "line": "    const startingAvatarPathRef = react_1.useRef(externalAvatarPath);",
+    "path": "ts/components/conversation/conversation-details/EditConversationAttributesModal.tsx",
+    "line": "  const focusDescriptionRef = useRef<undefined | boolean>(",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-05T22:52:40.572Z",
-    "reasonDetail": "Doesn't interact with the DOM."
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/conversation/conversation-details/EditConversationAttributesModal.js",
-    "line": "    const focusDescriptionRef = react_1.useRef(initiallyFocusDescription);",
+    "path": "ts/components/conversation/conversation-details/EditConversationAttributesModal.tsx",
+    "line": "  const startingTitleRef = useRef<string>(externalTitle);",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-06-04T14:19:49.714Z",
-    "reasonDetail": "Only stores undefined/true/false, not DOM references."
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/components/conversation/conversation-details/EditConversationAttributesModal.tsx",
+    "line": "  const startingAvatarPathRef = useRef<undefined | string>(externalAvatarPath);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
   },
   {
     "rule": "React-createRef",
@@ -13970,19 +13003,74 @@
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/stickers/StickerPicker.js",
-    "line": "    const focusRef = React.useRef(null);",
+    "path": "ts/hooks/useIntersectionObserver.ts",
+    "line": "  const unobserveRef = useRef<(() => unknown) | null>(null);",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-10-26T19:12:24.410Z",
-    "reasonDetail": "Only used to focus the element."
+    "updated": "2021-09-17T20:16:37.959Z"
   },
   {
     "rule": "React-useRef",
-    "path": "ts/components/stickers/StickerPreviewModal.js",
-    "line": "    const focusRef = React.useRef(null);",
+    "path": "ts/hooks/usePrevious.ts",
+    "line": "  const previousValueRef = useRef<T>(initialValue);",
     "reasonCategory": "usageTrusted",
-    "updated": "2020-10-26T19:12:24.410Z",
-    "reasonDetail": "Only used to focus the element."
+    "updated": "2021-09-17T20:16:37.959Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/hooks/useRestoreFocus.js",
+    "line": "    const lastFocusedRef = React.useRef(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T01:08:01.309Z",
+    "reasonDetail": "Used to store the previous-focused item, again to set focus"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/hooks/useRestoreFocus.js",
+    "line": "    const toFocusRef = React.useRef(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-17T17:37:46.279Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/hooks/useRestoreFocus.js",
+    "line": "    const toFocusRef = React.useRef(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-22T00:52:39.251Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/hooks/useRestoreFocus.js",
+    "line": "    const lastFocusedRef = React.useRef(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-22T00:52:39.251Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/hooks/useRestoreFocus.ts",
+    "line": "  const toFocusRef = React.useRef<HTMLElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/hooks/useRestoreFocus.ts",
+    "line": "  const lastFocusedRef = React.useRef<HTMLElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-07-30T16:57:33.618Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/hooks/useRestoreFocus.ts",
+    "line": "  const toFocusRef = React.useRef<HTMLElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-22T00:52:39.251Z"
+  },
+  {
+    "rule": "React-useRef",
+    "path": "ts/hooks/useRestoreFocus.ts",
+    "line": "  const lastFocusedRef = React.useRef<HTMLElement | null>(null);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-22T00:52:39.251Z"
   },
   {
     "rule": "jQuery-append(",
@@ -14128,33 +13216,923 @@
     "reasonDetail": "Doesn't manipulate the DOM."
   },
   {
-    "rule": "jQuery-wrap(",
-    "path": "ts/shims/textsecure.js",
-    "line": "    wrap(textsecure.messaging.sendStickerPackSync([",
+    "rule": "jQuery-load(",
+    "path": "ts/types/Stickers.js",
+    "line": "async function load() {",
     "reasonCategory": "falseMatch",
-    "updated": "2020-02-07T19:52:28.522Z"
+    "updated": "2021-07-02T02:57:58.052Z"
   },
   {
-    "rule": "jQuery-wrap(",
-    "path": "ts/shims/textsecure.ts",
-    "line": "  wrap(",
+    "rule": "jQuery-load(",
+    "path": "ts/types/Stickers.ts",
+    "line": "export async function load(): Promise<void> {",
     "reasonCategory": "falseMatch",
-    "updated": "2020-02-07T19:52:28.522Z"
+    "updated": "2019-04-26T17:48:30.675Z"
   },
   {
-    "rule": "React-useRef",
-    "path": "ts/util/hooks.js",
-    "line": "    const unobserveRef = React.useRef(null);",
+    "rule": "jQuery-load(",
+    "path": "ts/util/avatarDataToBytes.js",
+    "line": "    await font.load();",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-01-08T15:46:32.143Z",
-    "reasonDetail": "Doesn't manipulate the DOM. This is just a function."
+    "updated": "2021-08-03T21:17:38.615Z"
   },
   {
-    "rule": "React-useRef",
-    "path": "ts/util/hooks.js",
-    "line": "    const previousValueRef = React.useRef(initialValue);",
+    "rule": "jQuery-load(",
+    "path": "ts/util/avatarDataToBytes.ts",
+    "line": "  await font.load();",
     "reasonCategory": "usageTrusted",
-    "updated": "2021-03-18T21:41:28.361Z",
-    "reasonDetail": "A generic hook. Typically not to be used with non-DOM values."
+    "updated": "2021-08-03T21:17:38.615Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/util/createIPCEvents.js",
+    "line": "            if ($('.dark-overlay').length) {",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-18T18:22:55.307Z",
+    "reasonDetail": "Legacy code"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/util/createIPCEvents.js",
+    "line": "            $(document.body).prepend('<div class=\"dark-overlay\"></div>');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-18T18:22:55.307Z",
+    "reasonDetail": "Legacy code"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/util/createIPCEvents.js",
+    "line": "            $('.dark-overlay').on('click', () => $('.dark-overlay').remove());",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-18T18:22:55.307Z",
+    "reasonDetail": "Legacy code"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/util/createIPCEvents.js",
+    "line": "        }, removeDarkOverlay: () => $('.dark-overlay').remove(), showKeyboardShortcuts: () => window.showKeyboardShortcuts(), deleteAllData: async () => {",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-18T18:22:55.307Z",
+    "reasonDetail": "Legacy code"
+  },
+  {
+    "rule": "jQuery-prepend(",
+    "path": "ts/util/createIPCEvents.js",
+    "line": "            $(document.body).prepend('<div class=\"dark-overlay\"></div>');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-18T18:22:55.307Z",
+    "reasonDetail": "Legacy code"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/util/createIPCEvents.ts",
+    "line": "      if ($('.dark-overlay').length) {",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-18T18:22:55.307Z",
+    "reasonDetail": "Legacy code"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/util/createIPCEvents.ts",
+    "line": "      $(document.body).prepend('<div class=\"dark-overlay\"></div>');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-18T18:22:55.307Z",
+    "reasonDetail": "Legacy code"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/util/createIPCEvents.ts",
+    "line": "      $('.dark-overlay').on('click', () => $('.dark-overlay').remove());",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-18T18:22:55.307Z",
+    "reasonDetail": "Legacy code"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/util/createIPCEvents.ts",
+    "line": "    removeDarkOverlay: () => $('.dark-overlay').remove(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-18T18:22:55.307Z",
+    "reasonDetail": "Legacy code"
+  },
+  {
+    "rule": "jQuery-prepend(",
+    "path": "ts/util/createIPCEvents.ts",
+    "line": "      $(document.body).prepend('<div class=\"dark-overlay\"></div>');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-08-18T18:22:55.307Z",
+    "reasonDetail": "Legacy code"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/util/setupI18n.js",
+    "line": "        const FIND_REPLACEMENTS = /\\$([^$]+)\\$/g;",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-09-17T21:51:57.475Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/util/setupI18n.ts",
+    "line": "    const FIND_REPLACEMENTS = /\\$([^$]+)\\$/g;",
+    "reasonCategory": "falseMatch",
+    "updated": "2021-09-17T21:51:57.475Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.js",
+    "line": "    template: () => $('#app-loading-screen').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.js",
+    "line": "            this.$('.message').text(message);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.js",
+    "line": "    template: () => $('#two-column').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.js",
+    "line": "            el: this.$('.conversation-stack'),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.js",
+    "line": "        this.$('.left-pane-placeholder').replaceWith(this.leftPaneView.el);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-08T17:39:41.541Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.js",
+    "line": "        this.$('.no-conversation-open').toggle(!isAnyConversationOpen);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-08T17:40:22.770Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.js",
+    "line": "        this.$('.whats-new-placeholder').append(this.whatsNewLink.el);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-22T20:58:48.103Z"
+  },
+  {
+    "rule": "jQuery-append(",
+    "path": "ts/views/inbox_view.js",
+    "line": "        this.$('.whats-new-placeholder').append(this.whatsNewLink.el);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-22T20:58:48.103Z"
+  },
+  {
+    "rule": "jQuery-appendTo(",
+    "path": "ts/views/inbox_view.js",
+    "line": "            view.$el.appendTo(this.el);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-20T22:27:31.785Z"
+  },
+  {
+    "rule": "jQuery-html(",
+    "path": "ts/views/inbox_view.js",
+    "line": "    template: () => $('#app-loading-screen').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-html(",
+    "path": "ts/views/inbox_view.js",
+    "line": "    template: () => $('#two-column').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-prependTo(",
+    "path": "ts/views/inbox_view.js",
+    "line": "            this.appLoadingScreen.$el.prependTo(this.el);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "  template: () => $('#app-loading-screen').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "      this.$('.message').text(message);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "  template: () => $('#two-column').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "      el: this.$('.conversation-stack'),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "    this.$('.no-conversation-open').toggle(!isAnyConversationOpen);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-08T17:40:22.770Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "    this.$('.left-pane-placeholder').replaceWith(this.leftPaneView.el);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-08T17:40:22.770Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "    this.$('.whats-new-placeholder').append(this.whatsNewLink.el);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-22T20:58:48.103Z"
+  },
+  {
+    "rule": "jQuery-append(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "    this.$('.whats-new-placeholder').append(this.whatsNewLink.el);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-10-22T20:58:48.103Z"
+  },
+  {
+    "rule": "jQuery-appendTo(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "      view.$el.appendTo(this.el);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-html(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "  template: () => $('#app-loading-screen').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-html(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "  template: () => $('#two-column').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-prependTo(",
+    "path": "ts/views/inbox_view.ts",
+    "line": "      this.appLoadingScreen.$el.prependTo(this.el);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "    template: () => $('#link-flow-template').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.$('#qr img').remove();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.$('#qr canvas').remove();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.$('#qr .container').show();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.$('#qr').removeClass('ready');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        if ($('#qr').length === 0) {",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.$('#qr .container').hide();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.qr = new window.QRCode(this.$('#qr')[0]).makeCode(url);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.$('#qr').removeAttr('title');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.$('#qr').addClass('ready');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.$(DEVICE_NAME_SELECTOR).val(deviceName || window.getHostName());",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.$(DEVICE_NAME_SELECTOR).focus();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "            this.$('#link-phone').submit((e) => {",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "                let name = this.$(DEVICE_NAME_SELECTOR).val();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "                    this.$(DEVICE_NAME_SELECTOR).focus();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.js",
+    "line": "        this.$('#qr img').attr('alt', window.i18n('LinkScreen__scan-this-code'));",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-28T00:13:42.086Z"
+  },
+  {
+    "rule": "jQuery-html(",
+    "path": "ts/views/install_view.js",
+    "line": "    template: () => $('#link-flow-template').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "  template: () => $('#link-flow-template').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.$('#qr img').remove();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.$('#qr canvas').remove();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.$('#qr .container').show();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.$('#qr').removeClass('ready');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    if ($('#qr').length === 0) {",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.$('#qr .container').hide();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.qr = new window.QRCode(this.$('#qr')[0]).makeCode(url);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.$('#qr').removeAttr('title');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.$('#qr').addClass('ready');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.$(DEVICE_NAME_SELECTOR).val(deviceName || window.getHostName());",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.$(DEVICE_NAME_SELECTOR).focus();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "      this.$('#link-phone').submit((e: SubmitEvent) => {",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "        let name = this.$(DEVICE_NAME_SELECTOR).val();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "          this.$(DEVICE_NAME_SELECTOR).focus();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/install_view.ts",
+    "line": "    this.$('#qr img').attr('alt', window.i18n('LinkScreen__scan-this-code'));",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-28T00:13:42.086Z"
+  },
+  {
+    "rule": "jQuery-html(",
+    "path": "ts/views/install_view.ts",
+    "line": "  template: () => $('#link-flow-template').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.js",
+    "line": "    template: () => $('#phone-number').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.js",
+    "line": "        this.$('input.number').intlTelInput();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.js",
+    "line": "        const input = this.$('input.number');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.js",
+    "line": "        const regionCode = this.$('li.active')",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.js",
+    "line": "            this.$('.number-container').removeClass('invalid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.js",
+    "line": "            this.$('.number-container').addClass('valid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.js",
+    "line": "            this.$('.number-container').removeClass('valid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-html(",
+    "path": "ts/views/phone_input_view.js",
+    "line": "    template: () => $('#phone-number').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.ts",
+    "line": "  template: () => $('#phone-number').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.ts",
+    "line": "    this.$('input.number').intlTelInput();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.ts",
+    "line": "    const input = this.$('input.number');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.ts",
+    "line": "    const regionCode = this.$('li.active')",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.ts",
+    "line": "      this.$('.number-container').removeClass('invalid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.ts",
+    "line": "      this.$('.number-container').addClass('valid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/phone_input_view.ts",
+    "line": "      this.$('.number-container').removeClass('valid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-html(",
+    "path": "ts/views/phone_input_view.ts",
+    "line": "  template: () => $('#phone-number').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "    template: () => $('#standalone').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "            this.$('input.number').val(number);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "            el: this.$('#phone-number-input'),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "        this.$('#error').hide();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "        const codeHTML = $('#code').val();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "        this.$('#status').text(s);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "        this.$('#error').hide().text(error).addClass('in').fadeIn();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "        if (this.$('#number-container').hasClass('valid')) {",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "            this.$('#request-sms, #request-voice').removeAttr('disabled');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "            this.$('#request-sms, #request-voice').prop('disabled', 'disabled');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "            this.$('#code').addClass('invalid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "            this.$('#code').removeClass('invalid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "        this.$('#error').hide();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "            this.$('#step2').addClass('in').fadeIn();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "            this.$('#number-container').addClass('invalid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "        $('#error').hide();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "            this.$('#step2').addClass('in').fadeIn();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "            this.$('#number-container').addClass('invalid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-html(",
+    "path": "ts/views/standalone_registration_view.js",
+    "line": "    template: () => $('#standalone').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "  template: () => $('#standalone').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "      this.$('input.number').val(number);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "      el: this.$('#phone-number-input'),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "    this.$('#error').hide();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "    const codeHTML = $('#code').val();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "    this.$('#status').text(s);",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "    this.$('#error').hide().text(error).addClass('in').fadeIn();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "    if (this.$('#number-container').hasClass('valid')) {",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "      this.$('#request-sms, #request-voice').removeAttr('disabled');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "      this.$('#request-sms, #request-voice').prop('disabled', 'disabled');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "      this.$('#code').addClass('invalid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "      this.$('#code').removeClass('invalid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "    this.$('#error').hide();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "      this.$('#step2').addClass('in').fadeIn();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "      this.$('#number-container').addClass('invalid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "    $('#error').hide();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "      this.$('#step2').addClass('in').fadeIn();",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-$(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "      this.$('#number-container').addClass('invalid');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "jQuery-html(",
+    "path": "ts/views/standalone_registration_view.ts",
+    "line": "  template: () => $('#standalone').html(),",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-15T21:07:50.995Z"
+  },
+  {
+    "rule": "DOM-innerHTML",
+    "path": "ts/windows/loading/start.js",
+    "line": "    message.innerHTML = window.SignalContext.i18n('optimizingApplication');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-17T21:02:59.414Z"
+  },
+  {
+    "rule": "DOM-innerHTML",
+    "path": "ts/windows/loading/start.ts",
+    "line": "  message.innerHTML = window.SignalContext.i18n('optimizingApplication');",
+    "reasonCategory": "usageTrusted",
+    "updated": "2021-09-17T21:02:59.414Z"
   }
 ]

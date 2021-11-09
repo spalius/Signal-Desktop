@@ -11,19 +11,13 @@ const story = storiesOf('Components/Button', module);
 
 story.add('Kitchen sink', () => (
   <>
-    {[ButtonSize.Medium, ButtonSize.Small].map(size => (
-      <React.Fragment key={size}>
-        {[
-          ButtonVariant.Primary,
-          ButtonVariant.Secondary,
-          ButtonVariant.SecondaryAffirmative,
-          ButtonVariant.SecondaryDestructive,
-          ButtonVariant.Destructive,
-        ].map(variant => (
-          <React.Fragment key={variant}>
+    {Object.values(ButtonVariant).map(variant => (
+      <React.Fragment key={variant}>
+        {[ButtonSize.Medium, ButtonSize.Small].map(size => (
+          <React.Fragment key={size}>
             <p>
               <Button onClick={action('onClick')} size={size} variant={variant}>
-                Hello world
+                {variant}
               </Button>
             </p>
             <p>
@@ -33,7 +27,7 @@ story.add('Kitchen sink', () => (
                 size={size}
                 variant={variant}
               >
-                Hello world
+                {variant}
               </Button>
             </p>
           </React.Fragment>
@@ -49,4 +43,10 @@ story.add('aria-label', () => (
     className="module-ForwardMessageModal__header--back"
     onClick={action('onClick')}
   />
+));
+
+story.add('Custom styles', () => (
+  <Button onClick={action('onClick')} style={{ transform: 'rotate(5deg)' }}>
+    Hello world
+  </Button>
 ));

@@ -4,14 +4,18 @@
 import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { mapDispatchToProps } from '../actions';
+import type { Props as ComponentPropsType } from '../../components/CompositionArea';
 import { CompositionArea } from '../../components/CompositionArea';
-import { StateType } from '../reducer';
+import type { StateType } from '../reducer';
 import { isConversationSMSOnly } from '../../util/isConversationSMSOnly';
+import { dropNull } from '../../util/dropNull';
 
 import { selectRecentEmojis } from '../selectors/emojis';
-import { getIntl, getUserConversationId } from '../selectors/user';
+import { getIntl, getTheme, getUserConversationId } from '../selectors/user';
+import { getEmojiSkinTone } from '../selectors/items';
 import {
   getConversationSelector,
+  getGroupAdminsSelector,
   isMissingRequiredProfileSharing,
 } from '../selectors/conversations';
 import { getPropsForQuote } from '../selectors/message';
@@ -26,11 +30,13 @@ import {
 
 type ExternalProps = {
   id: string;
-  onClickQuotedMessage: (id?: string) => unknown;
+  handleClickQuotedMessage: (id: string) => unknown;
 };
 
+export type CompositionAreaPropsType = ExternalProps & ComponentPropsType;
+
 const mapStateToProps = (state: StateType, props: ExternalProps) => {
-  const { id, onClickQuotedMessage } = props;
+  const { id, handleClickQuotedMessage } = props;
 
   const conversationSelector = getConversationSelector(state);
   const conversation = conversationSelector(id);
@@ -38,7 +44,12 @@ const mapStateToProps = (state: StateType, props: ExternalProps) => {
     throw new Error(`Conversation id ${id} not found!`);
   }
 
-  const { draftText, draftBodyRanges } = conversation;
+  const {
+    announcementsOnly,
+    areWeAdmin,
+    draftText,
+    draftBodyRanges,
+  } = conversation;
 
   const receivedPacks = getReceivedStickerPacks(state);
   const installedPacks = getInstalledStickerPacks(state);
@@ -53,9 +64,10 @@ const mapStateToProps = (state: StateType, props: ExternalProps) => {
     ['showStickersIntroduction'],
     false
   );
-  const showPickerHint =
+  const showPickerHint = Boolean(
     get(state.items, ['showStickerPickerHint'], false) &&
-    receivedPacks.length > 0;
+      receivedPacks.length > 0
+  );
 
   const {
     attachments: draftAttachments,
@@ -69,9 +81,13 @@ const mapStateToProps = (state: StateType, props: ExternalProps) => {
 
   return {
     // Base
+    conversationId: id,
     i18n: getIntl(state),
-    draftText,
-    draftBodyRanges,
+    theme: getTheme(state),
+    // AudioCapture
+    errorDialogAudioRecorderType:
+      state.audioRecorder.errorDialogAudioRecorderType,
+    isRecording: state.audioRecorder.isRecording,
     // AttachmentsList
     draftAttachments,
     // MediaQualitySelector
@@ -81,17 +97,20 @@ const mapStateToProps = (state: StateType, props: ExternalProps) => {
     linkPreviewResult,
     // Quote
     quotedMessageProps: quotedMessage
-      ? getPropsForQuote(
-          quotedMessage,
+      ? getPropsForQuote(quotedMessage, {
           conversationSelector,
-          getUserConversationId(state)
-        )
+          ourConversationId: getUserConversationId(state),
+        })
       : undefined,
-    onClickQuotedMessage: () =>
-      onClickQuotedMessage(quotedMessage?.quote?.messageId),
+    onClickQuotedMessage: () => {
+      const messageId = quotedMessage?.quote?.messageId;
+      if (messageId) {
+        handleClickQuotedMessage(messageId);
+      }
+    },
     // Emojis
     recentEmojis,
-    skinTone: get(state, ['items', 'skinTone'], 0),
+    skinTone: getEmojiSkinTone(state),
     // Stickers
     receivedPacks,
     installedPack,
@@ -109,6 +128,13 @@ const mapStateToProps = (state: StateType, props: ExternalProps) => {
     isMissingMandatoryProfileSharing: isMissingRequiredProfileSharing(
       conversation
     ),
+    // Groups
+    announcementsOnly,
+    areWeAdmin,
+    groupAdmins: getGroupAdminsSelector(state)(conversation.id),
+
+    draftText: dropNull(draftText),
+    draftBodyRanges,
   };
 };
 
@@ -124,5 +150,4 @@ const dispatchPropsMap = {
 
 const smart = connect(mapStateToProps, dispatchPropsMap);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const SmartCompositionArea = smart(CompositionArea as any);
+export const SmartCompositionArea = smart(CompositionArea);

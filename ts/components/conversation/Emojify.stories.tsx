@@ -6,7 +6,8 @@ import * as React from 'react';
 import { text } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 
-import { Emojify, Props } from './Emojify';
+import type { Props } from './Emojify';
+import { Emojify } from './Emojify';
 
 const story = storiesOf('Components/Conversation/Emojify', module);
 
@@ -35,7 +36,16 @@ story.add('Skin Color Modifier', () => {
 story.add('Jumbo', () => {
   const props = createProps({
     text: '😹😹😹',
-    sizeClass: 'jumbo',
+    sizeClass: 'max',
+  });
+
+  return <Emojify {...props} />;
+});
+
+story.add('Extra Large', () => {
+  const props = createProps({
+    text: '😹😹😹',
+    sizeClass: 'extra-large',
   });
 
   return <Emojify {...props} />;
@@ -92,6 +102,22 @@ story.add('Custom Text Render', () => {
         {theText}
       </div>
     ),
+  });
+
+  return <Emojify {...props} />;
+});
+
+story.add('Tens of thousands of emoji', () => {
+  const props = createProps({
+    text: '💅'.repeat(40000),
+  });
+
+  return <Emojify {...props} />;
+});
+
+story.add('Tens of thousands of emoji, interspersed with text', () => {
+  const props = createProps({
+    text: '💅 hi '.repeat(40000),
   });
 
   return <Emojify {...props} />;

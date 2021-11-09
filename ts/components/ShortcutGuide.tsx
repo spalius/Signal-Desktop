@@ -3,8 +3,8 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import { useRestoreFocus } from '../util/hooks';
-import { LocalizerType } from '../types/Util';
+import { useRestoreFocus } from '../hooks/useRestoreFocus';
+import type { LocalizerType } from '../types/Util';
 
 export type Props = {
   hasInstalledStickers: boolean;
@@ -205,12 +205,11 @@ const CALLING_SHORTCUTS: Array<ShortcutType> = [
 ];
 
 export const ShortcutGuide = (props: Props): JSX.Element => {
-  const focusRef = React.useRef<HTMLDivElement>(null);
   const { i18n, close, hasInstalledStickers, platform } = props;
   const isMacOS = platform === 'darwin';
 
   // Restore focus on teardown
-  useRestoreFocus(focusRef);
+  const [focusRef] = useRestoreFocus();
 
   return (
     <div className="module-shortcut-guide">

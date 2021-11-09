@@ -7,45 +7,38 @@ import {
   ConversationHeader,
   OutgoingCallButtonStyle,
 } from '../../components/conversation/ConversationHeader';
+import { getPreferredBadgeSelector } from '../selectors/badges';
 import {
   getConversationSelector,
   isMissingRequiredProfileSharing,
 } from '../selectors/conversations';
-import { StateType } from '../reducer';
+import type { StateType } from '../reducer';
 import { CallMode } from '../../types/Calling';
-import {
-  ConversationType,
-  getConversationCallMode,
-} from '../ducks/conversations';
+import type { ConversationType } from '../ducks/conversations';
+import { getConversationCallMode } from '../ducks/conversations';
 import { getActiveCall, isAnybodyElseInGroupCall } from '../ducks/calling';
-import { getUserConversationId, getIntl } from '../selectors/user';
+import { getUserUuid, getIntl, getTheme } from '../selectors/user';
 import { getOwn } from '../../util/getOwn';
 import { missingCaseError } from '../../util/missingCaseError';
 import { isConversationSMSOnly } from '../../util/isConversationSMSOnly';
-import { isGroupCallingEnabled } from '../../util/isGroupCallingEnabled';
 
 export type OwnProps = {
   id: string;
 
+  onArchive: () => void;
   onDeleteMessages: () => void;
   onGoBack: () => void;
+  onMarkUnread: () => void;
+  onMoveToInbox: () => void;
   onOutgoingAudioCallInConversation: () => void;
   onOutgoingVideoCallInConversation: () => void;
-  onResetSession: () => void;
   onSearchInConversation: () => void;
   onSetDisappearingMessages: (seconds: number) => void;
   onSetMuteNotifications: (seconds: number) => void;
   onSetPin: (value: boolean) => void;
   onShowAllMedia: () => void;
-  onShowChatColorEditor: () => void;
-  onShowContactModal: (contactId: string) => void;
-  onShowGroupMembers: () => void;
-
-  onArchive: () => void;
-  onMarkUnread: () => void;
-  onMoveToInbox: () => void;
-  onShowSafetyNumber: () => void;
   onShowConversationDetails: () => void;
+  onShowGroupMembers: () => void;
 };
 
 const getOutgoingCallButtonStyle = (
@@ -65,13 +58,10 @@ const getOutgoingCallButtonStyle = (
     case CallMode.Direct:
       return OutgoingCallButtonStyle.Both;
     case CallMode.Group: {
-      if (!isGroupCallingEnabled()) {
-        return OutgoingCallButtonStyle.None;
-      }
       const call = getOwn(calling.callsByConversation, conversation.id);
       if (
         call?.callMode === CallMode.Group &&
-        isAnybodyElseInGroupCall(call.peekInfo, getUserConversationId(state))
+        isAnybodyElseInGroupCall(call.peekInfo, getUserUuid(state))
       ) {
         return OutgoingCallButtonStyle.Join;
       }
@@ -93,10 +83,13 @@ const mapStateToProps = (state: StateType, ownProps: OwnProps) => {
   return {
     ...pick(conversation, [
       'acceptedMessageRequest',
+      'announcementsOnly',
+      'areWeAdmin',
       'avatarPath',
       'canChangeTimer',
       'color',
       'expireTimer',
+      'groupVersion',
       'isArchived',
       'isMe',
       'isPinned',
@@ -107,12 +100,12 @@ const mapStateToProps = (state: StateType, ownProps: OwnProps) => {
       'name',
       'phoneNumber',
       'profileName',
+      'sharedGroupNames',
       'title',
       'type',
-      'groupVersion',
-      'sharedGroupNames',
       'unblurredAvatarPath',
     ]),
+    badge: getPreferredBadgeSelector(state)(conversation.badges),
     conversationTitle: state.conversations.selectedConversationTitle,
     isMissingMandatoryProfileSharing: isMissingRequiredProfileSharing(
       conversation
@@ -121,6 +114,7 @@ const mapStateToProps = (state: StateType, ownProps: OwnProps) => {
     i18n: getIntl(state),
     showBackButton: state.conversations.selectedConversationPanelDepth > 0,
     outgoingCallButtonStyle: getOutgoingCallButtonStyle(conversation, state),
+    theme: getTheme(state),
   };
 };
 

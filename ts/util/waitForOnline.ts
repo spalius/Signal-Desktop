@@ -3,19 +3,38 @@
 
 export function waitForOnline(
   navigator: Readonly<{ onLine: boolean }>,
-  onlineEventTarget: EventTarget
+  onlineEventTarget: EventTarget,
+  options: Readonly<{ timeout?: number }> = {}
 ): Promise<void> {
-  return new Promise(resolve => {
+  const { timeout } = options;
+
+  return new Promise((resolve, reject) => {
     if (navigator.onLine) {
       resolve();
       return;
     }
 
+    let timeoutId: undefined | ReturnType<typeof setTimeout>;
+
     const listener = () => {
-      onlineEventTarget.removeEventListener('online', listener);
+      cleanup();
       resolve();
     };
 
+    const cleanup = () => {
+      onlineEventTarget.removeEventListener('online', listener);
+      if (typeof timeoutId === 'number') {
+        clearTimeout(timeoutId);
+      }
+    };
+
     onlineEventTarget.addEventListener('online', listener);
+
+    if (timeout !== undefined) {
+      timeoutId = setTimeout(() => {
+        cleanup();
+        reject(new Error('waitForOnline: did not come online in time'));
+      }, timeout);
+    }
   });
 }

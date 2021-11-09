@@ -1,0 +1,222 @@
+// Copyright 2021 Signal Messenger, LLC
+// SPDX-License-Identifier: AGPL-3.0-only
+
+@keyframes progress-animation {
+  0% {
+    background-position: 100%;
+  }
+  100% {
+    background-position: -100%;
+  }
+}
+
+.LeftPaneDialog {
+  $default-background-color: $color-ultramarine;
+  $default-text-color: $color-white;
+  $error-background-color: $color-accent-red;
+  $error-text-color: $default-text-color;
+  $warning-background-color: $color-accent-yellow;
+  $warning-text-color: $color-black;
+
+  align-items: center;
+  background: $default-background-color;
+  color: $default-text-color;
+  display: flex;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 18px;
+  user-select: none;
+  cursor: inherit;
+
+  .module-left-pane--width-narrow & {
+    padding-left: 36px;
+  }
+
+  &--clickable {
+    cursor: pointer;
+  }
+
+  &__container {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+  }
+
+  &__container-close {
+    display: flex;
+    justify-content: flex-end;
+
+    .module-left-pane--width-narrow & {
+      display: none;
+    }
+  }
+
+  &__spinner-container {
+    margin-right: 18px;
+  }
+
+  &__spinner {
+    &__arc {
+      background-color: $color-black;
+
+      // Needed for specificity
+      @include dark-theme {
+        background-color: $color-black;
+      }
+    }
+
+    &__circle {
+      background-color: $color-accent-yellow;
+    }
+  }
+
+  &__icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 18px;
+    background-color: $color-white;
+    -webkit-mask-size: contain;
+
+    &--relink {
+      -webkit-mask: url('../images/icons/v2/link-broken-16.svg') no-repeat
+        center;
+    }
+
+    &--network {
+      -webkit-mask: url('../images/icons/v2/offline-22.svg') no-repeat center;
+    }
+
+    &--update {
+      -webkit-mask: url('../images/icons/v2/refresh-24.svg') no-repeat center;
+    }
+
+    &--warning {
+      -webkit-mask: url('../images/icons/v2/warning-outline-24.svg') no-repeat
+        center;
+    }
+  }
+
+  &__action-text {
+    @include button-reset;
+    text-decoration: none;
+  }
+
+  &__close-button {
+    @include button-reset;
+
+    border-radius: 4px;
+    float: right;
+    height: 24px;
+    width: 24px;
+
+    &::before {
+      -webkit-mask: url('../images/icons/v2/x-24.svg') no-repeat center;
+      background-color: $color-white;
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    &:hover,
+    &:focus {
+      background-color: $color-white-alpha-20;
+    }
+    &:active {
+      background-color: $color-white-alpha-20;
+    }
+  }
+
+  &__message {
+    width: 100%;
+
+    .module-left-pane--width-narrow & {
+      display: none;
+    }
+  }
+
+  &__message,
+  &__tooltip {
+    h3 {
+      @include font-body-1-bold;
+      padding: 0px;
+      margin: 0px;
+      margin-bottom: 8px;
+    }
+    span {
+      @include font-body-1;
+      display: inline-block;
+    }
+    a {
+      font-weight: bold;
+      text-decoration: none;
+    }
+  }
+
+  &--error {
+    background-color: $error-background-color;
+    color: $error-text-color;
+  }
+
+  &--warning {
+    background-color: $warning-background-color;
+    color: $warning-text-color;
+
+    a {
+      color: $color-black;
+    }
+
+    .LeftPaneDialog__icon {
+      background-color: $color-black;
+    }
+
+    .LeftPaneDialog__close-button::before {
+      background-color: $color-black;
+    }
+  }
+
+  &__progress {
+    &--container {
+      background: $color-white-alpha-20;
+      border-radius: 2px;
+      height: 4px;
+      max-width: 210px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    &--bar {
+      animation: progress-animation 2s linear infinite;
+      background: linear-gradient(
+        90deg,
+        $color-white-alpha-40,
+        $color-white-alpha-60,
+        $color-white-alpha-90,
+        $color-white-alpha-60,
+        $color-white-alpha-40
+      );
+      background-size: 200% 100%;
+      border-radius: 2px;
+      display: block;
+      height: 100%;
+      transition: width 500ms ease-out;
+    }
+  }
+
+  &__tooltip {
+    --tooltip-background-color: #{$default-background-color};
+    --tooltip-text-color: #{$default-text-color};
+    min-width: 280px;
+    text-align: inherit;
+
+    &--error {
+      --tooltip-text-color: #{$error-text-color};
+      --tooltip-background-color: #{$error-background-color};
+    }
+
+    &--warning {
+      --tooltip-text-color: #{$warning-text-color};
+      --tooltip-background-color: #{$warning-background-color};
+    }
+  }
+}

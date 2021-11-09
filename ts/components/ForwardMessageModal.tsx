@@ -1,38 +1,46 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import type { FunctionComponent } from 'react';
 import React, {
-  FunctionComponent,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import Measure, { MeasuredComponentProps } from 'react-measure';
+import type { MeasuredComponentProps } from 'react-measure';
+import Measure from 'react-measure';
 import { noop } from 'lodash';
+import { animated } from '@react-spring/web';
 
 import classNames from 'classnames';
 import { AttachmentList } from './conversation/AttachmentList';
-import { AttachmentType } from '../types/Attachment';
+import type { AttachmentType } from '../types/Attachment';
 import { Button } from './Button';
-import { CompositionInput, InputApi } from './CompositionInput';
+import type { InputApi } from './CompositionInput';
+import { CompositionInput } from './CompositionInput';
+import { ConfirmationDialog } from './ConfirmationDialog';
 import { ContactCheckboxDisabledReason } from './conversationList/ContactCheckbox';
-import { ConversationList, Row, RowType } from './ConversationList';
-import { ConversationType } from '../state/ducks/conversations';
-import { EmojiButton, Props as EmojiButtonProps } from './emoji/EmojiButton';
-import { EmojiPickDataType } from './emoji/EmojiPicker';
-import { LinkPreviewType } from '../types/message/LinkPreviews';
-import { BodyRangeType, LocalizerType } from '../types/Util';
+import type { Row } from './ConversationList';
+import { ConversationList, RowType } from './ConversationList';
+import type { ConversationType } from '../state/ducks/conversations';
+import type { Props as EmojiButtonProps } from './emoji/EmojiButton';
+import { EmojiButton } from './emoji/EmojiButton';
+import type { EmojiPickDataType } from './emoji/EmojiPicker';
+import type { LinkPreviewType } from '../types/message/LinkPreviews';
+import type { BodyRangeType, LocalizerType, ThemeType } from '../types/Util';
 import { ModalHost } from './ModalHost';
 import { SearchInput } from './SearchInput';
 import { StagedLinkPreview } from './conversation/StagedLinkPreview';
 import { assert } from '../util/assert';
 import { filterAndSortConversationsByRecent } from '../util/filterAndSortConversations';
+import { useAnimated } from '../hooks/useAnimated';
 
 export type DataPropsType = {
   attachments?: Array<AttachmentType>;
   candidateConversations: ReadonlyArray<ConversationType>;
+  conversationId: string;
   doForwardMessage: (
     selectedContacts: Array<string>,
     messageBody?: string,
@@ -50,6 +58,7 @@ export type DataPropsType = {
     caretLocation?: number
   ) => unknown;
   onTextTooLong: () => void;
+  theme: ThemeType;
 } & Pick<EmojiButtonProps, 'recentEmojis' | 'skinTone'>;
 
 type ActionPropsType = Pick<
@@ -66,6 +75,7 @@ const MAX_FORWARD = 5;
 export const ForwardMessageModal: FunctionComponent<PropsType> = ({
   attachments,
   candidateConversations,
+  conversationId,
   doForwardMessage,
   i18n,
   isSticker,
@@ -79,6 +89,7 @@ export const ForwardMessageModal: FunctionComponent<PropsType> = ({
   recentEmojis,
   removeLinkPreview,
   skinTone,
+  theme,
 }) => {
   const inputRef = useRef<null | HTMLInputElement>(null);
   const inputApiRef = React.useRef<InputApi | undefined>();
@@ -92,6 +103,7 @@ export const ForwardMessageModal: FunctionComponent<PropsType> = ({
   const [attachmentsToForward, setAttachmentsToForward] = useState(attachments);
   const [isEditingMessage, setIsEditingMessage] = useState(false);
   const [messageBodyText, setMessageBodyText] = useState(messageBody || '');
+  const [cannotMessage, setCannotMessage] = useState(false);
 
   const isMessageEditable = !isSticker;
 
@@ -171,10 +183,10 @@ export const ForwardMessageModal: FunctionComponent<PropsType> = ({
   }, [candidateConversations]);
 
   const toggleSelectedConversation = useCallback(
-    (conversationId: string) => {
+    (selectedConversationId: string) => {
       let removeContact = false;
       const nextSelectedContacts = selectedContacts.filter(contact => {
-        if (contact.id === conversationId) {
+        if (contact.id === selectedConversationId) {
           removeContact = true;
           return false;
         }
@@ -184,21 +196,36 @@ export const ForwardMessageModal: FunctionComponent<PropsType> = ({
         setSelectedContacts(nextSelectedContacts);
         return;
       }
-      const selectedContact = contactLookup.get(conversationId);
+      const selectedContact = contactLookup.get(selectedConversationId);
       if (selectedContact) {
-        setSelectedContacts([...nextSelectedContacts, selectedContact]);
+        if (selectedContact.announcementsOnly && !selectedContact.areWeAdmin) {
+          setCannotMessage(true);
+        } else {
+          setSelectedContacts([...nextSelectedContacts, selectedContact]);
+        }
       }
     },
     [contactLookup, selectedContacts, setSelectedContacts]
   );
 
+  const { close, modalStyles, overlayStyles } = useAnimated(onClose, {
+    getFrom: () => ({ opacity: 0, transform: 'translateY(48px)' }),
+    getTo: isOpen =>
+      isOpen
+        ? { opacity: 1, transform: 'translateY(0px)' }
+        : {
+            opacity: 0,
+            transform: 'translateY(48px)',
+          },
+  });
+
   const handleBackOrClose = useCallback(() => {
     if (isEditingMessage) {
       setIsEditingMessage(false);
     } else {
-      onClose();
+      close();
     }
-  }, [isEditingMessage, onClose, setIsEditingMessage]);
+  }, [isEditingMessage, close, setIsEditingMessage]);
 
   const rowCount = filteredConversations.length;
   const getRow = (index: number): undefined | Row => {
@@ -233,184 +260,206 @@ export const ForwardMessageModal: FunctionComponent<PropsType> = ({
   }, []);
 
   return (
-    <ModalHost onEscape={handleBackOrClose} onClose={onClose}>
-      <div className="module-ForwardMessageModal">
-        <div
-          className={classNames('module-ForwardMessageModal__header', {
-            'module-ForwardMessageModal__header--edit': isEditingMessage,
-          })}
+    <>
+      {cannotMessage && (
+        <ConfirmationDialog
+          cancelText={i18n('Confirmation--confirm')}
+          i18n={i18n}
+          onClose={() => setCannotMessage(false)}
         >
+          {i18n('GroupV2--cannot-send')}
+        </ConfirmationDialog>
+      )}
+      <ModalHost
+        onEscape={handleBackOrClose}
+        onClose={close}
+        overlayStyles={overlayStyles}
+      >
+        <animated.div
+          className="module-ForwardMessageModal"
+          style={modalStyles}
+        >
+          <div
+            className={classNames('module-ForwardMessageModal__header', {
+              'module-ForwardMessageModal__header--edit': isEditingMessage,
+            })}
+          >
+            {isEditingMessage ? (
+              <button
+                aria-label={i18n('back')}
+                className="module-ForwardMessageModal__header--back"
+                onClick={() => setIsEditingMessage(false)}
+                type="button"
+              >
+                &nbsp;
+              </button>
+            ) : (
+              <button
+                aria-label={i18n('close')}
+                className="module-ForwardMessageModal__header--close"
+                onClick={close}
+                type="button"
+              />
+            )}
+            <h1>{i18n('forwardMessage')}</h1>
+          </div>
           {isEditingMessage ? (
-            <button
-              aria-label={i18n('back')}
-              className="module-ForwardMessageModal__header--back"
-              onClick={() => setIsEditingMessage(false)}
-              type="button"
-            >
-              &nbsp;
-            </button>
-          ) : (
-            <button
-              aria-label={i18n('close')}
-              className="module-ForwardMessageModal__header--close"
-              onClick={onClose}
-              type="button"
-            />
-          )}
-          <h1>{i18n('forwardMessage')}</h1>
-        </div>
-        {isEditingMessage ? (
-          <div className="module-ForwardMessageModal__main-body">
-            {linkPreview ? (
-              <div className="module-ForwardMessageModal--link-preview">
-                <StagedLinkPreview
-                  date={linkPreview.date || null}
-                  description={linkPreview.description || ''}
-                  domain={linkPreview.url}
+            <div className="module-ForwardMessageModal__main-body">
+              {linkPreview ? (
+                <div className="module-ForwardMessageModal--link-preview">
+                  <StagedLinkPreview
+                    date={linkPreview.date || null}
+                    description={linkPreview.description || ''}
+                    domain={linkPreview.url}
+                    i18n={i18n}
+                    image={linkPreview.image}
+                    onClose={() => removeLinkPreview()}
+                    title={linkPreview.title}
+                  />
+                </div>
+              ) : null}
+              {attachmentsToForward && attachmentsToForward.length ? (
+                <AttachmentList
+                  attachments={attachmentsToForward}
                   i18n={i18n}
-                  image={linkPreview.image}
-                  onClose={() => removeLinkPreview()}
-                  title={linkPreview.title}
+                  onCloseAttachment={(attachment: AttachmentType) => {
+                    const newAttachments = attachmentsToForward.filter(
+                      currentAttachment => currentAttachment !== attachment
+                    );
+                    setAttachmentsToForward(newAttachments);
+                  }}
                 />
-              </div>
-            ) : null}
-            {attachmentsToForward && attachmentsToForward.length ? (
-              <AttachmentList
-                attachments={attachmentsToForward}
-                i18n={i18n}
-                onCloseAttachment={(attachment: AttachmentType) => {
-                  const newAttachments = attachmentsToForward.filter(
-                    currentAttachment => currentAttachment !== attachment
-                  );
-                  setAttachmentsToForward(newAttachments);
-                }}
-              />
-            ) : null}
-            <div className="module-ForwardMessageModal__text-edit-area">
-              <CompositionInput
-                clearQuotedMessage={shouldNeverBeCalled}
-                draftText={messageBodyText}
-                getQuotedMessage={noop}
-                i18n={i18n}
-                inputApi={inputApiRef}
-                large
-                moduleClassName="module-ForwardMessageModal__input"
-                onEditorStateChange={(
-                  messageText,
-                  bodyRanges,
-                  caretLocation
-                ) => {
-                  setMessageBodyText(messageText);
-                  onEditorStateChange(messageText, bodyRanges, caretLocation);
-                }}
-                onPickEmoji={onPickEmoji}
-                onSubmit={forwardMessage}
-                onTextTooLong={onTextTooLong}
-              />
-              <div className="module-ForwardMessageModal__emoji">
-                <EmojiButton
-                  doSend={noop}
+              ) : null}
+              <div className="module-ForwardMessageModal__text-edit-area">
+                <CompositionInput
+                  conversationId={conversationId}
+                  clearQuotedMessage={shouldNeverBeCalled}
+                  draftText={messageBodyText}
+                  getQuotedMessage={noop}
                   i18n={i18n}
-                  onClose={focusTextEditInput}
-                  onPickEmoji={insertEmoji}
-                  onSetSkinTone={onSetSkinTone}
-                  recentEmojis={recentEmojis}
-                  skinTone={skinTone}
+                  inputApi={inputApiRef}
+                  large
+                  moduleClassName="module-ForwardMessageModal__input"
+                  scrollToBottom={noop}
+                  onEditorStateChange={(
+                    messageText,
+                    bodyRanges,
+                    caretLocation
+                  ) => {
+                    setMessageBodyText(messageText);
+                    onEditorStateChange(messageText, bodyRanges, caretLocation);
+                  }}
+                  onPickEmoji={onPickEmoji}
+                  onSubmit={forwardMessage}
+                  onTextTooLong={onTextTooLong}
                 />
+                <div className="module-ForwardMessageModal__emoji">
+                  <EmojiButton
+                    i18n={i18n}
+                    onClose={focusTextEditInput}
+                    onPickEmoji={insertEmoji}
+                    onSetSkinTone={onSetSkinTone}
+                    recentEmojis={recentEmojis}
+                    skinTone={skinTone}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="module-ForwardMessageModal__main-body">
-            <SearchInput
-              disabled={candidateConversations.length === 0}
-              placeholder={i18n('contactSearchPlaceholder')}
-              onChange={event => {
-                setSearchTerm(event.target.value);
-              }}
-              ref={inputRef}
-              value={searchTerm}
-            />
-            {candidateConversations.length ? (
-              <Measure bounds>
-                {({ contentRect, measureRef }: MeasuredComponentProps) => {
-                  // We disable this ESLint rule because we're capturing a bubbled keydown
-                  //   event. See [this note in the jsx-a11y docs][0].
-                  //
-                  // [0]: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/c275964f52c35775208bd00cb612c6f82e42e34f/docs/rules/no-static-element-interactions.md#case-the-event-handler-is-only-being-used-to-capture-bubbled-events
-                  /* eslint-disable jsx-a11y/no-static-element-interactions */
-                  return (
-                    <div
-                      className="module-ForwardMessageModal__list-wrapper"
-                      ref={measureRef}
-                    >
-                      <ConversationList
-                        dimensions={contentRect.bounds}
-                        getRow={getRow}
-                        i18n={i18n}
-                        onClickArchiveButton={shouldNeverBeCalled}
-                        onClickContactCheckbox={(
-                          conversationId: string,
-                          disabledReason:
-                            | undefined
-                            | ContactCheckboxDisabledReason
-                        ) => {
-                          if (
-                            disabledReason !==
-                            ContactCheckboxDisabledReason.MaximumContactsSelected
-                          ) {
-                            toggleSelectedConversation(conversationId);
-                          }
-                        }}
-                        onSelectConversation={shouldNeverBeCalled}
-                        renderMessageSearchResult={() => {
-                          shouldNeverBeCalled();
-                          return <div />;
-                        }}
-                        rowCount={rowCount}
-                        shouldRecomputeRowHeights={false}
-                        showChooseGroupMembers={shouldNeverBeCalled}
-                        startNewConversationFromPhoneNumber={
-                          shouldNeverBeCalled
-                        }
-                      />
-                    </div>
-                  );
-                  /* eslint-enable jsx-a11y/no-static-element-interactions */
+          ) : (
+            <div className="module-ForwardMessageModal__main-body">
+              <SearchInput
+                disabled={candidateConversations.length === 0}
+                placeholder={i18n('contactSearchPlaceholder')}
+                onChange={event => {
+                  setSearchTerm(event.target.value);
                 }}
-              </Measure>
-            ) : (
-              <div className="module-ForwardMessageModal__no-candidate-contacts">
-                {i18n('noContactsFound')}
-              </div>
-            )}
-          </div>
-        )}
-        <div className="module-ForwardMessageModal__footer">
-          <div>
-            {Boolean(selectedContacts.length) &&
-              selectedContacts.map(contact => contact.title).join(', ')}
-          </div>
-          <div>
-            {isEditingMessage || !isMessageEditable ? (
-              <Button
-                aria-label={i18n('ForwardMessageModal--continue')}
-                className="module-ForwardMessageModal__send-button module-ForwardMessageModal__send-button--forward"
-                disabled={!canForwardMessage}
-                onClick={forwardMessage}
+                ref={inputRef}
+                value={searchTerm}
               />
-            ) : (
-              <Button
-                aria-label={i18n('forwardMessage')}
-                className="module-ForwardMessageModal__send-button module-ForwardMessageModal__send-button--continue"
-                disabled={!hasContactsSelected}
-                onClick={() => setIsEditingMessage(true)}
-              />
-            )}
+              {candidateConversations.length ? (
+                <Measure bounds>
+                  {({ contentRect, measureRef }: MeasuredComponentProps) => {
+                    // We disable this ESLint rule because we're capturing a bubbled
+                    // keydown event. See [this note in the jsx-a11y docs][0].
+                    //
+                    // [0]: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/c275964f52c35775208bd00cb612c6f82e42e34f/docs/rules/no-static-element-interactions.md#case-the-event-handler-is-only-being-used-to-capture-bubbled-events
+                    /* eslint-disable jsx-a11y/no-static-element-interactions */
+                    return (
+                      <div
+                        className="module-ForwardMessageModal__list-wrapper"
+                        ref={measureRef}
+                      >
+                        <ConversationList
+                          dimensions={contentRect.bounds}
+                          getRow={getRow}
+                          i18n={i18n}
+                          onClickArchiveButton={shouldNeverBeCalled}
+                          onClickContactCheckbox={(
+                            selectedConversationId: string,
+                            disabledReason:
+                              | undefined
+                              | ContactCheckboxDisabledReason
+                          ) => {
+                            if (
+                              disabledReason !==
+                              ContactCheckboxDisabledReason.MaximumContactsSelected
+                            ) {
+                              toggleSelectedConversation(
+                                selectedConversationId
+                              );
+                            }
+                          }}
+                          onSelectConversation={shouldNeverBeCalled}
+                          renderMessageSearchResult={() => {
+                            shouldNeverBeCalled();
+                            return <div />;
+                          }}
+                          rowCount={rowCount}
+                          shouldRecomputeRowHeights={false}
+                          showChooseGroupMembers={shouldNeverBeCalled}
+                          startNewConversationFromPhoneNumber={
+                            shouldNeverBeCalled
+                          }
+                          theme={theme}
+                        />
+                      </div>
+                    );
+                    /* eslint-enable jsx-a11y/no-static-element-interactions */
+                  }}
+                </Measure>
+              ) : (
+                <div className="module-ForwardMessageModal__no-candidate-contacts">
+                  {i18n('noContactsFound')}
+                </div>
+              )}
+            </div>
+          )}
+          <div className="module-ForwardMessageModal__footer">
+            <div>
+              {Boolean(selectedContacts.length) &&
+                selectedContacts.map(contact => contact.title).join(', ')}
+            </div>
+            <div>
+              {isEditingMessage || !isMessageEditable ? (
+                <Button
+                  aria-label={i18n('ForwardMessageModal--continue')}
+                  className="module-ForwardMessageModal__send-button module-ForwardMessageModal__send-button--forward"
+                  disabled={!canForwardMessage}
+                  onClick={forwardMessage}
+                />
+              ) : (
+                <Button
+                  aria-label={i18n('forwardMessage')}
+                  className="module-ForwardMessageModal__send-button module-ForwardMessageModal__send-button--continue"
+                  disabled={!hasContactsSelected}
+                  onClick={() => setIsEditingMessage(true)}
+                />
+              )}
+            </div>
           </div>
-        </div>
-      </div>
-    </ModalHost>
+        </animated.div>
+      </ModalHost>
+    </>
   );
 };
 

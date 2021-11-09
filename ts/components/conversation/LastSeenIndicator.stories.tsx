@@ -6,8 +6,9 @@ import * as React from 'react';
 import { number } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 
-import { LastSeenIndicator, Props } from './LastSeenIndicator';
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import type { Props } from './LastSeenIndicator';
+import { LastSeenIndicator } from './LastSeenIndicator';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
 
 const i18n = setupI18n('en', enMessages);

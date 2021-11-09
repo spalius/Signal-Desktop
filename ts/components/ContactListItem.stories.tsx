@@ -7,9 +7,10 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { gifUrl } from '../storybook/Fixtures';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 import { ContactListItem } from './ContactListItem';
+import { getRandomColor } from '../test-both/helpers/getRandomColor';
 
 const i18n = setupI18n('en', enMessages);
 const onClick = action('onClick');
@@ -126,7 +127,7 @@ storiesOf('Components/ContactListItem', module)
         isMe={false}
         title="Someone 🔥 Somewhere"
         name="Someone 🔥 Somewhere"
-        color="teal"
+        color={getRandomColor()}
         phoneNumber="(202) 555-0011"
         profileName="🔥Flames🔥"
         sharedGroupNames={[]}
@@ -140,7 +141,7 @@ storiesOf('Components/ContactListItem', module)
       <ContactListItem
         type="direct"
         acceptedMessageRequest
-        color="blue"
+        color={getRandomColor()}
         i18n={i18n}
         isMe={false}
         phoneNumber="(202) 555-0011"

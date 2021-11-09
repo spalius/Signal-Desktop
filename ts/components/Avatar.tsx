@@ -1,23 +1,28 @@
 // Copyright 2018-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React, {
+import type {
   FunctionComponent,
+  MouseEvent,
+  ReactChild,
   ReactNode,
-  useEffect,
-  useState,
 } from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { noop } from 'lodash';
 
 import { Spinner } from './Spinner';
 
 import { getInitials } from '../util/getInitials';
-import { LocalizerType } from '../types/Util';
-import { AvatarColorType } from '../types/Colors';
+import type { LocalizerType } from '../types/Util';
+import { ThemeType } from '../types/Util';
+import type { AvatarColorType } from '../types/Colors';
+import type { BadgeType } from '../badges/types';
 import * as log from '../logging/log';
 import { assert } from '../util/assert';
 import { shouldBlurAvatar } from '../util/shouldBlurAvatar';
+import { getBadgeImageFileLocalPath } from '../badges/getBadgeImageFileLocalPath';
+import { BadgeImageTheme } from '../badges/BadgeImageTheme';
 
 export enum AvatarBlur {
   NoBlur,
@@ -26,8 +31,11 @@ export enum AvatarBlur {
 }
 
 export enum AvatarSize {
+  SIXTEEN = 16,
   TWENTY_EIGHT = 28,
   THIRTY_TWO = 32,
+  THIRTY_SIX = 36,
+  FORTY_EIGHT = 48,
   FIFTY_TWO = 52,
   EIGHTY = 80,
   NINETY_SIX = 96,
@@ -36,6 +44,7 @@ export enum AvatarSize {
 
 export type Props = {
   avatarPath?: string;
+  badge?: BadgeType;
   blur?: AvatarBlur;
   color?: AvatarColorType;
   loading?: boolean;
@@ -49,10 +58,11 @@ export type Props = {
   profileName?: string;
   sharedGroupNames: Array<string>;
   size: AvatarSize;
+  theme?: ThemeType;
   title: string;
   unblurredAvatarPath?: string;
 
-  onClick?: () => unknown;
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => unknown;
 
   // Matches Popper's RefHandler type
   innerRef?: React.Ref<HTMLDivElement>;
@@ -68,8 +78,9 @@ const getDefaultBlur = (
 export const Avatar: FunctionComponent<Props> = ({
   acceptedMessageRequest,
   avatarPath,
+  badge,
   className,
-  color,
+  color = 'A200',
   conversationType,
   i18n,
   isMe,
@@ -79,6 +90,7 @@ export const Avatar: FunctionComponent<Props> = ({
   onClick,
   sharedGroupNames,
   size,
+  theme,
   title,
   unblurredAvatarPath,
   blur = getDefaultBlur({
@@ -117,10 +129,10 @@ export const Avatar: FunctionComponent<Props> = ({
   const shouldUseInitials =
     !hasImage && conversationType === 'direct' && Boolean(initials);
 
-  let contents: ReactNode;
+  let contentsChildren: ReactNode;
   if (loading) {
     const svgSize = size < 40 ? 'small' : 'normal';
-    contents = (
+    contentsChildren = (
       <div className="module-Avatar__spinner-container">
         <Spinner
           size={`${size - 8}px`}
@@ -140,7 +152,7 @@ export const Avatar: FunctionComponent<Props> = ({
     const isBlurred =
       blur === AvatarBlur.BlurPicture ||
       blur === AvatarBlur.BlurPictureWithClickToView;
-    contents = (
+    contentsChildren = (
       <>
         <div
           className="module-Avatar__image"
@@ -155,7 +167,7 @@ export const Avatar: FunctionComponent<Props> = ({
       </>
     );
   } else if (noteToSelf) {
-    contents = (
+    contentsChildren = (
       <div
         className={classNames(
           'module-Avatar__icon',
@@ -164,17 +176,17 @@ export const Avatar: FunctionComponent<Props> = ({
       />
     );
   } else if (shouldUseInitials) {
-    contents = (
+    contentsChildren = (
       <div
         aria-hidden="true"
         className="module-Avatar__label"
-        style={{ fontSize: Math.ceil(size * 0.5) }}
+        style={{ fontSize: Math.ceil(size * 0.45) }}
       >
         {initials}
       </div>
     );
   } else {
-    contents = (
+    contentsChildren = (
       <div
         className={classNames(
           'module-Avatar__icon',
@@ -184,12 +196,46 @@ export const Avatar: FunctionComponent<Props> = ({
     );
   }
 
+  let contents: ReactChild;
+  const contentsClassName = classNames(
+    'module-Avatar__contents',
+    `module-Avatar__contents--${color}`
+  );
   if (onClick) {
     contents = (
-      <button className="module-Avatar__button" type="button" onClick={onClick}>
-        {contents}
+      <button className={contentsClassName} type="button" onClick={onClick}>
+        {contentsChildren}
       </button>
     );
+  } else {
+    contents = <div className={contentsClassName}>{contentsChildren}</div>;
+  }
+
+  let badgeNode: ReactNode;
+  if (badge && theme && !isMe) {
+    const badgeSize = Math.ceil(size * 0.425);
+    const badgeTheme =
+      theme === ThemeType.light ? BadgeImageTheme.Light : BadgeImageTheme.Dark;
+    const badgeImagePath = getBadgeImageFileLocalPath(
+      badge,
+      badgeSize,
+      badgeTheme
+    );
+    if (badgeImagePath) {
+      badgeNode = (
+        <img
+          alt={badge.name}
+          className="module-Avatar__badge"
+          src={badgeImagePath}
+          style={{
+            width: badgeSize,
+            height: badgeSize,
+          }}
+        />
+      );
+    }
+  } else if (badge && !theme) {
+    log.error('<Avatar> requires a theme if a badge is provided');
   }
 
   return (
@@ -198,9 +244,6 @@ export const Avatar: FunctionComponent<Props> = ({
       className={classNames(
         'module-Avatar',
         hasImage ? 'module-Avatar--with-image' : 'module-Avatar--no-image',
-        {
-          [`module-Avatar--${color}`]: !hasImage,
-        },
         className
       )}
       style={{
@@ -211,6 +254,7 @@ export const Avatar: FunctionComponent<Props> = ({
       ref={innerRef}
     >
       {contents}
+      {badgeNode}
     </div>
   );
 };

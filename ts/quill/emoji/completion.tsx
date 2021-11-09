@@ -9,16 +9,17 @@ import _ from 'lodash';
 import { Popper } from 'react-popper';
 import classNames from 'classnames';
 import { createPortal } from 'react-dom';
+import type { EmojiData } from '../../components/emoji/lib';
 import {
-  EmojiData,
   search,
   convertShortName,
   isShortName,
   convertShortNameToData,
 } from '../../components/emoji/lib';
 import { Emoji } from '../../components/emoji/Emoji';
-import { EmojiPickDataType } from '../../components/emoji/EmojiPicker';
+import type { EmojiPickDataType } from '../../components/emoji/EmojiPicker';
 import { getBlotTextPartitions, matchBlotTextPartitions } from '../util';
+import { sameWidthModifier } from '../../util/popperUtil';
 
 const Keyboard = Quill.import('modules/keyboard');
 
@@ -103,7 +104,7 @@ export class EmojiCompletion {
     const range = this.quill.getSelection();
     const [blot, index] = this.quill.getLeaf(range ? range.index : -1);
 
-    return getBlotTextPartitions(blot, index);
+    return getBlotTextPartitions(blot.text, index);
   }
 
   onSelectionChange(): void {
@@ -265,25 +266,7 @@ export class EmojiCompletion {
     }
 
     const element = createPortal(
-      <Popper
-        placement="top"
-        modifiers={{
-          width: {
-            enabled: true,
-            fn: oldData => {
-              const data = oldData;
-              const { width, left } = data.offsets.reference;
-
-              data.styles.width = `${width}px`;
-              data.offsets.popper.width = width;
-              data.offsets.popper.left = left;
-
-              return data;
-            },
-            order: 840,
-          },
-        }}
-      >
+      <Popper placement="top-start" modifiers={[sameWidthModifier]}>
         {({ ref, style }) => (
           <div
             ref={ref}

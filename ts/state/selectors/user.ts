@@ -3,10 +3,11 @@
 
 import { createSelector } from 'reselect';
 
-import { LocalizerType, ThemeType } from '../../types/Util';
+import type { LocalizerType, ThemeType } from '../../types/Util';
+import type { UUIDStringType } from '../../types/UUID';
 
-import { StateType } from '../reducer';
-import { UserStateType } from '../ducks/user';
+import type { StateType } from '../reducer';
+import type { UserStateType } from '../ducks/user';
 
 export const getUser = (state: StateType): UserStateType => state.user;
 
@@ -32,7 +33,7 @@ export const getUserConversationId = createSelector(
 
 export const getUserUuid = createSelector(
   getUser,
-  (state: UserStateType): string => state.ourUuid
+  (state: UserStateType): UUIDStringType => state.ourUuid
 );
 
 export const getIntl = createSelector(

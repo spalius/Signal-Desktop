@@ -2,21 +2,36 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import React, { useEffect } from 'react';
-import classNames from 'classnames';
 import { createPortal } from 'react-dom';
-import { Theme, themeClassName } from '../util/theme';
+import FocusTrap from 'focus-trap-react';
+import type { SpringValues } from '@react-spring/web';
+import { animated } from '@react-spring/web';
+
+import type { ModalConfigType } from '../hooks/useAnimated';
+import type { Theme } from '../util/theme';
+import { themeClassName } from '../util/theme';
+import { useEscapeHandling } from '../hooks/useEscapeHandling';
 
 export type PropsType = {
-  readonly noMouseClose?: boolean;
-  readonly onEscape?: () => unknown;
-  readonly onClose: () => unknown;
   readonly children: React.ReactElement;
+  readonly noMouseClose?: boolean;
+  readonly onClose: () => unknown;
+  readonly onEscape?: () => unknown;
+  readonly overlayStyles?: SpringValues<ModalConfigType>;
   readonly theme?: Theme;
 };
 
 export const ModalHost = React.memo(
-  ({ onEscape, onClose, children, noMouseClose, theme }: PropsType) => {
+  ({
+    children,
+    noMouseClose,
+    onClose,
+    onEscape,
+    theme,
+    overlayStyles,
+  }: PropsType) => {
     const [root, setRoot] = React.useState<HTMLElement | null>(null);
+    const [isMouseDown, setIsMouseDown] = React.useState(false);
 
     useEffect(() => {
       const div = document.createElement('div');
@@ -29,49 +44,48 @@ export const ModalHost = React.memo(
       };
     }, []);
 
-    useEffect(() => {
-      const handler = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-          if (onEscape) {
-            onEscape();
-          } else {
-            onClose();
-          }
-
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      };
-      document.addEventListener('keydown', handler);
-
-      return () => {
-        document.removeEventListener('keydown', handler);
-      };
-    }, [onEscape, onClose]);
+    useEscapeHandling(onEscape || onClose);
 
     // This makes it easier to write dialogs to be hosted here; they won't have to worry
     //   as much about preventing propagation of mouse events.
-    const handleCancel = React.useCallback(
+    const handleMouseDown = React.useCallback(
       (e: React.MouseEvent) => {
         if (e.target === e.currentTarget) {
+          setIsMouseDown(true);
+        }
+      },
+      [setIsMouseDown]
+    );
+    const handleMouseUp = React.useCallback(
+      (e: React.MouseEvent) => {
+        setIsMouseDown(false);
+
+        if (e.target === e.currentTarget && isMouseDown) {
           onClose();
         }
       },
-      [onClose]
+      [onClose, isMouseDown, setIsMouseDown]
     );
 
     return root
       ? createPortal(
-          <div
-            role="presentation"
-            className={classNames(
-              'module-modal-host__overlay',
-              theme ? themeClassName(theme) : undefined
-            )}
-            onClick={noMouseClose ? undefined : handleCancel}
+          <FocusTrap
+            focusTrapOptions={{
+              // This is alright because the overlay covers the entire screen
+              allowOutsideClick: false,
+            }}
           >
-            {children}
-          </div>,
+            <div className={theme ? themeClassName(theme) : undefined}>
+              <animated.div
+                role="presentation"
+                className="module-modal-host__overlay"
+                onMouseDown={noMouseClose ? undefined : handleMouseDown}
+                onMouseUp={noMouseClose ? undefined : handleMouseUp}
+                style={overlayStyles}
+              />
+              <div className="module-modal-host__container">{children}</div>
+            </div>
+          </FocusTrap>,
           root
         )
       : null;

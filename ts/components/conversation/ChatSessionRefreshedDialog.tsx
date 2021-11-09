@@ -6,7 +6,9 @@ import classNames from 'classnames';
 
 import { Modal } from '../Modal';
 
-import { LocalizerType } from '../../types/Util';
+import { useRestoreFocus } from '../../hooks/useRestoreFocus';
+
+import type { LocalizerType } from '../../types/Util';
 
 export type PropsType = {
   i18n: LocalizerType;
@@ -19,8 +21,11 @@ export function ChatSessionRefreshedDialog(
 ): React.ReactElement {
   const { i18n, contactSupport, onClose } = props;
 
+  // Focus first button after initial render, restore focus on teardown
+  const [focusRef] = useRestoreFocus();
+
   return (
-    <Modal hasXButton={false} i18n={i18n}>
+    <Modal hasXButton={false} onClose={onClose} i18n={i18n}>
       <div className="module-chat-session-refreshed-dialog">
         <div className="module-chat-session-refreshed-dialog__image">
           <img
@@ -50,6 +55,7 @@ export function ChatSessionRefreshedDialog(
           <button
             type="button"
             onClick={onClose}
+            ref={focusRef}
             className="module-chat-session-refreshed-dialog__button"
           >
             {i18n('Confirmation--confirm')}

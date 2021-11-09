@@ -2,31 +2,35 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { assert } from 'chai';
-import { ConversationType } from '../../state/ducks/conversations';
-import { getDefaultConversation } from '../helpers/getDefaultConversation';
+import type { ConversationType } from '../../state/ducks/conversations';
+import { UUID } from '../../types/UUID';
+import type { UUIDStringType } from '../../types/UUID';
+import { getDefaultConversationWithUuid } from '../helpers/getDefaultConversation';
 
 import { getGroupMemberships } from '../../util/getGroupMemberships';
 
 describe('getGroupMemberships', () => {
-  const normalConversation1 = getDefaultConversation();
-  const normalConversation2 = getDefaultConversation();
-  const unregisteredConversation = getDefaultConversation({
+  const normalConversation1 = getDefaultConversationWithUuid();
+  const normalConversation2 = getDefaultConversationWithUuid();
+  const unregisteredConversation = getDefaultConversationWithUuid({
     discoveredUnregisteredAt: Date.now(),
   });
 
-  function getConversationById(id: string): undefined | ConversationType {
+  function getConversationByUuid(
+    uuid: UUIDStringType
+  ): undefined | ConversationType {
     return [
       normalConversation1,
       normalConversation2,
       unregisteredConversation,
-    ].find(conversation => conversation.id === id);
+    ].find(conversation => conversation.uuid === uuid);
   }
 
   describe('memberships', () => {
     it('returns an empty array if passed undefined', () => {
       const conversation = {};
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .memberships;
 
       assert.isEmpty(result);
@@ -35,7 +39,7 @@ describe('getGroupMemberships', () => {
     it('returns an empty array if passed an empty array', () => {
       const conversation = { memberships: [] };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .memberships;
 
       assert.isEmpty(result);
@@ -45,49 +49,53 @@ describe('getGroupMemberships', () => {
       const conversation = {
         memberships: [
           {
-            conversationId: 'garbage',
+            uuid: UUID.generate().toString(),
             isAdmin: true,
           },
         ],
       };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .memberships;
 
       assert.isEmpty(result);
     });
 
-    it('filters out unregistered conversations', () => {
+    it('does not filter out unregistered conversations', () => {
       const conversation = {
         memberships: [
           {
-            conversationId: unregisteredConversation.id,
+            uuid: unregisteredConversation.uuid,
             isAdmin: true,
           },
         ],
       };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .memberships;
 
-      assert.isEmpty(result);
+      assert.lengthOf(result, 1);
+      assert.deepEqual(result[0], {
+        isAdmin: true,
+        member: unregisteredConversation,
+      });
     });
 
     it('hydrates memberships', () => {
       const conversation = {
         memberships: [
           {
-            conversationId: normalConversation2.id,
+            uuid: normalConversation2.uuid,
             isAdmin: false,
           },
           {
-            conversationId: normalConversation1.id,
+            uuid: normalConversation1.uuid,
             isAdmin: true,
           },
         ],
       };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .memberships;
 
       assert.lengthOf(result, 2);
@@ -106,7 +114,7 @@ describe('getGroupMemberships', () => {
     it('returns an empty array if passed undefined', () => {
       const conversation = {};
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .pendingApprovalMemberships;
 
       assert.isEmpty(result);
@@ -115,7 +123,7 @@ describe('getGroupMemberships', () => {
     it('returns an empty array if passed an empty array', () => {
       const conversation = { pendingApprovalMemberships: [] };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .pendingApprovalMemberships;
 
       assert.isEmpty(result);
@@ -123,10 +131,10 @@ describe('getGroupMemberships', () => {
 
     it("filters out conversation IDs that don't exist", () => {
       const conversation = {
-        pendingApprovalMemberships: [{ conversationId: 'garbage' }],
+        pendingApprovalMemberships: [{ uuid: UUID.generate().toString() }],
       };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .pendingApprovalMemberships;
 
       assert.isEmpty(result);
@@ -134,12 +142,10 @@ describe('getGroupMemberships', () => {
 
     it('filters out unregistered conversations', () => {
       const conversation = {
-        pendingApprovalMemberships: [
-          { conversationId: unregisteredConversation.id },
-        ],
+        pendingApprovalMemberships: [{ uuid: unregisteredConversation.uuid }],
       };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .pendingApprovalMemberships;
 
       assert.isEmpty(result);
@@ -148,12 +154,12 @@ describe('getGroupMemberships', () => {
     it('hydrates pending-approval memberships', () => {
       const conversation = {
         pendingApprovalMemberships: [
-          { conversationId: normalConversation2.id },
-          { conversationId: normalConversation1.id },
+          { uuid: normalConversation2.uuid },
+          { uuid: normalConversation1.uuid },
         ],
       };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .pendingApprovalMemberships;
 
       assert.lengthOf(result, 2);
@@ -166,7 +172,7 @@ describe('getGroupMemberships', () => {
     it('returns an empty array if passed undefined', () => {
       const conversation = {};
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .pendingMemberships;
 
       assert.isEmpty(result);
@@ -175,7 +181,7 @@ describe('getGroupMemberships', () => {
     it('returns an empty array if passed an empty array', () => {
       const conversation = { pendingMemberships: [] };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .pendingMemberships;
 
       assert.isEmpty(result);
@@ -184,11 +190,14 @@ describe('getGroupMemberships', () => {
     it("filters out conversation IDs that don't exist", () => {
       const conversation = {
         pendingMemberships: [
-          { conversationId: 'garbage', addedByUserId: normalConversation1.id },
+          {
+            uuid: UUID.generate().toString(),
+            addedByUserId: normalConversation1.uuid,
+          },
         ],
       };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .pendingMemberships;
 
       assert.isEmpty(result);
@@ -198,37 +207,40 @@ describe('getGroupMemberships', () => {
       const conversation = {
         pendingMemberships: [
           {
-            conversationId: unregisteredConversation.id,
-            addedByUserId: normalConversation1.id,
+            uuid: unregisteredConversation.uuid,
+            addedByUserId: normalConversation1.uuid,
           },
         ],
       };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .pendingMemberships;
 
       assert.isEmpty(result);
     });
 
     it('hydrates pending memberships', () => {
+      const abc = UUID.generate().toString();
+      const xyz = UUID.generate().toString();
+
       const conversation = {
         pendingMemberships: [
-          { conversationId: normalConversation2.id, addedByUserId: 'abc' },
-          { conversationId: normalConversation1.id, addedByUserId: 'xyz' },
+          { uuid: normalConversation2.uuid, addedByUserId: abc },
+          { uuid: normalConversation1.uuid, addedByUserId: xyz },
         ],
       };
 
-      const result = getGroupMemberships(conversation, getConversationById)
+      const result = getGroupMemberships(conversation, getConversationByUuid)
         .pendingMemberships;
 
       assert.lengthOf(result, 2);
       assert.deepEqual(result[0], {
         member: normalConversation2,
-        metadata: { addedByUserId: 'abc' },
+        metadata: { addedByUserId: abc },
       });
       assert.deepEqual(result[1], {
         member: normalConversation1,
-        metadata: { addedByUserId: 'xyz' },
+        metadata: { addedByUserId: xyz },
       });
     });
   });

@@ -1,13 +1,12 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
-/* eslint-disable no-restricted-syntax */
 
 import React, { useState } from 'react';
 
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { Select } from './Select';
-import { LocalizerType } from '../types/Util';
-import { Theme } from '../util/theme';
+import type { LocalizerType } from '../types/Util';
+import type { Theme } from '../util/theme';
 
 const CSS_MODULE = 'module-disappearing-time-dialog';
 

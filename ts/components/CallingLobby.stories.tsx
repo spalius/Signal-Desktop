@@ -1,18 +1,23 @@
-// Copyright 2020 Signal Messenger, LLC
+// Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import * as React from 'react';
+import { times } from 'lodash';
 import { storiesOf } from '@storybook/react';
 import { boolean } from '@storybook/addon-knobs';
 import { action } from '@storybook/addon-actions';
-import { v4 as generateUuid } from 'uuid';
 
 import { AvatarColors } from '../types/Colors';
-import { ConversationType } from '../state/ducks/conversations';
-import { CallingLobby, PropsType } from './CallingLobby';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import type { ConversationType } from '../state/ducks/conversations';
+import type { PropsType } from './CallingLobby';
+import { CallingLobby } from './CallingLobby';
+import { setupI18n } from '../util/setupI18n';
+import { UUID } from '../types/UUID';
 import enMessages from '../../_locales/en/messages.json';
-import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
+import {
+  getDefaultConversation,
+  getDefaultConversationWithUuid,
+} from '../test-both/helpers/getDefaultConversation';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -26,37 +31,60 @@ const camera = {
   },
 };
 
-const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => ({
-  availableCameras: overrideProps.availableCameras || [camera],
-  conversation: {
-    title: 'Rick Sanchez',
-  },
-  hasLocalAudio: boolean('hasLocalAudio', overrideProps.hasLocalAudio || false),
-  hasLocalVideo: boolean('hasLocalVideo', overrideProps.hasLocalVideo || false),
-  i18n,
-  isGroupCall: boolean('isGroupCall', overrideProps.isGroupCall || false),
-  isCallFull: boolean('isCallFull', overrideProps.isCallFull || false),
-  me: overrideProps.me || {
-    color: AvatarColors[0],
-    uuid: generateUuid(),
-  },
-  onCallCanceled: action('on-call-canceled'),
-  onJoinCall: action('on-join-call'),
-  peekedParticipants: overrideProps.peekedParticipants || [],
-  setLocalAudio: action('set-local-audio'),
-  setLocalPreview: action('set-local-preview'),
-  setLocalVideo: action('set-local-video'),
-  showParticipantsList: boolean(
-    'showParticipantsList',
-    Boolean(overrideProps.showParticipantsList)
-  ),
-  toggleParticipants: action('toggle-participants'),
-  toggleSettings: action('toggle-settings'),
-});
+const createProps = (overrideProps: Partial<PropsType> = {}): PropsType => {
+  const isGroupCall = boolean(
+    'isGroupCall',
+    overrideProps.isGroupCall || false
+  );
+  const conversation = isGroupCall
+    ? getDefaultConversation({
+        title: 'Tahoe Trip',
+        type: 'group',
+      })
+    : getDefaultConversation();
+
+  return {
+    availableCameras: overrideProps.availableCameras || [camera],
+    conversation,
+    groupMembers:
+      overrideProps.groupMembers ||
+      (isGroupCall ? times(3, () => getDefaultConversation()) : undefined),
+    hasLocalAudio: boolean(
+      'hasLocalAudio',
+      overrideProps.hasLocalAudio || false
+    ),
+    hasLocalVideo: boolean(
+      'hasLocalVideo',
+      overrideProps.hasLocalVideo || false
+    ),
+    i18n,
+    isGroupCall,
+    isGroupCallOutboundRingEnabled: true,
+    isCallFull: boolean('isCallFull', overrideProps.isCallFull || false),
+    me: overrideProps.me || {
+      color: AvatarColors[0],
+      id: UUID.generate().toString(),
+      uuid: UUID.generate().toString(),
+    },
+    onCallCanceled: action('on-call-canceled'),
+    onJoinCall: action('on-join-call'),
+    outgoingRing: boolean('outgoingRing', Boolean(overrideProps.outgoingRing)),
+    peekedParticipants: overrideProps.peekedParticipants || [],
+    setLocalAudio: action('set-local-audio'),
+    setLocalPreview: action('set-local-preview'),
+    setLocalVideo: action('set-local-video'),
+    setOutgoingRing: action('set-outgoing-ring'),
+    showParticipantsList: boolean(
+      'showParticipantsList',
+      Boolean(overrideProps.showParticipantsList)
+    ),
+    toggleParticipants: action('toggle-participants'),
+    toggleSettings: action('toggle-settings'),
+  };
+};
 
 const fakePeekedParticipant = (conversationProps: Partial<ConversationType>) =>
-  getDefaultConversation({
-    uuid: generateUuid(),
+  getDefaultConversationWithUuid({
     ...conversationProps,
   });
 
@@ -80,7 +108,8 @@ story.add('No Camera, local avatar', () => {
     me: {
       avatarPath: '/fixtures/kitten-4-112-112.jpg',
       color: AvatarColors[0],
-      uuid: generateUuid(),
+      id: UUID.generate().toString(),
+      uuid: UUID.generate().toString(),
     },
   });
   return <CallingLobby {...props} />;
@@ -114,31 +143,14 @@ story.add('Group Call - 1 peeked participant', () => {
 });
 
 story.add('Group Call - 1 peeked participant (self)', () => {
-  const uuid = generateUuid();
+  const uuid = UUID.generate().toString();
   const props = createProps({
     isGroupCall: true,
-    me: { uuid },
+    me: {
+      id: UUID.generate().toString(),
+      uuid,
+    },
     peekedParticipants: [fakePeekedParticipant({ title: 'Ash', uuid })],
-  });
-  return <CallingLobby {...props} />;
-});
-
-story.add('Group Call - 2 peeked participants', () => {
-  const props = createProps({
-    isGroupCall: true,
-    peekedParticipants: ['Sam', 'Cayce'].map(title =>
-      fakePeekedParticipant({ title })
-    ),
-  });
-  return <CallingLobby {...props} />;
-});
-
-story.add('Group Call - 3 peeked participants', () => {
-  const props = createProps({
-    isGroupCall: true,
-    peekedParticipants: ['Sam', 'Cayce', 'April'].map(title =>
-      fakePeekedParticipant({ title })
-    ),
   });
   return <CallingLobby {...props} />;
 });
@@ -171,6 +183,14 @@ story.add('Group Call - call full', () => {
     peekedParticipants: ['Sam', 'Cayce'].map(title =>
       fakePeekedParticipant({ title })
     ),
+  });
+  return <CallingLobby {...props} />;
+});
+
+story.add('Group Call - 0 peeked participants, big group', () => {
+  const props = createProps({
+    isGroupCall: true,
+    groupMembers: times(100, () => getDefaultConversation()),
   });
   return <CallingLobby {...props} />;
 });

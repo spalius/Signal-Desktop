@@ -7,7 +7,7 @@ import { noop } from 'lodash';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 import { Button } from './Button';
 import { Modal } from './Modal';
@@ -29,6 +29,18 @@ story.add('Bare bones, long', () => (
     <p>{LOREM_IPSUM}</p>
     <p>{LOREM_IPSUM}</p>
     <p>{LOREM_IPSUM}</p>
+  </Modal>
+));
+
+story.add('Bare bones, long, with button', () => (
+  <Modal i18n={i18n}>
+    <p>{LOREM_IPSUM}</p>
+    <p>{LOREM_IPSUM}</p>
+    <p>{LOREM_IPSUM}</p>
+    <p>{LOREM_IPSUM}</p>
+    <Modal.ButtonFooter>
+      <Button onClick={noop}>Okay</Button>
+    </Modal.ButtonFooter>
   </Modal>
 ));
 
@@ -69,6 +81,18 @@ story.add('Long body with title', () => (
   </Modal>
 ));
 
+story.add('Long body with title and button', () => (
+  <Modal i18n={i18n} title="Hello world" onClose={onClose}>
+    <p>{LOREM_IPSUM}</p>
+    <p>{LOREM_IPSUM}</p>
+    <p>{LOREM_IPSUM}</p>
+    <p>{LOREM_IPSUM}</p>
+    <Modal.ButtonFooter>
+      <Button onClick={noop}>Okay</Button>
+    </Modal.ButtonFooter>
+  </Modal>
+));
+
 story.add('Long body with long title and X button', () => (
   <Modal
     i18n={i18n}
@@ -80,5 +104,47 @@ story.add('Long body with long title and X button', () => (
     <p>{LOREM_IPSUM}</p>
     <p>{LOREM_IPSUM}</p>
     <p>{LOREM_IPSUM}</p>
+  </Modal>
+));
+
+story.add('With sticky buttons long body', () => (
+  <Modal hasStickyButtons hasXButton i18n={i18n} onClose={onClose}>
+    <p>{LOREM_IPSUM}</p>
+    <p>{LOREM_IPSUM}</p>
+    <p>{LOREM_IPSUM}</p>
+    <p>{LOREM_IPSUM}</p>
+    <Modal.ButtonFooter>
+      <Button onClick={noop}>Okay</Button>
+      <Button onClick={noop}>Okay</Button>
+    </Modal.ButtonFooter>
+  </Modal>
+));
+
+story.add('With sticky buttons short body', () => (
+  <Modal hasStickyButtons hasXButton i18n={i18n} onClose={onClose}>
+    <p>{LOREM_IPSUM.slice(0, 140)}</p>
+    <Modal.ButtonFooter>
+      <Button onClick={noop}>Okay</Button>
+      <Button onClick={noop}>Okay</Button>
+    </Modal.ButtonFooter>
+  </Modal>
+));
+
+story.add('Sticky footer, Lots of buttons', () => (
+  <Modal hasStickyButtons i18n={i18n} onClose={onClose} title="OK">
+    <p>{LOREM_IPSUM}</p>
+    <Modal.ButtonFooter>
+      <Button onClick={noop}>Okay</Button>
+      <Button onClick={noop}>Okay</Button>
+      <Button onClick={noop}>Okay</Button>
+      <Button onClick={noop}>
+        This is a button with a fairly large amount of text
+      </Button>
+      <Button onClick={noop}>Okay</Button>
+      <Button onClick={noop}>
+        This is a button with a fairly large amount of text
+      </Button>
+      <Button onClick={noop}>Okay</Button>
+    </Modal.ButtonFooter>
   </Modal>
 ));

@@ -1,9 +1,6 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-// We use `for ... of` to deal with iterables in several places in this file.
-/* eslint-disable no-restricted-syntax */
-
 import { isNil, sortBy } from 'lodash';
 import PQueue from 'p-queue';
 
@@ -13,8 +10,10 @@ import { missingCaseError } from './util/missingCaseError';
 import { isNormalNumber } from './util/isNormalNumber';
 import { take } from './util/iterables';
 import { isOlderThan } from './util/timestamp';
-import { ConversationModel } from './models/conversations';
-import { StorageInterface } from './types/Storage.d';
+import type { ConversationModel } from './models/conversations';
+import type { StorageInterface } from './types/Storage.d';
+// Imported this way so that sinon.sandbox can stub this properly
+import * as profileGetter from './util/getProfile';
 
 const STORAGE_KEY = 'lastAttemptedToRefreshProfilesAt';
 const MAX_AGE_TO_BE_CONSIDERED_ACTIVE = 30 * 24 * 60 * 60 * 1000;
@@ -54,22 +53,22 @@ export async function routineProfileRefresh({
   async function refreshConversation(
     conversation: ConversationModel
   ): Promise<void> {
-    window.log.info(
+    log.info(
       `routineProfileRefresh: refreshing profile for ${conversation.idForLogging()}`
     );
 
     totalCount += 1;
     try {
-      await conversation.getProfile(
+      await profileGetter.getProfile(
         conversation.get('uuid'),
         conversation.get('e164')
       );
-      window.log.info(
+      log.info(
         `routineProfileRefresh: refreshed profile for ${conversation.idForLogging()}`
       );
       successCount += 1;
     } catch (err) {
-      window.log.error(
+      log.error(
         `routineProfileRefresh: refreshed profile for ${conversation.idForLogging()}`,
         err?.stack || err
       );

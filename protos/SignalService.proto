@@ -1,3 +1,6 @@
+// Copyright 2014-2021 Signal Messenger, LLC
+// SPDX-License-Identifier: AGPL-3.0-only
+
 // Source: https://github.com/signalapp/libsignal-service-java/blob/4684a49b2ed8f32be619e0d0eea423626b6cb2cb/protobuf/SignalService.proto
 package signalservice;
 
@@ -95,7 +98,13 @@ message CallingMessage {
   }
 
   message Opaque {
-    optional bytes data = 1;
+    enum Urgency {
+      DROPPABLE          = 0;
+      HANDLE_IMMEDIATELY = 1;
+    }
+
+    optional bytes   data    = 1;
+    optional Urgency urgency = 2;
   }
 
   optional Offer        offer               = 1;
@@ -211,6 +220,7 @@ message DataMessage {
     optional bytes             packKey   = 2;
     optional uint32            stickerId = 3;
     optional AttachmentPointer data      = 4;
+    optional string            emoji     = 5;
   }
 
   message Reaction {
@@ -241,14 +251,15 @@ message DataMessage {
   enum ProtocolVersion {
     option allow_alias = true;
 
-    INITIAL                  = 0;
-    MESSAGE_TIMERS           = 1;
-    VIEW_ONCE                = 2;
-    VIEW_ONCE_VIDEO          = 3;
-    REACTIONS                = 4;
+    INITIAL = 0;
+    MESSAGE_TIMERS = 1;
+    VIEW_ONCE = 2;
+    VIEW_ONCE_VIDEO = 3;
+    REACTIONS = 4;
     CDN_SELECTOR_ATTACHMENTS = 5;
-    MENTIONS                 = 6;
-    CURRENT                  = 6;
+    MENTIONS = 6;
+    PAYMENTS = 7;
+    CURRENT = 7;
   }
 
   optional string             body                    = 1;
@@ -366,6 +377,12 @@ message SyncMessage {
     optional uint64 timestamp  = 2;
   }
 
+  message Viewed {
+    optional string senderE164 = 1;
+    optional string senderUuid = 3;
+    optional uint64 timestamp = 2;
+  }
+
   message Configuration {
     optional bool   readReceipts                   = 1;
     optional bool   unidentifiedDeliveryIndicators = 2;
@@ -431,6 +448,8 @@ message SyncMessage {
   optional FetchLatest            fetchLatest            = 12;
   optional Keys                   keys                   = 13;
   optional MessageRequestResponse messageRequestResponse = 14;
+  reserved                                                 15; // not yet added
+  repeated Viewed                 viewed                 = 16;
 }
 
 message AttachmentPointer {

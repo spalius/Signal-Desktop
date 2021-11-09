@@ -3,19 +3,20 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { boolean, select, text } from '@storybook/addon-knobs';
 import { action } from '@storybook/addon-actions';
 
 import { IncomingCallBar } from './IncomingCallBar';
-import { AvatarColors } from '../types/Colors';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { CallMode } from '../types/Calling';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
 import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
 
 const i18n = setupI18n('en', enMessages);
 
-const defaultProps = {
+const commonProps = {
   acceptCall: action('accept-call'),
+  bounceAppIconStart: action('bounceAppIconStart'),
+  bounceAppIconStop: action('bounceAppIconStop'),
   call: {
     conversationId: 'fake-conversation-id',
     callId: 0,
@@ -25,7 +26,6 @@ const defaultProps = {
   conversation: getDefaultConversation({
     id: '3051234567',
     avatarPath: undefined,
-    color: AvatarColors[0],
     name: 'Rick Sanchez',
     phoneNumber: '3051234567',
     profileName: 'Rick Sanchez',
@@ -33,53 +33,96 @@ const defaultProps = {
   }),
   declineCall: action('decline-call'),
   i18n,
+  notifyForCall: action('notify-for-call'),
 };
 
-const permutations = [
-  {
-    title: 'Incoming Call Bar (video)',
-    props: {},
-  },
-  {
-    title: 'Incoming Call Bar (audio)',
-    props: {
-      call: {
-        ...defaultProps.call,
-        isVideoCall: false,
-      },
-    },
-  },
-];
+const directConversation = getDefaultConversation({
+  id: '3051234567',
+  avatarPath: undefined,
+  name: 'Rick Sanchez',
+  phoneNumber: '3051234567',
+  profileName: 'Rick Sanchez',
+  title: 'Rick Sanchez',
+});
+
+const groupConversation = getDefaultConversation({
+  avatarPath: undefined,
+  name: 'Tahoe Trip',
+  title: 'Tahoe Trip',
+  type: 'group',
+});
 
 storiesOf('Components/IncomingCallBar', module)
-  .add('Knobs Playground', () => {
-    const color = select('color', AvatarColors, 'ultramarine');
-    const isVideoCall = boolean('isVideoCall', false);
-    const name = text(
-      'name',
-      'Rick Sanchez Foo Bar Baz Spool Cool Mango Fango Wand Mars Venus Jupiter Spark Mirage Water Loop Branch Zeus Element Sail Bananas Cars Horticulture Turtle Lion Zebra Micro Music Garage Iguana Ohio Retro Joy Entertainment Logo Understanding Diary'
-    );
-
-    return (
-      <IncomingCallBar
-        {...defaultProps}
-        call={{
-          ...defaultProps.call,
-          isVideoCall,
-        }}
-        conversation={{
-          ...defaultProps.conversation,
-          color,
-          name,
-        }}
-      />
-    );
-  })
-  .add('Iterations', () => {
-    return permutations.map(({ props, title }) => (
-      <>
-        <h3>{title}</h3>
-        <IncomingCallBar {...defaultProps} {...props} />
-      </>
-    ));
-  });
+  .add('Incoming direct call (video)', () => (
+    <IncomingCallBar
+      {...commonProps}
+      conversation={directConversation}
+      callMode={CallMode.Direct}
+      isVideoCall
+    />
+  ))
+  .add('Incoming direct call (audio)', () => (
+    <IncomingCallBar
+      {...commonProps}
+      conversation={directConversation}
+      callMode={CallMode.Direct}
+      isVideoCall={false}
+    />
+  ))
+  .add('Incoming group call (only calling you)', () => (
+    <IncomingCallBar
+      {...commonProps}
+      conversation={groupConversation}
+      callMode={CallMode.Group}
+      otherMembersRung={[]}
+      ringer={{ firstName: 'Rick', title: 'Rick Sanchez' }}
+    />
+  ))
+  .add('Incoming group call (calling you and 1 other)', () => (
+    <IncomingCallBar
+      {...commonProps}
+      conversation={groupConversation}
+      callMode={CallMode.Group}
+      otherMembersRung={[{ firstName: 'Morty', title: 'Morty Smith' }]}
+      ringer={{ firstName: 'Rick', title: 'Rick Sanchez' }}
+    />
+  ))
+  .add('Incoming group call (calling you and 2 others)', () => (
+    <IncomingCallBar
+      {...commonProps}
+      conversation={groupConversation}
+      callMode={CallMode.Group}
+      otherMembersRung={[
+        { firstName: 'Morty', title: 'Morty Smith' },
+        { firstName: 'Summer', title: 'Summer Smith' },
+      ]}
+      ringer={{ firstName: 'Rick', title: 'Rick Sanchez' }}
+    />
+  ))
+  .add('Incoming group call (calling you and 3 others)', () => (
+    <IncomingCallBar
+      {...commonProps}
+      conversation={groupConversation}
+      callMode={CallMode.Group}
+      otherMembersRung={[
+        { firstName: 'Morty', title: 'Morty Smith' },
+        { firstName: 'Summer', title: 'Summer Smith' },
+        { firstName: 'Beth', title: 'Beth Smith' },
+      ]}
+      ringer={{ firstName: 'Rick', title: 'Rick Sanchez' }}
+    />
+  ))
+  .add('Incoming group call (calling you and 4 others)', () => (
+    <IncomingCallBar
+      {...commonProps}
+      conversation={groupConversation}
+      callMode={CallMode.Group}
+      otherMembersRung={[
+        { firstName: 'Morty', title: 'Morty Smith' },
+        { firstName: 'Summer', title: 'Summer Smith' },
+        { firstName: 'Beth', title: 'Beth Sanchez' },
+        { firstName: 'Jerry', title: 'Beth Smith' },
+      ]}
+      ringer={{ firstName: 'Rick', title: 'Rick Sanchez' }}
+    />
+  ));

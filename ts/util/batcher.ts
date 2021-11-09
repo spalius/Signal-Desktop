@@ -4,6 +4,7 @@
 import PQueue from 'p-queue';
 
 import { sleep } from './sleep';
+import * as log from '../logging/log';
 
 declare global {
   // We want to extend `window`'s properties, so we need an interface.
@@ -30,6 +31,7 @@ export type BatcherOptionsType<ItemType> = {
 
 export type BatcherType<ItemType> = {
   add: (item: ItemType) => void;
+  removeAll: (needle: ItemType) => void;
   anyPending: () => boolean;
   onIdle: () => Promise<void>;
   flushAndWait: () => Promise<void>;
@@ -69,6 +71,10 @@ export function createBatcher<ItemType>(
     }
   }
 
+  function removeAll(needle: ItemType) {
+    items = items.filter(item => item !== needle);
+  }
+
   function anyPending(): boolean {
     return queue.size > 0 || queue.pending > 0 || items.length > 0;
   }
@@ -92,9 +98,7 @@ export function createBatcher<ItemType>(
   }
 
   async function flushAndWait() {
-    window.log.info(
-      `Flushing ${options.name} batcher items.length=${items.length}`
-    );
+    log.info(`Flushing ${options.name} batcher items.length=${items.length}`);
 
     while (anyPending()) {
       _kickBatchOff();
@@ -104,11 +108,12 @@ export function createBatcher<ItemType>(
         await queue.onIdle();
       }
     }
-    window.log.info(`Flushing complete ${options.name} for batcher`);
+    log.info(`Flushing complete ${options.name} for batcher`);
   }
 
   batcher = {
     add,
+    removeAll,
     anyPending,
     onIdle,
     flushAndWait,

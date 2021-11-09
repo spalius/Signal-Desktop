@@ -5,7 +5,6 @@
 
 mocha.setup('bdd');
 window.assert = chai.assert;
-window.PROTO_ROOT = '../protos';
 
 const OriginalReporter = mocha._reporter;
 
@@ -52,18 +51,6 @@ Whisper.Database.id = 'test';
 /*
  * global helpers for tests
  */
-window.assertEqualArrayBuffers = (ab1, ab2) => {
-  assert.deepEqual(new Uint8Array(ab1), new Uint8Array(ab2));
-};
-
-window.hexToArrayBuffer = str => {
-  const ret = new ArrayBuffer(str.length / 2);
-  const array = new Uint8Array(ret);
-  for (let i = 0; i < str.length / 2; i += 1) {
-    array[i] = parseInt(str.substr(i * 2, 2), 16);
-  }
-  return ret;
-};
 
 function deleteIndexedDB() {
   return new Promise((resolve, reject) => {
@@ -79,16 +66,17 @@ before(async () => {
 
   await deleteIndexedDB();
   try {
-    window.log.info('Initializing SQL in renderer');
+    window.SignalContext.log.info('Initializing SQL in renderer');
     const isTesting = true;
-    await window.sqlInitializer.initialize(isTesting);
-    window.log.info('SQL initialized in renderer');
+    await window.Signal.Data.startInRenderer(isTesting);
+    window.SignalContext.log.info('SQL initialized in renderer');
   } catch (err) {
-    window.log.error(
+    window.SignalContext.log.error(
       'SQL failed to initialize',
       err && err.stack ? err.stack : err
     );
   }
+  await window.Signal.Util.initializeMessageCounter();
   await window.Signal.Data.removeAll();
   await window.storage.fetch();
 });

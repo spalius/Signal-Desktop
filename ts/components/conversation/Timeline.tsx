@@ -1,37 +1,42 @@
 // Copyright 2019-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { debounce, get, isNumber } from 'lodash';
+import { debounce, get, isNumber, pick, identity } from 'lodash';
 import classNames from 'classnames';
-import React, { CSSProperties, ReactChild, ReactNode } from 'react';
+import type { CSSProperties, ReactChild, ReactNode, RefObject } from 'react';
+import React from 'react';
+import { createSelector } from 'reselect';
+import type { Grid } from 'react-virtualized';
 import {
   AutoSizer,
   CellMeasurer,
   CellMeasurerCache,
   List,
-  Grid,
 } from 'react-virtualized';
 import Measure from 'react-measure';
 
 import { ScrollDownButton } from './ScrollDownButton';
 
-import { LocalizerType } from '../../types/Util';
-import { ConversationType } from '../../state/ducks/conversations';
+import type { AssertProps, LocalizerType } from '../../types/Util';
+import type { ConversationType } from '../../state/ducks/conversations';
 import { assert } from '../../util/assert';
 import { missingCaseError } from '../../util/missingCaseError';
+import { createRefMerger } from '../../util/refMerger';
+import { WidthBreakpoint } from '../_util';
 
-import { PropsActions as MessageActionsType } from './Message';
-import { PropsActions as SafetyNumberActionsType } from './SafetyNumberNotification';
+import type { PropsActions as MessageActionsType } from './Message';
+import type { PropsActions as UnsupportedMessageActionsType } from './UnsupportedMessage';
+import type { PropsActionsType as ChatSessionRefreshedNotificationActionsType } from './ChatSessionRefreshedNotification';
+import { ErrorBoundary } from './ErrorBoundary';
+import type { PropsActions as SafetyNumberActionsType } from './SafetyNumberNotification';
 import { Intl } from '../Intl';
 import { TimelineWarning } from './TimelineWarning';
 import { TimelineWarnings } from './TimelineWarnings';
 import { NewlyCreatedGroupInvitedContactsDialog } from '../NewlyCreatedGroupInvitedContactsDialog';
 import { ContactSpoofingType } from '../../util/contactSpoofing';
 import { ContactSpoofingReviewDialog } from './ContactSpoofingReviewDialog';
-import {
-  GroupNameCollisionsWithIdsByTitle,
-  hasUnacknowledgedCollisions,
-} from '../../util/groupMemberNameCollisions';
+import type { GroupNameCollisionsWithIdsByTitle } from '../../util/groupMemberNameCollisions';
+import { hasUnacknowledgedCollisions } from '../../util/groupMemberNameCollisions';
 
 const AT_BOTTOM_THRESHOLD = 15;
 const NEAR_BOTTOM_THRESHOLD = 15;
@@ -72,13 +77,14 @@ export type PropsDataType = {
   haveNewest: boolean;
   haveOldest: boolean;
   isLoadingMessages: boolean;
-  isNearBottom?: boolean;
-  items: Array<string>;
-  loadCountdownStart?: number;
-  messageHeightChangeIndex?: number;
-  oldestUnreadIndex?: number;
+  isNearBottom: boolean;
+  items: ReadonlyArray<string>;
+  loadCountdownStart: number | undefined;
+  messageHeightChangeIndex: number | undefined;
+  oldestUnreadIndex: number | undefined;
   resetCounter: number;
-  scrollToIndex?: number;
+  scrollToBottomCounter: number;
+  scrollToIndex: number | undefined;
   scrollToIndexCounter: number;
   totalUnread: number;
 };
@@ -99,12 +105,16 @@ type PropsHousekeepingType = {
 
   i18n: LocalizerType;
 
-  renderItem: (
-    id: string,
-    conversationId: string,
-    onHeightChange: (messageId: string) => unknown,
-    actions: Record<string, unknown>
-  ) => JSX.Element;
+  renderItem: (props: {
+    actionProps: PropsActionsType;
+    containerElementRef: RefObject<HTMLElement>;
+    containerWidthBreakpoint: WidthBreakpoint;
+    conversationId: string;
+    messageId: string;
+    nextMessageId: undefined | string;
+    onHeightChange: (messageId: string) => unknown;
+    previousMessageId: undefined | string;
+  }) => JSX.Element;
   renderLastSeenIndicator: (id: string) => JSX.Element;
   renderHeroRow: (
     id: string,
@@ -116,12 +126,12 @@ type PropsHousekeepingType = {
   renderTypingBubble: (id: string) => JSX.Element;
 };
 
-type PropsActionsType = {
+export type PropsActionsType = {
   acknowledgeGroupMemberNameCollisions: (
     groupNameCollisions: Readonly<GroupNameCollisionsWithIdsByTitle>
   ) => void;
   clearChangedMessages: (conversationId: string) => unknown;
-  clearInvitedConversationsForNewlyCreatedGroup: () => void;
+  clearInvitedUuidsForNewlyCreatedGroup: () => void;
   closeContactSpoofingReview: () => void;
   setLoadCountdownStart: (
     conversationId: string,
@@ -135,6 +145,7 @@ type PropsActionsType = {
     }>
   ) => void;
 
+  learnMoreAboutDeliveryIssue: () => unknown;
   loadAndScroll: (messageId: string) => unknown;
   loadOlderMessages: (messageId: string) => unknown;
   loadNewerMessages: (messageId: string) => unknown;
@@ -149,8 +160,10 @@ type PropsActionsType = {
   clearSelectedMessage: () => unknown;
   unblurAvatar: () => void;
   updateSharedGroups: () => unknown;
-} & MessageActionsType &
-  SafetyNumberActionsType;
+} & Omit<MessageActionsType, 'onHeightChange'> &
+  SafetyNumberActionsType &
+  UnsupportedMessageActionsType &
+  ChatSessionRefreshedNotificationActionsType;
 
 export type PropsType = PropsDataType &
   PropsHousekeepingType &
@@ -197,6 +210,8 @@ type StateType = {
   atTop: boolean;
   oneTimeScrollRow?: number;
 
+  widthBreakpoint: WidthBreakpoint;
+
   prevPropScrollToIndex?: number;
   prevPropScrollToIndexCounter?: number;
   propScrollToIndex?: number;
@@ -207,6 +222,73 @@ type StateType = {
   hasDismissedDirectContactSpoofingWarning: boolean;
   lastMeasuredWarningHeight: number;
 };
+
+const getActions = createSelector(
+  // It is expensive to pick so many properties out of the `props` object so we
+  // use `createSelector` to memoize them by the last seen `props` object.
+  identity,
+
+  (props: PropsType): PropsActionsType => {
+    const unsafe = pick(props, [
+      'acknowledgeGroupMemberNameCollisions',
+      'clearChangedMessages',
+      'clearInvitedUuidsForNewlyCreatedGroup',
+      'closeContactSpoofingReview',
+      'setLoadCountdownStart',
+      'setIsNearBottom',
+      'reviewGroupMemberNameCollision',
+      'reviewMessageRequestNameCollision',
+      'learnMoreAboutDeliveryIssue',
+      'loadAndScroll',
+      'loadOlderMessages',
+      'loadNewerMessages',
+      'loadNewestMessages',
+      'markMessageRead',
+      'markViewed',
+      'onBlock',
+      'onBlockAndReportSpam',
+      'onDelete',
+      'onUnblock',
+      'removeMember',
+      'selectMessage',
+      'clearSelectedMessage',
+      'unblurAvatar',
+      'updateSharedGroups',
+
+      'doubleCheckMissingQuoteReference',
+      'checkForAccount',
+      'reactToMessage',
+      'replyToMessage',
+      'retrySend',
+      'showForwardMessageModal',
+      'deleteMessage',
+      'deleteMessageForEveryone',
+      'showMessageDetail',
+      'openConversation',
+      'showContactDetail',
+      'showContactModal',
+      'kickOffAttachmentDownload',
+      'markAttachmentAsCorrupted',
+      'showVisualAttachment',
+      'downloadAttachment',
+      'displayTapToViewMessage',
+      'openLink',
+      'scrollToQuotedMessage',
+      'showExpiredIncomingTapToViewToast',
+      'showExpiredOutgoingTapToViewToast',
+
+      'showIdentity',
+
+      'downloadNewVersion',
+
+      'contactSupport',
+    ]);
+
+    const safe: AssertProps<PropsActionsType, typeof unsafe> = unsafe;
+
+    return safe;
+  }
+);
 
 export class Timeline extends React.PureComponent<PropsType, StateType> {
   public cellSizeCache = new CellMeasurerCache({
@@ -222,11 +304,15 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
 
   public resizeFlag = false;
 
-  public listRef = React.createRef<List>();
+  private readonly containerRef = React.createRef<HTMLDivElement>();
+
+  private readonly listRef = React.createRef<List>();
 
   public visibleRows: VisibleRowsType | undefined;
 
   public loadCountdownTimeout: NodeJS.Timeout | null = null;
+
+  private containerRefMerger = createRefMerger();
 
   constructor(props: PropsType) {
     super(props);
@@ -249,6 +335,8 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
       areUnreadBelowCurrentPosition: false,
       hasDismissedDirectContactSpoofingWarning: false,
       lastMeasuredWarningHeight: 0,
+      // This may be swiftly overridden.
+      widthBreakpoint: WidthBreakpoint.Wide,
     };
   }
 
@@ -288,7 +376,6 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
       return;
     }
 
-    // eslint-disable-next-line consistent-return
     return list.Grid;
   };
 
@@ -301,7 +388,6 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
       return;
     }
 
-    // eslint-disable-next-line consistent-return
     return grid._scrollingContainer as HTMLDivElement;
   };
 
@@ -652,6 +738,7 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
   }: RowRendererParamsType): JSX.Element => {
     const {
       id,
+      i18n,
       haveOldest,
       items,
       renderItem,
@@ -662,7 +749,7 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
       unblurAvatar,
       updateSharedGroups,
     } = this.props;
-    const { lastMeasuredWarningHeight } = this.state;
+    const { lastMeasuredWarningHeight, widthBreakpoint } = this.state;
 
     const styleWithWidth = {
       ...style,
@@ -676,7 +763,7 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
     if (haveOldest && row === 0) {
       rowContents = (
         <div data-row={row} style={styleWithWidth} role="row">
-          {this.getWarning() ? (
+          {Timeline.getWarning(this.props, this.state) ? (
             <div style={{ height: lastMeasuredWarningHeight }} />
           ) : null}
           {renderHeroRow(
@@ -717,7 +804,12 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
           `Attempted to render item with undefined index - row ${row}`
         );
       }
+      const previousMessageId: undefined | string = items[itemIndex - 1];
       const messageId = items[itemIndex];
+      const nextMessageId: undefined | string = items[itemIndex + 1];
+
+      const actionProps = getActions(this.props);
+
       rowContents = (
         <div
           id={messageId}
@@ -726,7 +818,18 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
           style={styleWithWidth}
           role="row"
         >
-          {renderItem(messageId, id, this.resizeMessage, this.props)}
+          <ErrorBoundary i18n={i18n} showDebugLog={() => window.showDebugLog()}>
+            {renderItem({
+              actionProps,
+              containerElementRef: this.containerRef,
+              containerWidthBreakpoint: widthBreakpoint,
+              conversationId: id,
+              messageId,
+              nextMessageId,
+              onHeightChange: this.resizeMessage,
+              previousMessageId,
+            })}
+          </ErrorBoundary>
         </div>
       );
     }
@@ -796,7 +899,6 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
       return;
     }
 
-    // eslint-disable-next-line consistent-return
     return index;
   }
 
@@ -806,7 +908,6 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
       return;
     }
 
-    // eslint-disable-next-line consistent-return
     return this.fromItemIndexToRow(oldestUnreadIndex) - 1;
   }
 
@@ -818,7 +919,6 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
 
     const last = items.length - 1;
 
-    // eslint-disable-next-line consistent-return
     return this.fromItemIndexToRow(last) + 1;
   }
 
@@ -860,7 +960,7 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
     this.scrollDown(false);
   };
 
-  public scrollDown = (setFocus?: boolean): void => {
+  public scrollDown = (setFocus?: boolean, forceScrollDown?: boolean): void => {
     const {
       haveNewest,
       id,
@@ -877,7 +977,7 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
     const lastId = items[items.length - 1];
     const lastSeenIndicatorRow = this.getLastSeenIndicatorRow();
 
-    if (!this.visibleRows) {
+    if (!this.visibleRows || forceScrollDown) {
       if (haveNewest) {
         this.scrollToBottom(setFocus);
       } else if (!isLoadingMessages) {
@@ -927,23 +1027,33 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
   ): void {
     const {
       clearChangedMessages,
+      haveOldest,
       id,
       isIncomingMessageRequest,
       items,
       messageHeightChangeIndex,
       oldestUnreadIndex,
       resetCounter,
+      scrollToBottomCounter,
       scrollToIndex,
       typingContact,
     } = this.props;
 
-    // Warnings can increase the size of the first row (adding padding for the floating
-    //   warning), so we recompute it when the warnings change.
-    const hadWarning = Boolean(
-      prevProps.warning && !prevState.hasDismissedDirectContactSpoofingWarning
-    );
-    if (hadWarning !== Boolean(this.getWarning())) {
-      this.recomputeRowHeights(0);
+    // We recompute the hero row's height if:
+    //
+    // 1. We just started showing it (a loading row changes to a hero row)
+    // 2. Warnings were shown (they add padding to the hero for the floating warning)
+    const hadOldest = prevProps.haveOldest;
+    const hadWarning = Boolean(Timeline.getWarning(prevProps, prevState));
+    const haveWarning = Boolean(Timeline.getWarning(this.props, this.state));
+    const shouldRecomputeRowHeights =
+      (!hadOldest && haveOldest) || hadWarning !== haveWarning;
+    if (shouldRecomputeRowHeights) {
+      this.resizeHeroRow();
+    }
+
+    if (scrollToBottomCounter !== prevProps.scrollToBottomCounter) {
+      this.scrollDown(false, true);
     }
 
     // There are a number of situations which can necessitate that we forget about row
@@ -980,15 +1090,24 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
       return;
     }
 
+    let resizeStartRow: number | undefined;
+
+    if (isNumber(messageHeightChangeIndex)) {
+      resizeStartRow = this.fromItemIndexToRow(messageHeightChangeIndex);
+      clearChangedMessages(id);
+    }
+
     if (
-      items &&
-      items.length > 0 &&
-      prevProps.items &&
-      prevProps.items.length > 0 &&
-      items !== prevProps.items
+      items !== prevProps.items ||
+      oldestUnreadIndex !== prevProps.oldestUnreadIndex ||
+      Boolean(typingContact) !== Boolean(prevProps.typingContact)
     ) {
       const { atTop } = this.state;
 
+      // This clause handles prepended messages when user scrolls up. New
+      // messages are added to `items`, but we want to keep the scroll position
+      // at the first previously visible message even though the row numbers
+      // have now changed.
       if (atTop) {
         const oldFirstIndex = 0;
         const oldFirstId = prevProps.items[oldFirstIndex];
@@ -1013,39 +1132,55 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
         }
       }
 
-      // We continue on after our atTop check; because if we're not loading new messages
-      //   we still have to check for all the other situations which might require a
-      //   resize.
+      // Compare current rows against previous rows to identify the number of
+      // consecutive rows (from start of the list) the are the same in both
+      // lists.
+      const rowsIterator = Timeline.getEphemeralRows({
+        items,
+        oldestUnreadIndex,
+        typingContact: Boolean(typingContact),
+        haveOldest,
+      });
+      const prevRowsIterator = Timeline.getEphemeralRows({
+        items: prevProps.items,
+        oldestUnreadIndex: prevProps.oldestUnreadIndex,
+        typingContact: Boolean(prevProps.typingContact),
+        haveOldest: prevProps.haveOldest,
+      });
 
-      const oldLastIndex = prevProps.items.length - 1;
-      const oldLastId = prevProps.items[oldLastIndex];
-
-      const newLastIndex = items.findIndex(item => item === oldLastId);
-      if (newLastIndex < 0) {
-        this.resize();
-
-        return;
-      }
-
-      const indexDelta = newLastIndex - oldLastIndex;
-
-      // If we've just added to the end of the list, then the index of the last id's
-      //   index won't have changed, and we can rely on List's detection that items is
-      //   different for the necessary re-render.
-      if (indexDelta === 0) {
-        if (typingContact || prevProps.typingContact) {
-          // The last row will be off, because it was previously the typing indicator
-          const rowCount = this.getRowCount();
-          this.resize(rowCount - 2);
+      let firstChangedRow = 0;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const row = rowsIterator.next();
+        if (row.done) {
+          break;
         }
 
-        // no resize because we just add to the end
-        return;
+        const prevRow = prevRowsIterator.next();
+        if (prevRow.done) {
+          break;
+        }
+
+        if (prevRow.value !== row.value) {
+          break;
+        }
+
+        firstChangedRow += 1;
       }
 
-      this.resize();
-
-      return;
+      // If either:
+      //
+      // - Row count has changed after props update
+      // - There are some different rows (and the loop above was interrupted)
+      //
+      // Recompute heights of all rows starting from the first changed row or
+      // the last row in the previous row list.
+      if (!rowsIterator.next().done || !prevRowsIterator.next().done) {
+        resizeStartRow = Math.min(
+          resizeStartRow ?? firstChangedRow,
+          firstChangedRow
+        );
+      }
     }
 
     if (this.resizeFlag) {
@@ -1054,34 +1189,8 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
       return;
     }
 
-    if (oldestUnreadIndex !== prevProps.oldestUnreadIndex) {
-      const prevRow = this.getLastSeenIndicatorRow(prevProps);
-      const newRow = this.getLastSeenIndicatorRow();
-      const rowCount = this.getRowCount();
-      const lastRow = rowCount - 1;
-
-      const targetRow = Math.min(
-        isNumber(prevRow) ? prevRow : lastRow,
-        isNumber(newRow) ? newRow : lastRow
-      );
-      this.resize(targetRow);
-
-      return;
-    }
-
-    if (isNumber(messageHeightChangeIndex)) {
-      const rowIndex = this.fromItemIndexToRow(messageHeightChangeIndex);
-      this.resize(rowIndex);
-      clearChangedMessages(id);
-
-      return;
-    }
-
-    if (Boolean(typingContact) !== Boolean(prevProps.typingContact)) {
-      const rowCount = this.getRowCount();
-      this.resize(rowCount - 2);
-
-      return;
+    if (resizeStartRow !== undefined) {
+      this.resize(resizeStartRow);
     }
 
     this.updateWithVisibleRows();
@@ -1209,7 +1318,7 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
     const {
       acknowledgeGroupMemberNameCollisions,
       areWeAdmin,
-      clearInvitedConversationsForNewlyCreatedGroup,
+      clearInvitedUuidsForNewlyCreatedGroup,
       closeContactSpoofingReview,
       contactSpoofingReview,
       i18n,
@@ -1229,6 +1338,7 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
     const {
       shouldShowScrollDownButton,
       areUnreadBelowCurrentPosition,
+      widthBreakpoint,
     } = this.state;
 
     const rowCount = this.getRowCount();
@@ -1270,13 +1380,23 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
               scrollToIndex={scrollToIndex}
               tabIndex={-1}
               width={width}
+              style={{
+                // `overlay` is [a nonstandard value][0] so it's not supported. See [this
+                //   issue][1].
+                //
+                // [0]: https://developer.mozilla.org/en-US/docs/Web/CSS/overflow#values
+                // [1]: https://github.com/frenic/csstype/issues/62#issuecomment-937238313
+                //
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                overflowY: 'overlay' as any,
+              }}
             />
           );
         }}
       </AutoSizer>
     );
 
-    const warning = this.getWarning();
+    const warning = Timeline.getWarning(this.props, this.state);
     let timelineWarning: ReactNode;
     if (warning) {
       let text: ReactChild;
@@ -1410,35 +1530,48 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
 
     return (
       <>
-        <div
-          className={classNames(
-            'module-timeline',
-            isGroupV1AndDisabled ? 'module-timeline--disabled' : null
-          )}
-          role="presentation"
-          tabIndex={-1}
-          onBlur={this.handleBlur}
-          onKeyDown={this.handleKeyDown}
+        <Measure
+          bounds
+          onResize={({ bounds }) => {
+            this.setState({
+              widthBreakpoint: getWidthBreakpoint(bounds?.width || 0),
+            });
+          }}
         >
-          {timelineWarning}
+          {({ measureRef }) => (
+            <div
+              className={classNames(
+                'module-timeline',
+                isGroupV1AndDisabled ? 'module-timeline--disabled' : null,
+                `module-timeline--width-${widthBreakpoint}`
+              )}
+              role="presentation"
+              tabIndex={-1}
+              onBlur={this.handleBlur}
+              onKeyDown={this.handleKeyDown}
+              ref={this.containerRefMerger(measureRef)}
+            >
+              {timelineWarning}
 
-          {autoSizer}
+              {autoSizer}
 
-          {shouldShowScrollDownButton ? (
-            <ScrollDownButton
-              conversationId={id}
-              withNewMessages={areUnreadBelowCurrentPosition}
-              scrollDown={this.onClickScrollDownButton}
-              i18n={i18n}
-            />
-          ) : null}
-        </div>
+              {shouldShowScrollDownButton ? (
+                <ScrollDownButton
+                  conversationId={id}
+                  withNewMessages={areUnreadBelowCurrentPosition}
+                  scrollDown={this.onClickScrollDownButton}
+                  i18n={i18n}
+                />
+              ) : null}
+            </div>
+          )}
+        </Measure>
 
         {Boolean(invitedContactsForNewlyCreatedGroup.length) && (
           <NewlyCreatedGroupInvitedContactsDialog
             contacts={invitedContactsForNewlyCreatedGroup}
             i18n={i18n}
-            onClose={clearInvitedConversationsForNewlyCreatedGroup}
+            onClose={clearInvitedUuidsForNewlyCreatedGroup}
           />
         )}
 
@@ -1447,15 +1580,42 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
     );
   }
 
-  private getWarning(): undefined | WarningType {
-    const { warning } = this.props;
+  private static *getEphemeralRows({
+    items,
+    typingContact,
+    oldestUnreadIndex,
+    haveOldest,
+  }: {
+    items: ReadonlyArray<string>;
+    typingContact: boolean;
+    oldestUnreadIndex?: number;
+    haveOldest: boolean;
+  }): Iterator<string> {
+    yield haveOldest ? 'hero' : 'loading';
+
+    for (let i = 0; i < items.length; i += 1) {
+      if (i === oldestUnreadIndex) {
+        yield 'oldest-unread';
+      }
+      yield `item:${items[i]}`;
+    }
+
+    if (typingContact) {
+      yield 'typing-contact';
+    }
+  }
+
+  private static getWarning(
+    { warning }: PropsType,
+    state: StateType
+  ): undefined | WarningType {
     if (!warning) {
       return undefined;
     }
 
     switch (warning.type) {
       case ContactSpoofingType.DirectConversationWithSameTitle: {
-        const { hasDismissedDirectContactSpoofingWarning } = this.state;
+        const { hasDismissedDirectContactSpoofingWarning } = state;
         return hasDismissedDirectContactSpoofingWarning ? undefined : warning;
       }
       case ContactSpoofingType.MultipleGroupMembersWithSameTitle:
@@ -1469,4 +1629,14 @@ export class Timeline extends React.PureComponent<PropsType, StateType> {
         throw missingCaseError(warning);
     }
   }
+}
+
+function getWidthBreakpoint(width: number): WidthBreakpoint {
+  if (width > 606) {
+    return WidthBreakpoint.Wide;
+  }
+  if (width > 514) {
+    return WidthBreakpoint.Medium;
+  }
+  return WidthBreakpoint.Narrow;
 }

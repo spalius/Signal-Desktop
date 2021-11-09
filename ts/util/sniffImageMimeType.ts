@@ -1,6 +1,7 @@
 // Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import type { MIMEType } from '../types/MIME';
 import {
   IMAGE_BMP,
   IMAGE_GIF,
@@ -8,7 +9,6 @@ import {
   IMAGE_JPEG,
   IMAGE_PNG,
   IMAGE_WEBP,
-  MIMEType,
 } from '../types/MIME';
 
 /**
@@ -16,13 +16,10 @@ import {
  *
  * [0]: https://mimesniff.spec.whatwg.org/#matching-an-image-type-pattern
  */
-export function sniffImageMimeType(
-  bytes: ArrayBuffer | Uint8Array
-): undefined | MIMEType {
-  const asTypedArray = new Uint8Array(bytes);
+export function sniffImageMimeType(bytes: Uint8Array): undefined | MIMEType {
   for (let i = 0; i < TYPES.length; i += 1) {
     const type = TYPES[i];
-    if (matchesType(asTypedArray, type)) {
+    if (matchesType(bytes, type)) {
       return type.mimeType;
     }
   }

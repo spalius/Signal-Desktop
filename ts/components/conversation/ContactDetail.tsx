@@ -3,14 +3,13 @@
 
 import React from 'react';
 
-import {
-  AddressType,
-  ContactFormType,
-  ContactType,
+import type {
+  EmbeddedContactType,
   Email,
   Phone,
   PostalAddress,
-} from '../../types/Contact';
+} from '../../types/EmbeddedContact';
+import { AddressType, ContactFormType } from '../../types/EmbeddedContact';
 import { missingCaseError } from '../../util/missingCaseError';
 
 import {
@@ -19,10 +18,10 @@ import {
   renderName,
 } from './_contactUtil';
 
-import { LocalizerType } from '../../types/Util';
+import type { LocalizerType } from '../../types/Util';
 
 export type Props = {
-  contact: ContactType;
+  contact: EmbeddedContactType;
   hasSignalAccount: boolean;
   i18n: LocalizerType;
   onSendMessage: () => void;

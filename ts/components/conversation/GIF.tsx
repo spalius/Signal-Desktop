@@ -5,15 +5,16 @@ import React, { useRef, useState, useEffect } from 'react';
 import classNames from 'classnames';
 import { Blurhash } from 'react-blurhash';
 
-import { LocalizerType, ThemeType } from '../../types/Util';
+import type { LocalizerType, ThemeType } from '../../types/Util';
 import { Spinner } from '../Spinner';
 
+import type { AttachmentType } from '../../types/Attachment';
 import {
-  AttachmentType,
   hasNotDownloaded,
   getImageDimensions,
   defaultBlurHash,
 } from '../../types/Attachment';
+import * as log from '../../logging/log';
 
 const MAX_GIF_REPEAT = 4;
 const MAX_GIF_TIME = 8;
@@ -29,6 +30,7 @@ export type Props = {
   readonly reducedMotion?: boolean;
 
   onError(): void;
+  showVisualAttachment(): void;
   kickOffAttachmentDownload(): void;
 };
 
@@ -48,6 +50,7 @@ export const GIF: React.FC<Props> = props => {
     ),
 
     onError,
+    showVisualAttachment,
     kickOffAttachmentDownload,
   } = props;
 
@@ -85,7 +88,7 @@ export const GIF: React.FC<Props> = props => {
 
     if (isPlaying) {
       video.play().catch(error => {
-        window.log.info(
+        log.info(
           "Failed to match GIF playback to window's state",
           (error && error.stack) || error
         );
@@ -191,6 +194,12 @@ export const GIF: React.FC<Props> = props => {
         onTimeUpdate={onTimeUpdate}
         onEnded={onEnded}
         onError={onError}
+        onClick={(event: React.MouseEvent): void => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          showVisualAttachment();
+        }}
         className="module-image--gif__video"
         autoPlay
         playsInline

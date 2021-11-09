@@ -1,9 +1,6 @@
-// Copyright 2020 Signal Messenger, LLC
+// Copyright 2020-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-/* eslint-disable no-param-reassign */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable max-classes-per-file */
 /*
  * WebSocket-Resources
@@ -15,242 +12,214 @@
  *    request.respond(200, 'OK');
  * });
  *
- * client.sendRequest({
+ * const { response, status } = await client.sendRequest({
  *    verb: 'PUT',
  *    path: '/v1/messages',
- *    body: '{ some: "json" }',
- *    success: function(message, status, request) {...},
- *    error: function(message, status, request) {...}
+ *    headers: ['content-type:application/json'],
+ *    body: Buffer.from('{ some: "json" }'),
  * });
  *
  * 1. https://github.com/signalapp/WebSocket-Resources
  *
  */
 
-import { connection as WebSocket, IMessage } from 'websocket';
+import type { connection as WebSocket, IMessage } from 'websocket';
 
-import { ByteBufferClass } from '../window.d';
-import { typedArrayToArrayBuffer as toArrayBuffer } from '../Crypto';
-
+import type { EventHandler } from './EventTarget';
 import EventTarget from './EventTarget';
 
+import * as durations from '../util/durations';
+import { dropNull } from '../util/dropNull';
 import { isOlderThan } from '../util/timestamp';
+import { strictAssert } from '../util/assert';
+import { normalizeNumber } from '../util/normalizeNumber';
+import * as Errors from '../types/errors';
+import { SignalService as Proto } from '../protobuf';
+import * as log from '../logging/log';
+import * as Timers from '../Timers';
 
-class Request {
-  verb: string;
+const THIRTY_SECONDS = 30 * durations.SECOND;
 
-  path: string;
-
-  headers: Array<string>;
-
-  body: ByteBufferClass | null;
-
-  success: Function;
-
-  error: Function;
-
-  id: number;
-
-  response?: any;
-
-  constructor(options: any) {
-    this.verb = options.verb || options.type;
-    this.path = options.path || options.url;
-    this.headers = options.headers;
-    this.body = options.body || options.data;
-    this.success = options.success;
-    this.error = options.error;
-    this.id = options.id;
-
-    if (this.id === undefined) {
-      const bits = new Uint32Array(2);
-      window.crypto.getRandomValues(bits);
-      this.id = window.dcodeIO.Long.fromBits(bits[0], bits[1], true);
-    }
-
-    if (this.body === undefined) {
-      this.body = null;
-    }
-  }
-}
+const MAX_MESSAGE_SIZE = 256 * 1024;
 
 export class IncomingWebSocketRequest {
-  verb: string;
+  private readonly id: Long | number;
 
-  path: string;
+  public readonly verb: string;
 
-  body: ByteBufferClass | null;
+  public readonly path: string;
 
-  headers: Array<string>;
+  public readonly body: Uint8Array | undefined;
 
-  respond: (status: number, message: string) => void;
+  public readonly headers: ReadonlyArray<string>;
 
-  constructor(options: unknown) {
-    const request = new Request(options);
-    const { socket } = options as { socket: WebSocket };
+  constructor(
+    request: Proto.IWebSocketRequestMessage,
+    private readonly sendBytes: (bytes: Buffer) => void
+  ) {
+    strictAssert(request.id, 'request without id');
+    strictAssert(request.verb, 'request without verb');
+    strictAssert(request.path, 'request without path');
 
+    this.id = request.id;
     this.verb = request.verb;
     this.path = request.path;
-    this.body = request.body;
-    this.headers = request.headers;
+    this.body = dropNull(request.body);
+    this.headers = request.headers || [];
+  }
 
-    this.respond = (status, message) => {
-      const ab = new window.textsecure.protobuf.WebSocketMessage({
-        type: window.textsecure.protobuf.WebSocketMessage.Type.RESPONSE,
-        response: { id: request.id, message, status },
-      })
-        .encode()
-        .toArrayBuffer();
-      socket.sendBytes(Buffer.from(ab));
-    };
+  public respond(status: number, message: string): void {
+    const bytes = Proto.WebSocketMessage.encode({
+      type: Proto.WebSocketMessage.Type.RESPONSE,
+      response: { id: this.id, message, status },
+    }).finish();
+
+    this.sendBytes(Buffer.from(bytes));
   }
 }
 
-const outgoing: {
-  [id: number]: Request;
-} = {};
-class OutgoingWebSocketRequest {
-  constructor(options: any, socket: WebSocket) {
-    const request = new Request(options);
-    outgoing[request.id] = request;
-    const ab = new window.textsecure.protobuf.WebSocketMessage({
-      type: window.textsecure.protobuf.WebSocketMessage.Type.REQUEST,
-      request: {
-        verb: request.verb,
-        path: request.path,
-        body: request.body,
-        headers: request.headers,
-        id: request.id,
-      },
-    })
-      .encode()
-      .toArrayBuffer();
-    socket.sendBytes(Buffer.from(ab));
+export type SendRequestOptions = Readonly<{
+  verb: string;
+  path: string;
+  body?: Uint8Array;
+  timeout?: number;
+  headers?: ReadonlyArray<string>;
+}>;
+
+export type SendRequestResult = Readonly<{
+  status: number;
+  message: string;
+  response?: Uint8Array;
+  headers: ReadonlyArray<string>;
+}>;
+
+export type WebSocketResourceOptions = {
+  handleRequest?: (request: IncomingWebSocketRequest) => void;
+  keepalive?: KeepAliveOptionsType | true;
+};
+
+export class CloseEvent extends Event {
+  constructor(public readonly code: number, public readonly reason: string) {
+    super('close');
   }
 }
 
 export default class WebSocketResource extends EventTarget {
-  closed?: boolean;
+  private outgoingId = 1;
 
-  close: (code?: number, reason?: string) => void;
+  private closed = false;
 
-  sendRequest: (options: any) => OutgoingWebSocketRequest;
+  private readonly outgoingMap = new Map<
+    number,
+    (result: SendRequestResult) => void
+  >();
 
-  keepalive?: KeepAlive;
+  private readonly boundOnMessage: (message: IMessage) => void;
 
-  constructor(socket: WebSocket, opts: any = {}) {
+  private activeRequests = new Set<IncomingWebSocketRequest | number>();
+
+  private shuttingDown = false;
+
+  private shutdownTimer?: Timers.Timeout;
+
+  // Public for tests
+  public readonly keepalive?: KeepAlive;
+
+  constructor(
+    private readonly socket: WebSocket,
+    private readonly options: WebSocketResourceOptions = {}
+  ) {
     super();
 
-    let { handleRequest } = opts;
-    if (typeof handleRequest !== 'function') {
-      handleRequest = (request: IncomingWebSocketRequest) => {
-        request.respond(404, 'Not found');
-      };
-    }
-    this.sendRequest = options => new OutgoingWebSocketRequest(options, socket);
+    this.boundOnMessage = this.onMessage.bind(this);
 
-    // eslint-disable-next-line no-param-reassign
-    const onMessage = ({ type, binaryData }: IMessage): void => {
-      if (type !== 'binary' || !binaryData) {
-        throw new Error(`Unsupported websocket message type: ${type}`);
-      }
+    socket.on('message', this.boundOnMessage);
 
-      const message = window.textsecure.protobuf.WebSocketMessage.decode(
-        toArrayBuffer(binaryData)
+    if (options.keepalive) {
+      const keepalive = new KeepAlive(
+        this,
+        options.keepalive === true ? {} : options.keepalive
       );
-      if (
-        message.type ===
-          window.textsecure.protobuf.WebSocketMessage.Type.REQUEST &&
-        message.request
-      ) {
-        handleRequest(
-          new IncomingWebSocketRequest({
-            verb: message.request.verb,
-            path: message.request.path,
-            body: message.request.body,
-            headers: message.request.headers,
-            id: message.request.id,
-            socket,
-          })
+      this.keepalive = keepalive;
+
+      keepalive.reset();
+      socket.on('message', () => keepalive.reset());
+      socket.on('close', () => keepalive.stop());
+      socket.on('error', (error: Error) => {
+        log.warn(
+          'WebSocketResource: WebSocket error',
+          Errors.toLogFormat(error)
         );
-      } else if (
-        message.type ===
-          window.textsecure.protobuf.WebSocketMessage.Type.RESPONSE &&
-        message.response
-      ) {
-        const { response } = message;
-        const request = outgoing[response.id];
-        if (request) {
-          request.response = response;
-          let callback = request.error;
-          if (
-            response.status &&
-            response.status >= 200 &&
-            response.status < 300
-          ) {
-            callback = request.success;
-          }
-
-          if (typeof callback === 'function') {
-            callback(response.message, response.status, request);
-          }
-        } else {
-          throw new Error(
-            `Received response for unknown request ${message.response.id}`
-          );
-        }
-      }
-    };
-    socket.on('message', onMessage);
-
-    if (opts.keepalive) {
-      this.keepalive = new KeepAlive(this, {
-        path: opts.keepalive.path,
-        disconnect: opts.keepalive.disconnect,
       });
-      const resetKeepAliveTimer = this.keepalive.reset.bind(this.keepalive);
-
-      this.keepalive.reset();
-
-      socket.on('message', resetKeepAliveTimer);
-      socket.on('close', this.keepalive.stop.bind(this.keepalive));
     }
 
-    socket.on('close', () => {
+    socket.on('close', (code, reason) => {
       this.closed = true;
+
+      log.warn('WebSocketResource: Socket closed');
+      this.dispatchEvent(new CloseEvent(code, reason || 'normal'));
     });
 
-    this.close = (code = 3000, reason) => {
-      if (this.closed) {
-        return;
-      }
+    this.addEventListener('close', () => this.onClose());
+  }
 
-      window.log.info('WebSocketResource.close()');
-      if (this.keepalive) {
-        this.keepalive.stop();
-      }
+  public addEventListener(
+    name: 'close',
+    handler: (ev: CloseEvent) => void
+  ): void;
 
-      socket.close(code, reason);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      socket.removeListener('message', onMessage);
+  public addEventListener(name: string, handler: EventHandler): void {
+    return super.addEventListener(name, handler);
+  }
 
-      // On linux the socket can wait a long time to emit its close event if we've
-      //   lost the internet connection. On the order of minutes. This speeds that
-      //   process up.
-      setTimeout(() => {
-        if (this.closed) {
-          return;
+  public async sendRequest(
+    options: SendRequestOptions
+  ): Promise<SendRequestResult> {
+    const id = this.outgoingId;
+    strictAssert(!this.outgoingMap.has(id), 'Duplicate outgoing request');
+
+    // eslint-disable-next-line no-bitwise
+    this.outgoingId = Math.max(1, (this.outgoingId + 1) & 0x7fffffff);
+
+    const bytes = Proto.WebSocketMessage.encode({
+      type: Proto.WebSocketMessage.Type.REQUEST,
+      request: {
+        verb: options.verb,
+        path: options.path,
+        body: options.body,
+        headers: options.headers ? options.headers.slice() : undefined,
+        id,
+      },
+    }).finish();
+    strictAssert(
+      bytes.length <= MAX_MESSAGE_SIZE,
+      'WebSocket request byte size exceeded'
+    );
+
+    strictAssert(!this.shuttingDown, 'Cannot send request, shutting down');
+    this.addActive(id);
+    const promise = new Promise<SendRequestResult>((resolve, reject) => {
+      let timer = options.timeout
+        ? Timers.setTimeout(() => {
+            this.removeActive(id);
+            reject(new Error('Request timed out'));
+          }, options.timeout)
+        : undefined;
+
+      this.outgoingMap.set(id, result => {
+        if (timer !== undefined) {
+          Timers.clearTimeout(timer);
+          timer = undefined;
         }
-        this.closed = true;
 
-        window.log.warn('Dispatching our own socket close event');
-        const ev = new Event('close');
-        ev.code = code;
-        ev.reason = reason;
-        this.dispatchEvent(ev);
-      }, 5000);
-    };
+        this.removeActive(id);
+        resolve(result);
+      });
+    });
+
+    this.socket.sendBytes(Buffer.from(bytes));
+
+    return promise;
   }
 
   public forceKeepAlive(): void {
@@ -259,21 +228,171 @@ export default class WebSocketResource extends EventTarget {
     }
     this.keepalive.send();
   }
+
+  public close(code = 3000, reason?: string): void {
+    if (this.closed) {
+      return;
+    }
+
+    log.info('WebSocketResource.close()');
+    if (this.keepalive) {
+      this.keepalive.stop();
+    }
+
+    this.socket.close(code, reason);
+
+    this.socket.removeListener('message', this.boundOnMessage);
+
+    // On linux the socket can wait a long time to emit its close event if we've
+    //   lost the internet connection. On the order of minutes. This speeds that
+    //   process up.
+    Timers.setTimeout(() => {
+      if (this.closed) {
+        return;
+      }
+
+      log.warn('WebSocketResource: Dispatching our own socket close event');
+      this.dispatchEvent(new CloseEvent(code, reason || 'normal'));
+    }, 5000);
+  }
+
+  public shutdown(): void {
+    if (this.closed) {
+      return;
+    }
+
+    if (this.activeRequests.size === 0) {
+      log.info('WebSocketResource: no active requests, closing');
+      this.close(3000, 'Shutdown');
+      return;
+    }
+
+    this.shuttingDown = true;
+
+    log.info('WebSocketResource: shutting down');
+    this.shutdownTimer = Timers.setTimeout(() => {
+      if (this.closed) {
+        return;
+      }
+
+      log.warn('WebSocketResource: Failed to shutdown gracefully');
+      this.close(3000, 'Shutdown');
+    }, THIRTY_SECONDS);
+  }
+
+  private onMessage({ type, binaryData }: IMessage): void {
+    if (type !== 'binary' || !binaryData) {
+      throw new Error(`Unsupported websocket message type: ${type}`);
+    }
+
+    const message = Proto.WebSocketMessage.decode(binaryData);
+    if (
+      message.type === Proto.WebSocketMessage.Type.REQUEST &&
+      message.request
+    ) {
+      const handleRequest =
+        this.options.handleRequest ||
+        (request => request.respond(404, 'Not found'));
+
+      const incomingRequest = new IncomingWebSocketRequest(
+        message.request,
+        (bytes: Buffer): void => {
+          this.removeActive(incomingRequest);
+
+          strictAssert(
+            bytes.length <= MAX_MESSAGE_SIZE,
+            'WebSocket response byte size exceeded'
+          );
+          this.socket.sendBytes(bytes);
+        }
+      );
+
+      if (this.shuttingDown) {
+        incomingRequest.respond(-1, 'Shutting down');
+        return;
+      }
+
+      this.addActive(incomingRequest);
+      handleRequest(incomingRequest);
+    } else if (
+      message.type === Proto.WebSocketMessage.Type.RESPONSE &&
+      message.response
+    ) {
+      const { response } = message;
+      strictAssert(response.id, 'response without id');
+
+      const responseId = normalizeNumber(response.id);
+      const resolve = this.outgoingMap.get(responseId);
+      this.outgoingMap.delete(responseId);
+
+      if (!resolve) {
+        throw new Error(`Received response for unknown request ${responseId}`);
+      }
+
+      resolve({
+        status: response.status ?? -1,
+        message: response.message ?? '',
+        response: dropNull(response.body),
+        headers: response.headers ?? [],
+      });
+    }
+  }
+
+  private onClose(): void {
+    const outgoing = new Map(this.outgoingMap);
+    this.outgoingMap.clear();
+
+    for (const resolve of outgoing.values()) {
+      resolve({
+        status: -1,
+        message: 'Connection closed',
+        response: undefined,
+        headers: [],
+      });
+    }
+  }
+
+  private addActive(request: IncomingWebSocketRequest | number): void {
+    this.activeRequests.add(request);
+  }
+
+  private removeActive(request: IncomingWebSocketRequest | number): void {
+    if (!this.activeRequests.has(request)) {
+      log.warn('WebSocketResource: removing unknown request');
+      return;
+    }
+
+    this.activeRequests.delete(request);
+    if (this.activeRequests.size !== 0) {
+      return;
+    }
+    if (!this.shuttingDown) {
+      return;
+    }
+
+    if (this.shutdownTimer) {
+      Timers.clearTimeout(this.shutdownTimer);
+      this.shutdownTimer = undefined;
+    }
+
+    log.info('WebSocketResource: shutdown complete');
+    this.close(3000, 'Shutdown');
+  }
 }
 
-type KeepAliveOptionsType = {
+export type KeepAliveOptionsType = {
   path?: string;
   disconnect?: boolean;
 };
 
 const KEEPALIVE_INTERVAL_MS = 55000; // 55 seconds + 5 seconds for closing the
 // socket above.
-const MAX_KEEPALIVE_INTERVAL_MS = 300 * 1000; // 5 minutes
+const MAX_KEEPALIVE_INTERVAL_MS = 5 * durations.MINUTE;
 
 class KeepAlive {
-  private keepAliveTimer: NodeJS.Timeout | undefined;
+  private keepAliveTimer: Timers.Timeout | undefined;
 
-  private disconnectTimer: NodeJS.Timeout | undefined;
+  private disconnectTimer: Timers.Timeout | undefined;
 
   private path: string;
 
@@ -300,11 +419,11 @@ class KeepAlive {
     this.clearTimers();
   }
 
-  public send(): void {
+  public async send(): Promise<void> {
     this.clearTimers();
 
     if (isOlderThan(this.lastAliveAt, MAX_KEEPALIVE_INTERVAL_MS)) {
-      window.log.info('WebSocketResources: disconnecting due to stale state');
+      log.info('WebSocketResources: disconnecting due to stale state');
       this.wsr.close(
         3001,
         `Last keepalive request was too far in the past: ${this.lastAliveAt}`
@@ -314,8 +433,8 @@ class KeepAlive {
 
     if (this.disconnect) {
       // automatically disconnect if server doesn't ack
-      this.disconnectTimer = setTimeout(() => {
-        window.log.info('WebSocketResources: disconnecting due to no response');
+      this.disconnectTimer = Timers.setTimeout(() => {
+        log.info('WebSocketResources: disconnecting due to no response');
         this.clearTimers();
 
         this.wsr.close(3001, 'No response to keepalive request');
@@ -324,12 +443,15 @@ class KeepAlive {
       this.reset();
     }
 
-    window.log.info('WebSocketResources: Sending a keepalive message');
-    this.wsr.sendRequest({
+    log.info('WebSocketResources: Sending a keepalive message');
+    const { status } = await this.wsr.sendRequest({
       verb: 'GET',
       path: this.path,
-      success: this.reset.bind(this),
     });
+
+    if (status >= 200 || status < 300) {
+      this.reset();
+    }
   }
 
   public reset(): void {
@@ -337,16 +459,19 @@ class KeepAlive {
 
     this.clearTimers();
 
-    this.keepAliveTimer = setTimeout(() => this.send(), KEEPALIVE_INTERVAL_MS);
+    this.keepAliveTimer = Timers.setTimeout(
+      () => this.send(),
+      KEEPALIVE_INTERVAL_MS
+    );
   }
 
   private clearTimers(): void {
     if (this.keepAliveTimer) {
-      clearTimeout(this.keepAliveTimer);
+      Timers.clearTimeout(this.keepAliveTimer);
       this.keepAliveTimer = undefined;
     }
     if (this.disconnectTimer) {
-      clearTimeout(this.disconnectTimer);
+      Timers.clearTimeout(this.disconnectTimer);
       this.disconnectTimer = undefined;
     }
   }

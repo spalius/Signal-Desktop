@@ -6,13 +6,10 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { boolean, text } from '@storybook/addon-knobs';
 
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
-import {
-  ContactType,
-  Props,
-  SafetyNumberNotification,
-} from './SafetyNumberNotification';
+import type { ContactType, Props } from './SafetyNumberNotification';
+import { SafetyNumberNotification } from './SafetyNumberNotification';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -49,6 +46,17 @@ stories.add('Direct Conversation', () => {
     isGroup: false,
     contact: createContact({
       title: 'Mr. Fire',
+    }),
+  });
+
+  return <SafetyNumberNotification {...props} />;
+});
+
+stories.add('Long name in group', () => {
+  const props = createProps({
+    isGroup: true,
+    contact: createContact({
+      title: '🐈‍⬛🍕🎂'.repeat(50),
     }),
   });
 

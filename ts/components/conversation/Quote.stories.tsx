@@ -10,18 +10,22 @@ import { storiesOf } from '@storybook/react';
 
 import { ConversationColors } from '../../types/Colors';
 import { pngUrl } from '../../storybook/Fixtures';
-import { Message, Props as MessagesProps } from './Message';
+import type { Props as MessagesProps } from './Message';
+import { Message } from './Message';
 import {
   AUDIO_MP3,
   IMAGE_PNG,
   LONG_MESSAGE,
-  MIMEType,
   VIDEO_MP4,
+  stringToMIMEType,
 } from '../../types/MIME';
-import { Props, Quote } from './Quote';
-import { setup as setupI18n } from '../../../js/modules/i18n';
+import type { Props } from './Quote';
+import { Quote } from './Quote';
+import { ReadStatus } from '../../messages/MessageReadStatus';
+import { setupI18n } from '../../util/setupI18n';
 import enMessages from '../../../_locales/en/messages.json';
 import { getDefaultConversation } from '../../test-both/helpers/getDefaultConversation';
+import { WidthBreakpoint } from '../_util';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -37,6 +41,8 @@ const defaultMessageProps: MessagesProps = {
   canDownload: true,
   checkForAccount: action('checkForAccount'),
   clearSelectedMessage: action('default--clearSelectedMessage'),
+  containerElementRef: React.createRef<HTMLElement>(),
+  containerWidthBreakpoint: WidthBreakpoint.Wide,
   conversationColor: 'crimson',
   conversationId: 'conversationId',
   conversationType: 'direct', // override
@@ -56,12 +62,15 @@ const defaultMessageProps: MessagesProps = {
   isMessageRequestAccepted: true,
   kickOffAttachmentDownload: action('default--kickOffAttachmentDownload'),
   markAttachmentAsCorrupted: action('default--markAttachmentAsCorrupted'),
+  markViewed: action('default--markViewed'),
   onHeightChange: action('onHeightChange'),
   openConversation: action('default--openConversation'),
   openLink: action('default--openLink'),
   previews: [],
   reactToMessage: action('default--reactToMessage'),
+  readStatus: ReadStatus.Read,
   renderEmojiPicker: () => <div />,
+  renderReactionPicker: () => <div />,
   renderAudioAttachment: () => <div>*AudioAttachment*</div>,
   replyToMessage: action('default--replyToMessage'),
   retrySend: action('default--retrySend'),
@@ -84,9 +93,6 @@ const defaultMessageProps: MessagesProps = {
 };
 
 const renderInMessage = ({
-  authorName,
-  authorPhoneNumber,
-  authorProfileName,
   authorTitle,
   conversationColor,
   isFromMe,
@@ -100,9 +106,6 @@ const renderInMessage = ({
     conversationColor,
     quote: {
       authorId: 'an-author',
-      authorName,
-      authorPhoneNumber,
-      authorProfileName,
       authorTitle,
       conversationColor,
       isFromMe,
@@ -124,15 +127,6 @@ const renderInMessage = ({
 };
 
 const createProps = (overrideProps: Partial<Props> = {}): Props => ({
-  authorName: text('authorName', overrideProps.authorName || ''),
-  authorPhoneNumber: text(
-    'authorPhoneNumber',
-    overrideProps.authorPhoneNumber || ''
-  ),
-  authorProfileName: text(
-    'authorProfileName',
-    overrideProps.authorProfileName || ''
-  ),
   authorTitle: text('authorTitle', overrideProps.authorTitle || ''),
   conversationColor: overrideProps.conversationColor || 'forest',
   doubleCheckMissingQuoteReference:
@@ -154,10 +148,6 @@ const createProps = (overrideProps: Partial<Props> = {}): Props => ({
     isString(overrideProps.text)
       ? overrideProps.text
       : 'A sample message from a pal'
-  ),
-  withContentAbove: boolean(
-    'withContentAbove',
-    overrideProps.withContentAbove || false
   ),
 });
 
@@ -202,19 +192,6 @@ story.add('Incoming/Outgoing Colors', () => {
       {ConversationColors.map(color =>
         renderInMessage({ ...props, conversationColor: color })
       )}
-    </>
-  );
-});
-
-story.add('Content Above', () => {
-  const props = createProps({
-    withContentAbove: true,
-  });
-
-  return (
-    <>
-      <div>Content Above</div>
-      <Quote {...props} />
     </>
   );
 });
@@ -392,7 +369,7 @@ story.add('Voice Message Attachment', () => {
 story.add('Other File Only', () => {
   const props = createProps({
     rawAttachment: {
-      contentType: 'application/json' as MIMEType,
+      contentType: stringToMIMEType('application/json'),
       fileName: 'great-data.json',
       isVoiceMessage: false,
     },
@@ -420,7 +397,7 @@ story.add('Media Tap-to-View', () => {
 story.add('Other File Attachment', () => {
   const props = createProps({
     rawAttachment: {
-      contentType: 'application/json' as MIMEType,
+      contentType: stringToMIMEType('application/json'),
       fileName: 'great-data.json',
       isVoiceMessage: false,
     },

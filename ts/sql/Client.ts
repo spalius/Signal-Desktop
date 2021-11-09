@@ -7,14 +7,14 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable no-restricted-syntax */
-import { ipcRenderer } from 'electron';
+import { ipcRenderer as ipc } from 'electron';
+import fs from 'fs-extra';
+import pify from 'pify';
 
 import {
   cloneDeep,
   compact,
   fromPairs,
-  toPairs,
   get,
   groupBy,
   isFunction,
@@ -22,39 +22,61 @@ import {
   map,
   omit,
   set,
+  toPairs,
+  uniq,
 } from 'lodash';
 
-import { arrayBufferToBase64, base64ToArrayBuffer } from '../Crypto';
+import * as Bytes from '../Bytes';
 import { CURRENT_SCHEMA_VERSION } from '../../js/modules/types/message';
 import { createBatcher } from '../util/batcher';
-import { assert } from '../util/assert';
+import { assert, strictAssert } from '../util/assert';
 import { cleanDataForIpc } from './cleanDataForIpc';
-import { ReactionType } from '../types/Reactions';
-import { ConversationColorType, CustomColorType } from '../types/Colors';
+import type { ReactionType } from '../types/Reactions';
+import type { ConversationColorType, CustomColorType } from '../types/Colors';
+import type { UUIDStringType } from '../types/UUID';
+import type { BadgeType } from '../badges/types';
+import type { ProcessGroupCallRingRequestResult } from '../types/Calling';
+import type { RemoveAllConfiguration } from '../types/RemoveAllConfiguration';
+import createTaskWithTimeout from '../textsecure/TaskWithTimeout';
+import * as log from '../logging/log';
 
-import {
+import type {
   ConversationModelCollectionType,
   MessageModelCollectionType,
 } from '../model-types.d';
-import { StoredJob } from '../jobs/types';
+import type { StoredJob } from '../jobs/types';
+import { formatJobForInsert } from '../jobs/formatJobForInsert';
 
-import {
+import type {
   AttachmentDownloadJobType,
   ClientInterface,
-  ClientSearchResultMessageType,
   ClientJobType,
+  ClientSearchResultMessageType,
   ConversationType,
+  DeleteSentProtoRecipientOptionsType,
   IdentityKeyType,
+  IdentityKeyIdType,
   ItemKeyType,
   ItemType,
+  LastConversationMessagesType,
   MessageType,
   MessageTypeUnhydrated,
   PreKeyType,
+  PreKeyIdType,
   SearchResultMessageType,
   SenderKeyType,
+  SenderKeyIdType,
+  SentMessageDBType,
+  SentMessagesType,
+  SentProtoType,
+  SentProtoWithMessageIdsType,
+  SentRecipientsDBType,
+  SentRecipientsType,
   ServerInterface,
   SessionType,
+  SessionIdType,
   SignedPreKeyType,
+  SignedPreKeyIdType,
   StickerPackStatusType,
   StickerPackType,
   StickerType,
@@ -62,18 +84,19 @@ import {
   UnprocessedUpdateType,
 } from './Interface';
 import Server from './Server';
-import { MessageModel } from '../models/messages';
-import { ConversationModel } from '../models/conversations';
+import { isCorruptionError } from './errors';
+import type { MessageModel } from '../models/messages';
+import type { ConversationModel } from '../models/conversations';
 
-// We listen to a lot of events on ipcRenderer, often on the same channel. This prevents
+// We listen to a lot of events on ipc, often on the same channel. This prevents
 //   any warnings that might be sent to the console in that case.
-if (ipcRenderer && ipcRenderer.setMaxListeners) {
-  ipcRenderer.setMaxListeners(0);
+if (ipc && ipc.setMaxListeners) {
+  ipc.setMaxListeners(0);
 } else {
-  window.log.warn('sql/Client: ipcRenderer is not available!');
+  log.warn('sql/Client: ipc is not available!');
 }
 
-const DATABASE_UPDATE_TIMEOUT = 2 * 60 * 1000; // two minutes
+const getRealPath = pify(fs.realpath);
 
 const MIN_TRACE_DURATION = 10;
 
@@ -92,13 +115,20 @@ type ClientJobUpdateType = {
   args?: Array<any>;
 };
 
+enum RendererState {
+  InMain = 'InMain',
+  Opening = 'Opening',
+  InRenderer = 'InRenderer',
+  Closing = 'Closing',
+}
+
 const _jobs: { [id: string]: ClientJobType } = Object.create(null);
 const _DEBUG = false;
 let _jobCounter = 0;
 let _shuttingDown = false;
 let _shutdownCallback: Function | null = null;
 let _shutdownPromise: Promise<any> | null = null;
-let shouldUseRendererProcess = true;
+let state = RendererState.InMain;
 const startupQueries = new Map<string, number>();
 
 // Because we can't force this module to conform to an interface, we narrow our exports
@@ -143,6 +173,17 @@ const dataInterface: ClientInterface = {
   getAllSenderKeys,
   removeSenderKeyById,
 
+  insertSentProto,
+  deleteSentProtosOlderThan,
+  deleteSentProtoByMessageId,
+  insertProtoRecipients,
+  deleteSentProtoRecipient,
+  getSentProtoByRecipient,
+  removeAllSentProtos,
+  getAllSentProtos,
+  _getAllSentProtoRecipients,
+  _getAllSentProtoMessageIds,
+
   createOrUpdateSession,
   createOrUpdateSessions,
   commitSessionsAndUnprocessed,
@@ -165,14 +206,13 @@ const dataInterface: ClientInterface = {
   getAllConversations,
   getAllConversationIds,
   getAllPrivateConversations,
-  getAllGroupsInvolvingId,
+  getAllGroupsInvolvingUuid,
 
   searchConversations,
   searchMessages,
   searchMessagesInConversation,
 
   getMessageCount,
-  hasUserInitiatedMessages,
   saveMessage,
   saveMessages,
   removeMessage,
@@ -183,9 +223,11 @@ const dataInterface: ClientInterface = {
   markReactionAsRead,
   removeReactionFromConversation,
   addReaction,
+  _getAllReactions,
 
   getMessageBySender,
   getMessageById,
+  getMessagesById,
   getAllMessageIds,
   getMessagesBySentAt,
   getExpiredMessages,
@@ -195,8 +237,7 @@ const dataInterface: ClientInterface = {
   getTapToViewMessagesNeedingErase,
   getOlderMessagesByConversation,
   getNewerMessagesByConversation,
-  getLastConversationActivity,
-  getLastConversationPreview,
+  getLastConversationMessages,
   getMessageMetricsForConversation,
   hasGroupCallHistoryMessage,
   migrateConversationMessages,
@@ -204,7 +245,6 @@ const dataInterface: ClientInterface = {
   getUnprocessedCount,
   getAllUnprocessed,
   getUnprocessedById,
-  updateUnprocessedAttempts,
   updateUnprocessedWithData,
   updateUnprocessedsWithData,
   removeUnprocessed,
@@ -233,6 +273,10 @@ const dataInterface: ClientInterface = {
   updateEmojiUsage,
   getRecentEmojis,
 
+  getAllBadges,
+  updateOrCreateBadges,
+  badgeImageFileDownloaded,
+
   removeAll,
   removeAllConfiguration,
 
@@ -244,6 +288,14 @@ const dataInterface: ClientInterface = {
   getJobsInQueue,
   insertJob,
   deleteJob,
+
+  processGroupCallRingRequest,
+  processGroupCallRingCancelation,
+  cleanExpiredGroupCallRings,
+
+  getMaxMessageCounter,
+
+  getStatisticsForLogging,
 
   // Test-only
 
@@ -260,6 +312,7 @@ const dataInterface: ClientInterface = {
 
   // Client-side only, and test-only
 
+  startInRendererProcess,
   goBackToMainProcess,
   _removeConversations,
   _jobs,
@@ -267,21 +320,54 @@ const dataInterface: ClientInterface = {
 
 export default dataInterface;
 
+async function startInRendererProcess(isTesting = false): Promise<void> {
+  strictAssert(
+    state === RendererState.InMain,
+    `startInRendererProcess: expected ${state} to be ${RendererState.InMain}`
+  );
+
+  log.info('data.startInRendererProcess: switching to renderer process');
+  state = RendererState.Opening;
+
+  if (!isTesting) {
+    ipc.send('database-ready');
+
+    await new Promise<void>(resolve => {
+      ipc.once('database-ready', () => {
+        resolve();
+      });
+    });
+  }
+
+  const configDir = await getRealPath(ipc.sendSync('get-user-data-path'));
+  const key = ipc.sendSync('user-config-key');
+
+  await Server.initializeRenderer({ configDir, key });
+
+  log.info('data.startInRendererProcess: switched to renderer process');
+
+  state = RendererState.InRenderer;
+}
+
 async function goBackToMainProcess(): Promise<void> {
-  if (!shouldUseRendererProcess) {
-    window.log.info(
-      'data.goBackToMainProcess: already switched to main process'
-    );
+  if (state === RendererState.InMain) {
+    log.info('goBackToMainProcess: Already in the main process');
     return;
   }
 
+  strictAssert(
+    state === RendererState.InRenderer,
+    `goBackToMainProcess: expected ${state} to be ${RendererState.InRenderer}`
+  );
+
   // We don't need to wait for pending queries since they are synchronous.
-  window.log.info('data.goBackToMainProcess: switching to main process');
+  log.info('data.goBackToMainProcess: switching to main process');
+  const closePromise = close();
 
-  // Close the database in the renderer process.
-  await close();
-
-  shouldUseRendererProcess = false;
+  // It should be the last query we run in renderer process
+  state = RendererState.Closing;
+  await closePromise;
+  state = RendererState.InMain;
 
   // Print query statistics for whole startup
   const entries = Array.from(startupQueries.entries());
@@ -292,8 +378,10 @@ async function goBackToMainProcess(): Promise<void> {
     .sort((a, b) => b[1] - a[1])
     .filter(([_, duration]) => duration > MIN_TRACE_DURATION)
     .forEach(([query, duration]) => {
-      window.log.info(`startup query: ${query} ${duration}ms`);
+      log.info(`startup query: ${query} ${duration}ms`);
     });
+
+  log.info('data.goBackToMainProcess: switched to main process');
 }
 
 const channelsAsUnknown = fromPairs(
@@ -316,7 +404,7 @@ function _cleanData(
   const { cleaned, pathsChanged } = cleanDataForIpc(data);
 
   if (pathsChanged.length) {
-    window.log.info(
+    log.info(
       `_cleanData cleaned the following paths: ${pathsChanged.join(', ')}`
     );
   }
@@ -335,7 +423,7 @@ function _cleanMessageData(data: MessageType): MessageType {
 
 async function _shutdown() {
   const jobKeys = Object.keys(_jobs);
-  window.log.info(
+  log.info(
     `data.shutdown: shutdown requested. ${jobKeys.length} jobs outstanding`
   );
 
@@ -355,7 +443,7 @@ async function _shutdown() {
   // Outstanding jobs; we need to wait until the last one is done
   _shutdownPromise = new Promise<void>((resolve, reject) => {
     _shutdownCallback = (error: Error) => {
-      window.log.info('data.shutdown: process complete');
+      log.info('data.shutdown: process complete');
       if (error) {
         reject(error);
 
@@ -380,7 +468,7 @@ function _makeJob(fnName: string) {
   const id = _jobCounter;
 
   if (_DEBUG) {
-    window.log.info(`SQL channel job ${id} (${fnName}) started`);
+    log.info(`SQL channel job ${id} (${fnName}) started`);
   }
   _jobs[id] = {
     fnName,
@@ -401,7 +489,7 @@ function _updateJob(id: number, data: ClientJobUpdateType) {
       _removeJob(id);
       const end = Date.now();
       if (_DEBUG) {
-        window.log.info(
+        log.info(
           `SQL channel job ${id} (${fnName}) succeeded in ${end - start}ms`
         );
       }
@@ -411,21 +499,7 @@ function _updateJob(id: number, data: ClientJobUpdateType) {
     reject: (error: Error) => {
       _removeJob(id);
       const end = Date.now();
-      window.log.info(
-        `SQL channel job ${id} (${fnName}) failed in ${end - start}ms`
-      );
-
-      if (
-        error &&
-        error.message &&
-        (error.message.includes('SQLITE_CORRUPT') ||
-          error.message.includes('database disk image is malformed'))
-      ) {
-        window.log.error(
-          `Detected corruption. Restarting the application immediately. Error: ${error.message}`
-        );
-        window.restart();
-      }
+      log.info(`SQL channel job ${id} (${fnName}) failed in ${end - start}ms`);
 
       return reject(error);
     },
@@ -453,38 +527,35 @@ function _getJob(id: number) {
   return _jobs[id];
 }
 
-if (ipcRenderer && ipcRenderer.on) {
-  ipcRenderer.on(
-    `${SQL_CHANNEL_KEY}-done`,
-    (_, jobId, errorForDisplay, result) => {
-      const job = _getJob(jobId);
-      if (!job) {
-        throw new Error(
-          `Received SQL channel reply to job ${jobId}, but did not have it in our registry!`
-        );
-      }
-
-      const { resolve, reject, fnName } = job;
-
-      if (!resolve || !reject) {
-        throw new Error(
-          `SQL channel job ${jobId} (${fnName}): didn't have a resolve or reject`
-        );
-      }
-
-      if (errorForDisplay) {
-        return reject(
-          new Error(
-            `Error received from SQL channel job ${jobId} (${fnName}): ${errorForDisplay}`
-          )
-        );
-      }
-
-      return resolve(result);
+if (ipc && ipc.on) {
+  ipc.on(`${SQL_CHANNEL_KEY}-done`, (_, jobId, errorForDisplay, result) => {
+    const job = _getJob(jobId);
+    if (!job) {
+      throw new Error(
+        `Received SQL channel reply to job ${jobId}, but did not have it in our registry!`
+      );
     }
-  );
+
+    const { resolve, reject, fnName } = job;
+
+    if (!resolve || !reject) {
+      throw new Error(
+        `SQL channel job ${jobId} (${fnName}): didn't have a resolve or reject`
+      );
+    }
+
+    if (errorForDisplay) {
+      return reject(
+        new Error(
+          `Error received from SQL channel job ${jobId} (${fnName}): ${errorForDisplay}`
+        )
+      );
+    }
+
+    return resolve(result);
+  });
 } else {
-  window.log.warn('sql/Client: ipcRenderer.on is not available!');
+  log.warn('sql/Client: ipc.on is not available!');
 }
 
 function makeChannel(fnName: string) {
@@ -493,56 +564,71 @@ function makeChannel(fnName: string) {
     // the db that exists in the renderer process to be able to boot up quickly
     // once the app is running we switch back to the main process to avoid the
     // UI from locking up whenever we do costly db operations.
-    if (shouldUseRendererProcess) {
+    if (state === RendererState.InRenderer) {
       const serverFnName = fnName as keyof ServerInterface;
       const start = Date.now();
 
-      // Ignoring this error TS2556: Expected 3 arguments, but got 0 or more.
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const result = Server[serverFnName](...args);
-
-      const duration = Date.now() - start;
-
-      startupQueries.set(
-        serverFnName,
-        (startupQueries.get(serverFnName) || 0) + duration
-      );
-
-      if (duration > MIN_TRACE_DURATION || _DEBUG) {
-        window.log.info(
-          `Renderer SQL channel job (${fnName}) succeeded in ${duration}ms`
+      try {
+        // Ignoring this error TS2556: Expected 3 arguments, but got 0 or more.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        return await Server[serverFnName](...args);
+      } catch (error) {
+        if (isCorruptionError(error)) {
+          log.error(
+            'Detected sql corruption in renderer process. ' +
+              `Restarting the application immediately. Error: ${error.message}`
+          );
+          ipc?.send(
+            'database-error',
+            `${error.stack}\n${Server.getCorruptionLog()}`
+          );
+        }
+        log.error(
+          `Renderer SQL channel job (${fnName}) error ${error.message}`
         );
-      }
+        throw error;
+      } finally {
+        const duration = Date.now() - start;
 
-      return result;
+        startupQueries.set(
+          serverFnName,
+          (startupQueries.get(serverFnName) || 0) + duration
+        );
+
+        if (duration > MIN_TRACE_DURATION || _DEBUG) {
+          log.info(
+            `Renderer SQL channel job (${fnName}) completed in ${duration}ms`
+          );
+        }
+      }
     }
 
     const jobId = _makeJob(fnName);
 
-    return new Promise((resolve, reject) => {
-      try {
-        ipcRenderer.send(SQL_CHANNEL_KEY, jobId, fnName, ...args);
+    return createTaskWithTimeout(
+      () =>
+        new Promise((resolve, reject) => {
+          try {
+            ipc.send(SQL_CHANNEL_KEY, jobId, fnName, ...args);
 
-        _updateJob(jobId, {
-          resolve,
-          reject,
-          args: _DEBUG ? args : undefined,
-        });
+            _updateJob(jobId, {
+              resolve,
+              reject,
+              args: _DEBUG ? args : undefined,
+            });
+          } catch (error) {
+            _removeJob(jobId);
 
-        setTimeout(() => {
-          reject(new Error(`SQL channel job ${jobId} (${fnName}) timed out`));
-        }, DATABASE_UPDATE_TIMEOUT);
-      } catch (error) {
-        _removeJob(jobId);
-
-        reject(error);
-      }
-    });
+            reject(error);
+          }
+        }),
+      `SQL channel job ${jobId} (${fnName})`
+    )();
   };
 }
 
-function keysToArrayBuffer(keys: Array<string>, data: any) {
+function keysToBytes(keys: Array<string>, data: any) {
   const updated = cloneDeep(data);
 
   const max = keys.length;
@@ -551,14 +637,14 @@ function keysToArrayBuffer(keys: Array<string>, data: any) {
     const value = get(data, key);
 
     if (value) {
-      set(updated, key, base64ToArrayBuffer(value));
+      set(updated, key, Bytes.fromBase64(value));
     }
   }
 
   return updated;
 }
 
-function keysFromArrayBuffer(keys: Array<string>, data: any) {
+function keysFromBytes(keys: Array<string>, data: any) {
   const updated = cloneDeep(data);
 
   const max = keys.length;
@@ -567,7 +653,7 @@ function keysFromArrayBuffer(keys: Array<string>, data: any) {
     const value = get(data, key);
 
     if (value) {
-      set(updated, key, arrayBufferToBase64(value));
+      set(updated, key, Bytes.toBase64(value));
     }
   }
 
@@ -602,32 +688,19 @@ async function removeIndexedDBFiles() {
 
 const IDENTITY_KEY_KEYS = ['publicKey'];
 async function createOrUpdateIdentityKey(data: IdentityKeyType) {
-  const updated = keysFromArrayBuffer(IDENTITY_KEY_KEYS, {
-    ...data,
-    id: window.ConversationController.getConversationId(data.id),
-  });
+  const updated = keysFromBytes(IDENTITY_KEY_KEYS, data);
   await channels.createOrUpdateIdentityKey(updated);
 }
-async function getIdentityKeyById(identifier: string) {
-  const id = window.ConversationController.getConversationId(identifier);
-  if (!id) {
-    throw new Error('getIdentityKeyById: unable to find conversationId');
-  }
+async function getIdentityKeyById(id: IdentityKeyIdType) {
   const data = await channels.getIdentityKeyById(id);
 
-  return keysToArrayBuffer(IDENTITY_KEY_KEYS, data);
+  return keysToBytes(IDENTITY_KEY_KEYS, data);
 }
 async function bulkAddIdentityKeys(array: Array<IdentityKeyType>) {
-  const updated = map(array, data =>
-    keysFromArrayBuffer(IDENTITY_KEY_KEYS, data)
-  );
+  const updated = map(array, data => keysFromBytes(IDENTITY_KEY_KEYS, data));
   await channels.bulkAddIdentityKeys(updated);
 }
-async function removeIdentityKeyById(identifier: string) {
-  const id = window.ConversationController.getConversationId(identifier);
-  if (!id) {
-    throw new Error('removeIdentityKeyById: unable to find conversationId');
-  }
+async function removeIdentityKeyById(id: IdentityKeyIdType) {
   await channels.removeIdentityKeyById(id);
 }
 async function removeAllIdentityKeys() {
@@ -636,25 +709,25 @@ async function removeAllIdentityKeys() {
 async function getAllIdentityKeys() {
   const keys = await channels.getAllIdentityKeys();
 
-  return keys.map(key => keysToArrayBuffer(IDENTITY_KEY_KEYS, key));
+  return keys.map(key => keysToBytes(IDENTITY_KEY_KEYS, key));
 }
 
 // Pre Keys
 
 async function createOrUpdatePreKey(data: PreKeyType) {
-  const updated = keysFromArrayBuffer(PRE_KEY_KEYS, data);
+  const updated = keysFromBytes(PRE_KEY_KEYS, data);
   await channels.createOrUpdatePreKey(updated);
 }
-async function getPreKeyById(id: number) {
+async function getPreKeyById(id: PreKeyIdType) {
   const data = await channels.getPreKeyById(id);
 
-  return keysToArrayBuffer(PRE_KEY_KEYS, data);
+  return keysToBytes(PRE_KEY_KEYS, data);
 }
 async function bulkAddPreKeys(array: Array<PreKeyType>) {
-  const updated = map(array, data => keysFromArrayBuffer(PRE_KEY_KEYS, data));
+  const updated = map(array, data => keysFromBytes(PRE_KEY_KEYS, data));
   await channels.bulkAddPreKeys(updated);
 }
-async function removePreKeyById(id: number) {
+async function removePreKeyById(id: PreKeyIdType) {
   await channels.removePreKeyById(id);
 }
 async function removeAllPreKeys() {
@@ -663,33 +736,31 @@ async function removeAllPreKeys() {
 async function getAllPreKeys() {
   const keys = await channels.getAllPreKeys();
 
-  return keys.map(key => keysToArrayBuffer(PRE_KEY_KEYS, key));
+  return keys.map(key => keysToBytes(PRE_KEY_KEYS, key));
 }
 
 // Signed Pre Keys
 
 const PRE_KEY_KEYS = ['privateKey', 'publicKey'];
 async function createOrUpdateSignedPreKey(data: SignedPreKeyType) {
-  const updated = keysFromArrayBuffer(PRE_KEY_KEYS, data);
+  const updated = keysFromBytes(PRE_KEY_KEYS, data);
   await channels.createOrUpdateSignedPreKey(updated);
 }
-async function getSignedPreKeyById(id: number) {
+async function getSignedPreKeyById(id: SignedPreKeyIdType) {
   const data = await channels.getSignedPreKeyById(id);
 
-  return keysToArrayBuffer(PRE_KEY_KEYS, data);
+  return keysToBytes(PRE_KEY_KEYS, data);
 }
 async function getAllSignedPreKeys() {
   const keys = await channels.getAllSignedPreKeys();
 
-  return keys.map((key: SignedPreKeyType) =>
-    keysToArrayBuffer(PRE_KEY_KEYS, key)
-  );
+  return keys.map((key: SignedPreKeyType) => keysToBytes(PRE_KEY_KEYS, key));
 }
 async function bulkAddSignedPreKeys(array: Array<SignedPreKeyType>) {
-  const updated = map(array, data => keysFromArrayBuffer(PRE_KEY_KEYS, data));
+  const updated = map(array, data => keysFromBytes(PRE_KEY_KEYS, data));
   await channels.bulkAddSignedPreKeys(updated);
 }
-async function removeSignedPreKeyById(id: number) {
+async function removeSignedPreKeyById(id: SignedPreKeyIdType) {
   await channels.removeSignedPreKeyById(id);
 }
 async function removeAllSignedPreKeys() {
@@ -699,10 +770,8 @@ async function removeAllSignedPreKeys() {
 // Items
 
 const ITEM_KEYS: Partial<Record<ItemKeyType, Array<string>>> = {
-  identityKey: ['value.pubKey', 'value.privKey'],
   senderCertificate: ['value.serialized'],
   senderCertificateNoE164: ['value.serialized'],
-  signaling_key: ['value'],
   profileKey: ['value'],
 };
 async function createOrUpdateItem<K extends ItemKeyType>(data: ItemType<K>) {
@@ -714,15 +783,17 @@ async function createOrUpdateItem<K extends ItemKeyType>(data: ItemType<K>) {
   }
 
   const keys = ITEM_KEYS[id];
-  const updated = Array.isArray(keys) ? keysFromArrayBuffer(keys, data) : data;
+  const updated = Array.isArray(keys) ? keysFromBytes(keys, data) : data;
 
   await channels.createOrUpdateItem(updated);
 }
-async function getItemById<K extends ItemKeyType>(id: K): Promise<ItemType<K>> {
+async function getItemById<K extends ItemKeyType>(
+  id: K
+): Promise<ItemType<K> | undefined> {
   const keys = ITEM_KEYS[id];
   const data = await channels.getItemById(id);
 
-  return Array.isArray(keys) ? keysToArrayBuffer(keys, data) : data;
+  return Array.isArray(keys) ? keysToBytes(keys, data) : data;
 }
 async function getAllItems() {
   const items = await channels.getAllItems();
@@ -736,7 +807,7 @@ async function getAllItems() {
     const keys = ITEM_KEYS[key];
 
     const deserializedValue = Array.isArray(keys)
-      ? keysToArrayBuffer(keys, { value }).value
+      ? keysToBytes(keys, { value }).value
       : value;
 
     result[key] = deserializedValue;
@@ -757,7 +828,7 @@ async function createOrUpdateSenderKey(key: SenderKeyType): Promise<void> {
   await channels.createOrUpdateSenderKey(key);
 }
 async function getSenderKeyById(
-  id: string
+  id: SenderKeyIdType
 ): Promise<SenderKeyType | undefined> {
   return channels.getSenderKeyById(id);
 }
@@ -767,8 +838,68 @@ async function removeAllSenderKeys(): Promise<void> {
 async function getAllSenderKeys(): Promise<Array<SenderKeyType>> {
   return channels.getAllSenderKeys();
 }
-async function removeSenderKeyById(id: string): Promise<void> {
+async function removeSenderKeyById(id: SenderKeyIdType): Promise<void> {
   return channels.removeSenderKeyById(id);
+}
+
+// Sent Protos
+
+async function insertSentProto(
+  proto: SentProtoType,
+  options: {
+    messageIds: SentMessagesType;
+    recipients: SentRecipientsType;
+  }
+): Promise<number> {
+  return channels.insertSentProto(proto, {
+    ...options,
+    messageIds: uniq(options.messageIds),
+  });
+}
+async function deleteSentProtosOlderThan(timestamp: number): Promise<void> {
+  await channels.deleteSentProtosOlderThan(timestamp);
+}
+async function deleteSentProtoByMessageId(messageId: string): Promise<void> {
+  await channels.deleteSentProtoByMessageId(messageId);
+}
+
+async function insertProtoRecipients(options: {
+  id: number;
+  recipientUuid: string;
+  deviceIds: Array<number>;
+}): Promise<void> {
+  await channels.insertProtoRecipients(options);
+}
+async function deleteSentProtoRecipient(
+  options:
+    | DeleteSentProtoRecipientOptionsType
+    | ReadonlyArray<DeleteSentProtoRecipientOptionsType>
+): Promise<void> {
+  await channels.deleteSentProtoRecipient(options);
+}
+
+async function getSentProtoByRecipient(options: {
+  now: number;
+  recipientUuid: string;
+  timestamp: number;
+}): Promise<SentProtoWithMessageIdsType | undefined> {
+  return channels.getSentProtoByRecipient(options);
+}
+async function removeAllSentProtos(): Promise<void> {
+  await channels.removeAllSentProtos();
+}
+async function getAllSentProtos(): Promise<Array<SentProtoType>> {
+  return channels.getAllSentProtos();
+}
+
+// Test-only:
+async function _getAllSentProtoRecipients(): Promise<
+  Array<SentRecipientsDBType>
+> {
+  return channels._getAllSentProtoRecipients();
+}
+async function _getAllSentProtoMessageIds(): Promise<Array<SentMessageDBType>> {
+  return channels._getAllSentProtoMessageIds();
 }
 
 // Sessions
@@ -788,7 +919,7 @@ async function commitSessionsAndUnprocessed(options: {
 async function bulkAddSessions(array: Array<SessionType>) {
   await channels.bulkAddSessions(array);
 }
-async function removeSessionById(id: string) {
+async function removeSessionById(id: SessionIdType) {
   await channels.removeSessionById(id);
 }
 
@@ -919,15 +1050,15 @@ async function getAllPrivateConversations({
   return collection;
 }
 
-async function getAllGroupsInvolvingId(
-  id: string,
+async function getAllGroupsInvolvingUuid(
+  uuid: UUIDStringType,
   {
     ConversationCollection,
   }: {
     ConversationCollection: typeof ConversationModelCollectionType;
   }
 ) {
-  const conversations = await channels.getAllGroupsInvolvingId(id);
+  const conversations = await channels.getAllGroupsInvolvingUuid(uuid);
 
   const collection = new ConversationCollection();
   collection.add(conversations);
@@ -984,31 +1115,32 @@ async function getMessageCount(conversationId?: string) {
   return channels.getMessageCount(conversationId);
 }
 
-async function hasUserInitiatedMessages(conversationId: string) {
-  return channels.hasUserInitiatedMessages(conversationId);
-}
-
 async function saveMessage(
   data: MessageType,
-  { forceSave, Message }: { forceSave?: boolean; Message: typeof MessageModel }
+  options: { jobToInsert?: Readonly<StoredJob>; forceSave?: boolean } = {}
 ) {
   const id = await channels.saveMessage(_cleanMessageData(data), {
-    forceSave,
+    ...options,
+    jobToInsert: options.jobToInsert && formatJobForInsert(options.jobToInsert),
   });
-  Message.updateTimers();
+
+  window.Whisper.ExpiringMessagesListener.update();
+  window.Whisper.TapToViewMessagesListener.update();
 
   return id;
 }
 
 async function saveMessages(
   arrayOfMessages: Array<MessageType>,
-  { forceSave, Message }: { forceSave?: boolean; Message: typeof MessageModel }
+  options?: { forceSave?: boolean }
 ) {
   await channels.saveMessages(
     arrayOfMessages.map(message => _cleanMessageData(message)),
-    { forceSave }
+    options
   );
-  Message.updateTimers();
+
+  window.Whisper.ExpiringMessagesListener.update();
+  window.Whisper.TapToViewMessagesListener.update();
 }
 
 async function removeMessage(
@@ -1042,6 +1174,13 @@ async function getMessageById(
   return new Message(message);
 }
 
+async function getMessagesById(messageIds: Array<string>) {
+  if (!messageIds.length) {
+    return [];
+  }
+  return channels.getMessagesById(messageIds);
+}
+
 // For testing only
 async function _getAllMessages({
   MessageCollection,
@@ -1068,7 +1207,7 @@ async function getMessageBySender(
   }: {
     source: string;
     sourceUuid: string;
-    sourceDevice: string;
+    sourceDevice: number;
     sent_at: number;
   },
   { Message }: { Message: typeof MessageModel }
@@ -1129,6 +1268,10 @@ async function addReaction(reactionObj: ReactionType) {
   return channels.addReaction(reactionObj);
 }
 
+async function _getAllReactions() {
+  return channels._getAllReactions();
+}
+
 function handleMessageJSON(messages: Array<MessageTypeUnhydrated>) {
   return messages.map(message => JSON.parse(message.json));
 }
@@ -1186,41 +1329,29 @@ async function getNewerMessagesByConversation(
 
   return new MessageCollection(handleMessageJSON(messages));
 }
-async function getLastConversationActivity({
+async function getLastConversationMessages({
   conversationId,
-  ourConversationId,
+  ourUuid,
   Message,
 }: {
   conversationId: string;
-  ourConversationId: string;
+  ourUuid: UUIDStringType;
   Message: typeof MessageModel;
-}): Promise<MessageModel | undefined> {
-  const result = await channels.getLastConversationActivity({
+}): Promise<LastConversationMessagesType> {
+  const {
+    preview,
+    activity,
+    hasUserInitiatedMessages,
+  } = await channels.getLastConversationMessages({
     conversationId,
-    ourConversationId,
+    ourUuid,
   });
-  if (result) {
-    return new Message(result);
-  }
-  return undefined;
-}
-async function getLastConversationPreview({
-  conversationId,
-  ourConversationId,
-  Message,
-}: {
-  conversationId: string;
-  ourConversationId: string;
-  Message: typeof MessageModel;
-}): Promise<MessageModel | undefined> {
-  const result = await channels.getLastConversationPreview({
-    conversationId,
-    ourConversationId,
-  });
-  if (result) {
-    return new Message(result);
-  }
-  return undefined;
+
+  return {
+    preview: preview ? new Message(preview) : undefined,
+    activity: activity ? new Message(activity) : undefined,
+    hasUserInitiatedMessages,
+  };
 }
 async function getMessageMetricsForConversation(conversationId: string) {
   const result = await channels.getMessageMetricsForConversation(
@@ -1255,7 +1386,7 @@ async function removeAllMessagesInConversation(
   let messages;
   do {
     const chunkSize = 20;
-    window.log.info(
+    log.info(
       `removeAllMessagesInConversation/${logId}: Fetching chunk of ${chunkSize} messages`
     );
     // Yes, we really want the await in the loop. We're deleting a chunk at a
@@ -1271,7 +1402,7 @@ async function removeAllMessagesInConversation(
 
     const ids = messages.map((message: MessageModel) => message.id);
 
-    window.log.info(`removeAllMessagesInConversation/${logId}: Cleanup...`);
+    log.info(`removeAllMessagesInConversation/${logId}: Cleanup...`);
     // Note: It's very important that these models are fully hydrated because
     //   we need to delete all associated on-disk files along with the database delete.
     const queue = new window.PQueue({ concurrency: 3, timeout: 1000 * 60 * 2 });
@@ -1280,7 +1411,7 @@ async function removeAllMessagesInConversation(
     );
     await queue.onIdle();
 
-    window.log.info(`removeAllMessagesInConversation/${logId}: Deleting...`);
+    log.info(`removeAllMessagesInConversation/${logId}: Deleting...`);
     await channels.removeMessages(ids);
   } while (messages.length > 0);
 }
@@ -1341,9 +1472,6 @@ async function getUnprocessedById(id: string) {
   return channels.getUnprocessedById(id);
 }
 
-async function updateUnprocessedAttempts(id: string, attempts: number) {
-  await channels.updateUnprocessedAttempts(id, attempts);
-}
 async function updateUnprocessedWithData(
   id: string,
   data: UnprocessedUpdateType
@@ -1418,9 +1546,7 @@ async function addStickerPackReference(messageId: string, packId: string) {
   await channels.addStickerPackReference(messageId, packId);
 }
 async function deleteStickerPackReference(messageId: string, packId: string) {
-  const paths = await channels.deleteStickerPackReference(messageId, packId);
-
-  return paths;
+  return channels.deleteStickerPackReference(messageId, packId);
 }
 async function deleteStickerPack(packId: string) {
   const paths = await channels.deleteStickerPack(packId);
@@ -1454,14 +1580,35 @@ async function getRecentEmojis(limit = 32) {
   return channels.getRecentEmojis(limit);
 }
 
+// Badges
+
+function getAllBadges(): Promise<Array<BadgeType>> {
+  return channels.getAllBadges();
+}
+
+async function updateOrCreateBadges(
+  badges: ReadonlyArray<BadgeType>
+): Promise<void> {
+  if (badges.length) {
+    await channels.updateOrCreateBadges(badges);
+  }
+}
+
+function badgeImageFileDownloaded(
+  url: string,
+  localPath: string
+): Promise<void> {
+  return channels.badgeImageFileDownloaded(url, localPath);
+}
+
 // Other
 
 async function removeAll() {
   await channels.removeAll();
 }
 
-async function removeAllConfiguration() {
-  await channels.removeAllConfiguration();
+async function removeAllConfiguration(type?: RemoveAllConfiguration) {
+  await channels.removeAllConfiguration(type);
 }
 
 async function cleanupOrphanedAttachments() {
@@ -1484,22 +1631,22 @@ async function removeOtherData() {
 }
 
 async function callChannel(name: string) {
-  return new Promise<void>((resolve, reject) => {
-    ipcRenderer.send(name);
-    ipcRenderer.once(`${name}-done`, (_, error) => {
-      if (error) {
-        reject(error);
+  return createTaskWithTimeout(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        ipc.send(name);
+        ipc.once(`${name}-done`, (_, error) => {
+          if (error) {
+            reject(error);
 
-        return;
-      }
+            return;
+          }
 
-      resolve();
-    });
-
-    setTimeout(() => {
-      reject(new Error(`callChannel call to ${name} timed out`));
-    }, DATABASE_UPDATE_TIMEOUT);
-  });
+          resolve();
+        });
+      }),
+    `callChannel call to ${name}`
+  )();
 }
 
 async function getMessagesNeedingUpgrade(
@@ -1549,6 +1696,20 @@ function deleteJob(id: string): Promise<void> {
   return channels.deleteJob(id);
 }
 
+function processGroupCallRingRequest(
+  ringId: bigint
+): Promise<ProcessGroupCallRingRequestResult> {
+  return channels.processGroupCallRingRequest(ringId);
+}
+
+function processGroupCallRingCancelation(ringId: bigint): Promise<void> {
+  return channels.processGroupCallRingCancelation(ringId);
+}
+
+async function cleanExpiredGroupCallRings(): Promise<void> {
+  await channels.cleanExpiredGroupCallRings();
+}
+
 async function updateAllConversationColors(
   conversationColor?: ConversationColorType,
   customColorData?: {
@@ -1560,4 +1721,12 @@ async function updateAllConversationColors(
     conversationColor,
     customColorData
   );
+}
+
+function getMaxMessageCounter(): Promise<number | undefined> {
+  return channels.getMaxMessageCounter();
+}
+
+function getStatisticsForLogging(): Promise<Record<string, string>> {
+  return channels.getStatisticsForLogging();
 }

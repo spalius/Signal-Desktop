@@ -1,23 +1,23 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { times, omit } from 'lodash';
 
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { boolean, date, select, text } from '@storybook/addon-knobs';
 
-import { ConversationList, PropsType, RowType, Row } from './ConversationList';
+import type { Row } from './ConversationList';
+import { ConversationList, RowType } from './ConversationList';
 import { MessageSearchResult } from './conversationList/MessageSearchResult';
-import {
-  PropsData as ConversationListItemPropsType,
-  MessageStatuses,
-} from './conversationList/ConversationListItem';
+import type { PropsData as ConversationListItemPropsType } from './conversationList/ConversationListItem';
+import { MessageStatuses } from './conversationList/ConversationListItem';
 import { ContactCheckboxDisabledReason } from './conversationList/ContactCheckbox';
 import { getDefaultConversation } from '../test-both/helpers/getDefaultConversation';
-import { setup as setupI18n } from '../../js/modules/i18n';
+import { setupI18n } from '../util/setupI18n';
 import enMessages from '../../_locales/en/messages.json';
+import { StorybookThemeContext } from '../../.storybook/StorybookThemeContext';
 
 const i18n = setupI18n('en', enMessages);
 
@@ -33,6 +33,11 @@ const defaultConversations: Array<ConversationListItemPropsType> = [
     isSelected: true,
     unreadCount: 12,
     title: 'Marc Barraca',
+    lastMessage: {
+      deletedForEveryone: false,
+      text:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.',
+    },
   }),
   getDefaultConversation({
     id: 'long-name-convo',
@@ -42,53 +47,58 @@ const defaultConversations: Array<ConversationListItemPropsType> = [
   getDefaultConversation(),
 ];
 
-const createProps = (rows: ReadonlyArray<Row>): PropsType => ({
-  dimensions: {
-    width: 300,
-    height: 350,
-  },
-  rowCount: rows.length,
-  getRow: (index: number) => rows[index],
-  shouldRecomputeRowHeights: false,
-  i18n,
-  onSelectConversation: action('onSelectConversation'),
-  onClickArchiveButton: action('onClickArchiveButton'),
-  onClickContactCheckbox: action('onClickContactCheckbox'),
-  renderMessageSearchResult: (id: string, style: React.CSSProperties) => (
-    <MessageSearchResult
-      body="Lorem ipsum wow"
-      bodyRanges={[]}
-      conversationId="marc-convo"
-      from={defaultConversations[0]}
+const Wrapper = ({
+  rows,
+  scrollable,
+}: Readonly<{ rows: ReadonlyArray<Row>; scrollable?: boolean }>) => {
+  const theme = useContext(StorybookThemeContext);
+
+  return (
+    <ConversationList
+      dimensions={{
+        width: 300,
+        height: 350,
+      }}
+      rowCount={rows.length}
+      getRow={(index: number) => rows[index]}
+      shouldRecomputeRowHeights={false}
       i18n={i18n}
-      id={id}
-      openConversationInternal={action('openConversationInternal')}
-      sentAt={1587358800000}
-      snippet="Lorem <<left>>ipsum<<right>> wow"
-      style={style}
-      to={defaultConversations[1]}
+      onSelectConversation={action('onSelectConversation')}
+      onClickArchiveButton={action('onClickArchiveButton')}
+      onClickContactCheckbox={action('onClickContactCheckbox')}
+      renderMessageSearchResult={(id: string) => (
+        <MessageSearchResult
+          body="Lorem ipsum wow"
+          bodyRanges={[]}
+          conversationId="marc-convo"
+          from={defaultConversations[0]}
+          i18n={i18n}
+          id={id}
+          openConversationInternal={action('openConversationInternal')}
+          sentAt={1587358800000}
+          snippet="Lorem <<left>>ipsum<<right>> wow"
+          to={defaultConversations[1]}
+        />
+      )}
+      scrollable={scrollable}
+      showChooseGroupMembers={action('showChooseGroupMembers')}
+      startNewConversationFromPhoneNumber={action(
+        'startNewConversationFromPhoneNumber'
+      )}
+      theme={theme}
     />
-  ),
-  showChooseGroupMembers: action('showChooseGroupMembers'),
-  startNewConversationFromPhoneNumber: action(
-    'startNewConversationFromPhoneNumber'
-  ),
-});
+  );
+};
 
 story.add('Archive button', () => (
-  <ConversationList
-    {...createProps([
-      {
-        type: RowType.ArchiveButton,
-        archivedConversationsCount: 123,
-      },
-    ])}
+  <Wrapper
+    rows={[{ type: RowType.ArchiveButton, archivedConversationsCount: 123 }]}
   />
 ));
 
 story.add('Contact: note to self', () => (
-  <ConversationList
-    {...createProps([
+  <Wrapper
+    rows={[
       {
         type: RowType.Contact,
         contact: {
@@ -97,35 +107,30 @@ story.add('Contact: note to self', () => (
           about: '🤠 should be ignored',
         },
       },
-    ])}
+    ]}
   />
 ));
 
 story.add('Contact: direct', () => (
-  <ConversationList
-    {...createProps([
-      {
-        type: RowType.Contact,
-        contact: defaultConversations[0],
-      },
-    ])}
+  <Wrapper
+    rows={[{ type: RowType.Contact, contact: defaultConversations[0] }]}
   />
 ));
 
 story.add('Contact: direct with short about', () => (
-  <ConversationList
-    {...createProps([
+  <Wrapper
+    rows={[
       {
         type: RowType.Contact,
         contact: { ...defaultConversations[0], about: '🤠 yee haw' },
       },
-    ])}
+    ]}
   />
 ));
 
 story.add('Contact: direct with long about', () => (
-  <ConversationList
-    {...createProps([
+  <Wrapper
+    rows={[
       {
         type: RowType.Contact,
         contact: {
@@ -134,24 +139,24 @@ story.add('Contact: direct with long about', () => (
             '🤠 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue.',
         },
       },
-    ])}
+    ]}
   />
 ));
 
 story.add('Contact: group', () => (
-  <ConversationList
-    {...createProps([
+  <Wrapper
+    rows={[
       {
         type: RowType.Contact,
         contact: { ...defaultConversations[0], type: 'group' },
       },
-    ])}
+    ]}
   />
 ));
 
 story.add('Contact checkboxes', () => (
-  <ConversationList
-    {...createProps([
+  <Wrapper
+    rows={[
       {
         type: RowType.ContactCheckbox,
         contact: defaultConversations[0],
@@ -170,13 +175,13 @@ story.add('Contact checkboxes', () => (
         },
         isChecked: true,
       },
-    ])}
+    ]}
   />
 ));
 
 story.add('Contact checkboxes: disabled', () => (
-  <ConversationList
-    {...createProps([
+  <Wrapper
+    rows={[
       {
         type: RowType.ContactCheckbox,
         contact: defaultConversations[0],
@@ -201,7 +206,7 @@ story.add('Contact checkboxes: disabled', () => (
         isChecked: true,
         disabledReason: ContactCheckboxDisabledReason.AlreadyAdded,
       },
-    ])}
+    ]}
   />
 ));
 
@@ -216,6 +221,7 @@ story.add('Contact checkboxes: disabled', () => (
         ? overrideProps.acceptedMessageRequest
         : true
     ),
+    badges: [],
     isMe: boolean('isMe', overrideProps.isMe || false),
     avatarPath: text('avatarPath', overrideProps.avatarPath || ''),
     id: overrideProps.id || '',
@@ -231,6 +237,7 @@ story.add('Contact checkboxes: disabled', () => (
         MessageStatuses.reduce((m, s) => ({ ...m, [s]: s }), {}),
         'read'
       ),
+      deletedForEveryone: false,
     },
     lastUpdated: date(
       'lastUpdated',
@@ -242,13 +249,13 @@ story.add('Contact checkboxes: disabled', () => (
   const renderConversation = (
     overrideProps: Partial<ConversationListItemPropsType> = {}
   ) => (
-    <ConversationList
-      {...createProps([
+    <Wrapper
+      rows={[
         {
           type: RowType.Conversation,
           conversation: createConversation(overrideProps),
         },
-      ])}
+      ]}
     />
   );
 
@@ -265,6 +272,7 @@ story.add('Contact checkboxes: disabled', () => (
       lastMessage: {
         text: 'Just a second',
         status: 'read',
+        deletedForEveryone: false,
       },
       name: 'Myself',
       title: 'Myself',
@@ -273,21 +281,20 @@ story.add('Contact checkboxes: disabled', () => (
   );
 
   story.add('Conversations: Message Statuses', () => (
-    <ConversationList
-      {...createProps(
-        MessageStatuses.map(status => ({
-          type: RowType.Conversation,
-          conversation: createConversation({
-            lastMessage: { text: status, status },
-          }),
-        }))
-      )}
+    <Wrapper
+      rows={MessageStatuses.map(status => ({
+        type: RowType.Conversation,
+        conversation: createConversation({
+          lastMessage: { text: status, status, deletedForEveryone: false },
+        }),
+      }))}
     />
   ));
 
   story.add('Conversation: Typing Status', () =>
     renderConversation({
       typingContact: {
+        ...getDefaultConversation(),
         name: 'Someone Here',
       },
     })
@@ -302,11 +309,7 @@ story.add('Contact checkboxes: disabled', () => (
 
   story.add('Conversation: Deleted for everyone', () =>
     renderConversation({
-      lastMessage: {
-        status: 'sent',
-        text: 'You should not see this!',
-        deletedForEveryone: true,
-      },
+      lastMessage: { deletedForEveryone: true },
     })
   );
 
@@ -316,21 +319,24 @@ story.add('Contact checkboxes: disabled', () => (
       lastMessage: {
         text: 'A Message',
         status: 'delivered',
+        deletedForEveryone: false,
       },
     })
   );
 
   story.add('Conversations: unread count', () => (
-    <ConversationList
-      {...createProps(
-        [4, 10, 250].map(unreadCount => ({
-          type: RowType.Conversation,
-          conversation: createConversation({
-            lastMessage: { text: 'Hey there!', status: 'delivered' },
-            unreadCount,
-          }),
-        }))
-      )}
+    <Wrapper
+      rows={[4, 10, 34, 250].map(unreadCount => ({
+        type: RowType.Conversation,
+        conversation: createConversation({
+          lastMessage: {
+            text: 'Hey there!',
+            status: 'delivered',
+            deletedForEveryone: false,
+          },
+          unreadCount,
+        }),
+      }))}
     />
   ));
 
@@ -343,6 +349,7 @@ story.add('Contact checkboxes: disabled', () => (
       lastMessage: {
         text: 'Hey there!',
         status: 'read',
+        deletedForEveryone: false,
       },
       isSelected: true,
     })
@@ -353,6 +360,7 @@ story.add('Contact checkboxes: disabled', () => (
       lastMessage: {
         text: '🔥',
         status: 'read',
+        deletedForEveryone: false,
       },
     })
   );
@@ -362,6 +370,7 @@ story.add('Contact checkboxes: disabled', () => (
       lastMessage: {
         text: 'Download at http://signal.org',
         status: 'read',
+        deletedForEveryone: false,
       },
     })
   );
@@ -386,18 +395,17 @@ Line 4, well.`,
     ];
 
     return (
-      <ConversationList
-        {...createProps(
-          messages.map(messageText => ({
-            type: RowType.Conversation,
-            conversation: createConversation({
-              lastMessage: {
-                text: messageText,
-                status: 'read',
-              },
-            }),
-          }))
-        )}
+      <Wrapper
+        rows={messages.map(messageText => ({
+          type: RowType.Conversation,
+          conversation: createConversation({
+            lastMessage: {
+              text: messageText,
+              status: 'read',
+              deletedForEveryone: false,
+            },
+          }),
+        }))}
       />
     );
   });
@@ -411,19 +419,18 @@ Line 4, well.`,
     ];
 
     return (
-      <ConversationList
-        {...createProps(
-          pairs.map(([lastUpdated, messageText]) => ({
-            type: RowType.Conversation,
-            conversation: createConversation({
-              lastUpdated,
-              lastMessage: {
-                text: messageText,
-                status: 'read',
-              },
-            }),
-          }))
-        )}
+      <Wrapper
+        rows={pairs.map(([lastUpdated, messageText]) => ({
+          type: RowType.Conversation,
+          conversation: createConversation({
+            lastUpdated,
+            lastMessage: {
+              text: messageText,
+              status: 'read',
+              deletedForEveryone: false,
+            },
+          }),
+        }))}
       />
     );
   });
@@ -434,7 +441,7 @@ Line 4, well.`,
       conversation: omit(createConversation(), 'lastUpdated'),
     };
 
-    return <ConversationList {...createProps([row])} />;
+    return <Wrapper rows={[row]} />;
   });
 
   story.add('Conversation: Missing Message', () => {
@@ -443,15 +450,15 @@ Line 4, well.`,
       conversation: omit(createConversation(), 'lastMessage'),
     };
 
-    return <ConversationList {...createProps([row])} />;
+    return <Wrapper rows={[row]} />;
   });
 
   story.add('Conversation: Missing Text', () =>
     renderConversation({
       lastMessage: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        text: undefined as any,
+        text: '',
         status: 'sent',
+        deletedForEveryone: false,
       },
     })
   );
@@ -469,14 +476,15 @@ Line 4, well.`,
       lastMessage: {
         text: '@Leia Organa I know',
         status: 'read',
+        deletedForEveryone: false,
       },
     })
   );
 }
 
 story.add('Headers', () => (
-  <ConversationList
-    {...createProps([
+  <Wrapper
+    rows={[
       {
         type: RowType.Header,
         i18nKey: 'conversationsHeader',
@@ -485,36 +493,36 @@ story.add('Headers', () => (
         type: RowType.Header,
         i18nKey: 'messagesHeader',
       },
-    ])}
+    ]}
   />
 ));
 
 story.add('Start new conversation', () => (
-  <ConversationList
-    {...createProps([
+  <Wrapper
+    rows={[
       {
         type: RowType.StartNewConversation,
         phoneNumber: '+12345559876',
       },
-    ])}
+    ]}
   />
 ));
 
 story.add('Search results loading skeleton', () => (
-  <ConversationList
+  <Wrapper
     scrollable={false}
-    {...createProps([
+    rows={[
       { type: RowType.SearchResultsLoadingFakeHeader },
       ...times(99, () => ({
         type: RowType.SearchResultsLoadingFakeRow as const,
       })),
-    ])}
+    ]}
   />
 ));
 
 story.add('Kitchen sink', () => (
-  <ConversationList
-    {...createProps([
+  <Wrapper
+    rows={[
       {
         type: RowType.StartNewConversation,
         phoneNumber: '+12345559876',
@@ -539,6 +547,6 @@ story.add('Kitchen sink', () => (
         type: RowType.ArchiveButton,
         archivedConversationsCount: 123,
       },
-    ])}
+    ]}
   />
 ));

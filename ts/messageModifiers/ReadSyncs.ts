@@ -1,12 +1,15 @@
-// Copyright 2017-2020 Signal Messenger, LLC
+// Copyright 2017-2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /* eslint-disable max-classes-per-file */
 
 import { Collection, Model } from 'backbone';
 
-import { MessageModel } from '../models/messages';
+import type { MessageModel } from '../models/messages';
 import { isIncoming } from '../state/selectors/message';
+import { isMessageUnread } from '../util/isMessageUnread';
+import { notificationService } from '../services/notifications';
+import * as log from '../logging/log';
 
 type ReadSyncAttributesType = {
   senderId: string;
@@ -20,26 +23,24 @@ class ReadSyncModel extends Model<ReadSyncAttributesType> {}
 
 let singleton: ReadSyncs | undefined;
 
-async function maybeItIsAReactionReadSync(
-  receipt: ReadSyncModel
-): Promise<void> {
+async function maybeItIsAReactionReadSync(sync: ReadSyncModel): Promise<void> {
   const readReaction = await window.Signal.Data.markReactionAsRead(
-    receipt.get('senderUuid'),
-    Number(receipt.get('timestamp'))
+    sync.get('senderUuid'),
+    Number(sync.get('timestamp'))
   );
 
   if (!readReaction) {
-    window.log.info(
+    log.info(
       'Nothing found for read sync',
-      receipt.get('senderId'),
-      receipt.get('sender'),
-      receipt.get('senderUuid'),
-      receipt.get('timestamp')
+      sync.get('senderId'),
+      sync.get('sender'),
+      sync.get('senderUuid'),
+      sync.get('timestamp')
     );
     return;
   }
 
-  window.Whisper.Notifications.removeBy({
+  notificationService.removeBy({
     conversationId: readReaction.conversationId,
     emoji: readReaction.emoji,
     targetAuthorUuid: readReaction.targetAuthorUuid,
@@ -61,25 +62,25 @@ export class ReadSyncs extends Collection {
       e164: message.get('source'),
       uuid: message.get('sourceUuid'),
     });
-    const receipt = this.find(item => {
+    const sync = this.find(item => {
       return (
         item.get('senderId') === senderId &&
         item.get('timestamp') === message.get('sent_at')
       );
     });
-    if (receipt) {
-      window.log.info('Found early read sync for message');
-      this.remove(receipt);
-      return receipt;
+    if (sync) {
+      log.info(`Found early read sync for message ${sync.get('timestamp')}`);
+      this.remove(sync);
+      return sync;
     }
 
     return null;
   }
 
-  async onReceipt(receipt: ReadSyncModel): Promise<void> {
+  async onSync(sync: ReadSyncModel): Promise<void> {
     try {
       const messages = await window.Signal.Data.getMessagesBySentAt(
-        receipt.get('timestamp'),
+        sync.get('timestamp'),
         {
           MessageCollection: window.Whisper.MessageCollection,
         }
@@ -91,25 +92,23 @@ export class ReadSyncs extends Collection {
           uuid: item.get('sourceUuid'),
         });
 
-        return (
-          isIncoming(item.attributes) && senderId === receipt.get('senderId')
-        );
+        return isIncoming(item.attributes) && senderId === sync.get('senderId');
       });
 
       if (!found) {
-        await maybeItIsAReactionReadSync(receipt);
+        await maybeItIsAReactionReadSync(sync);
         return;
       }
 
-      window.Whisper.Notifications.removeBy({ messageId: found.id });
+      notificationService.removeBy({ messageId: found.id });
 
       const message = window.MessageController.register(found.id, found);
-      const readAt = receipt.get('readAt');
+      const readAt = Math.min(sync.get('readAt'), Date.now());
 
       // If message is unread, we mark it read. Otherwise, we update the expiration
       //   timer to the time specified by the read sync if it's earlier than
       //   the previous read time.
-      if (message.isUnread()) {
+      if (isMessageUnread(message.attributes)) {
         // TODO DESKTOP-1509: use MessageUpdater.markRead once this is TS
         message.markRead(readAt, { skipSave: true });
 
@@ -117,10 +116,7 @@ export class ReadSyncs extends Collection {
           // onReadMessage may result in messages older than this one being
           //   marked read. We want those messages to have the same expire timer
           //   start time as this one, so we pass the readAt value through.
-          const conversation = message.getConversation();
-          if (conversation) {
-            conversation.onReadMessage(message, readAt);
-          }
+          message.getConversation()?.onReadMessage(message, readAt);
         };
 
         if (window.startupProcessingQueue) {
@@ -128,6 +124,7 @@ export class ReadSyncs extends Collection {
           if (conversation) {
             window.startupProcessingQueue.add(
               conversation.get('id'),
+              message.get('sent_at'),
               updateConversation
             );
           }
@@ -142,19 +139,14 @@ export class ReadSyncs extends Collection {
           Math.min(existingTimestamp || now, readAt || now)
         );
         message.set({ expirationStartTimestamp });
-
-        const conversation = message.getConversation();
-        if (conversation) {
-          conversation.trigger('expiration-change', message);
-        }
       }
 
       window.Signal.Util.queueUpdateMessage(message.attributes);
 
-      this.remove(receipt);
+      this.remove(sync);
     } catch (error) {
-      window.log.error(
-        'ReadSyncs.onReceipt error:',
+      log.error(
+        'ReadSyncs.onSync error:',
         error && error.stack ? error.stack : error
       );
     }

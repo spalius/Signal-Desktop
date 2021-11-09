@@ -1,20 +1,23 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
+/* eslint-disable class-methods-use-this */
 
 import * as z from 'zod';
-import * as moment from 'moment';
+import * as durations from '../util/durations';
+import { strictAssert } from '../util/assert';
 import { waitForOnline } from '../util/waitForOnline';
 import { isDone as isDeviceLinked } from '../util/registration';
-import * as log from '../logging/log';
-import { connectToServerWithStoredCredentials } from '../util/connectToServerWithStoredCredentials';
+import type { LoggerType } from '../types/Logging';
 import { map } from '../util/iterables';
 import { sleep } from '../util/sleep';
 
 import { JobQueue } from './JobQueue';
 import { jobQueueDatabaseStore } from './JobQueueDatabaseStore';
 import { parseIntWithFallback } from '../util/parseIntWithFallback';
+import type { WebAPIType } from '../textsecure/WebAPI';
+import { HTTPError } from '../textsecure/Errors';
 
-const RETRY_WAIT_TIME = moment.duration(1, 'minute').asMilliseconds();
+const RETRY_WAIT_TIME = durations.MINUTE;
 const RETRYABLE_4XX_FAILURE_STATUSES = new Set([
   404,
   408,
@@ -45,18 +48,21 @@ const reportSpamJobDataSchema = z.object({
 
 export type ReportSpamJobData = z.infer<typeof reportSpamJobDataSchema>;
 
-export const reportSpamJobQueue = new JobQueue<ReportSpamJobData>({
-  store: jobQueueDatabaseStore,
+export class ReportSpamJobQueue extends JobQueue<ReportSpamJobData> {
+  private server?: WebAPIType;
 
-  queueType: 'report spam',
+  public initialize({ server }: { server: WebAPIType }): void {
+    this.server = server;
+  }
 
-  maxAttempts: 25,
-
-  parseData(data: unknown): ReportSpamJobData {
+  protected parseData(data: unknown): ReportSpamJobData {
     return reportSpamJobDataSchema.parse(data);
-  },
+  }
 
-  async run({ data }: Readonly<{ data: ReportSpamJobData }>): Promise<void> {
+  protected async run(
+    { data }: Readonly<{ data: ReportSpamJobData }>,
+    { log }: Readonly<{ log: LoggerType }>
+  ): Promise<void> {
     const { e164, serverGuids } = data;
 
     await new Promise<void>(resolve => {
@@ -70,17 +76,15 @@ export const reportSpamJobQueue = new JobQueue<ReportSpamJobData>({
 
     await waitForOnline(window.navigator, window);
 
-    const server = connectToServerWithStoredCredentials(
-      window.WebAPI,
-      window.storage
-    );
+    const { server } = this;
+    strictAssert(server !== undefined, 'ReportSpamJobQueue not initialized');
 
     try {
       await Promise.all(
         map(serverGuids, serverGuid => server.reportMessage(e164, serverGuid))
       );
     } catch (err: unknown) {
-      if (!(err instanceof Error)) {
+      if (!(err instanceof HTTPError)) {
         throw err;
       }
 
@@ -115,5 +119,11 @@ export const reportSpamJobQueue = new JobQueue<ReportSpamJobData>({
 
       throw err;
     }
-  },
+  }
+}
+
+export const reportSpamJobQueue = new ReportSpamJobQueue({
+  store: jobQueueDatabaseStore,
+  queueType: 'report spam',
+  maxAttempts: 25,
 });

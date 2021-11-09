@@ -1,12 +1,13 @@
 // Copyright 2021 Signal Messenger, LLC
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { GroupV2Membership } from '../components/conversation/conversation-details/ConversationDetailsMembershipList';
-import {
+import type { GroupV2Membership } from '../components/conversation/conversation-details/ConversationDetailsMembershipList';
+import type {
   GroupV2PendingMembership,
   GroupV2RequestingMembership,
 } from '../components/conversation/conversation-details/PendingInvites';
-import { ConversationType } from '../state/ducks/conversations';
+import type { ConversationType } from '../state/ducks/conversations';
+import type { UUIDStringType } from '../types/UUID';
 import { isConversationUnregistered } from './isConversationUnregistered';
 
 export const getGroupMemberships = (
@@ -20,7 +21,7 @@ export const getGroupMemberships = (
       'memberships' | 'pendingApprovalMemberships' | 'pendingMemberships'
     >
   >,
-  getConversationById: (conversationId: string) => undefined | ConversationType
+  getConversationByUuid: (uuid: UUIDStringType) => undefined | ConversationType
 ): {
   memberships: Array<GroupV2Membership>;
   pendingApprovalMemberships: Array<GroupV2RequestingMembership>;
@@ -28,8 +29,8 @@ export const getGroupMemberships = (
 } => ({
   memberships: memberships.reduce(
     (result: Array<GroupV2Membership>, membership) => {
-      const member = getConversationById(membership.conversationId);
-      if (!member || isConversationUnregistered(member)) {
+      const member = getConversationByUuid(membership.uuid);
+      if (!member) {
         return result;
       }
       return [...result, { isAdmin: membership.isAdmin, member }];
@@ -38,7 +39,7 @@ export const getGroupMemberships = (
   ),
   pendingApprovalMemberships: pendingApprovalMemberships.reduce(
     (result: Array<GroupV2RequestingMembership>, membership) => {
-      const member = getConversationById(membership.conversationId);
+      const member = getConversationByUuid(membership.uuid);
       if (!member || isConversationUnregistered(member)) {
         return result;
       }
@@ -48,7 +49,7 @@ export const getGroupMemberships = (
   ),
   pendingMemberships: pendingMemberships.reduce(
     (result: Array<GroupV2PendingMembership>, membership) => {
-      const member = getConversationById(membership.conversationId);
+      const member = getConversationByUuid(membership.uuid);
       if (!member || isConversationUnregistered(member)) {
         return result;
       }
